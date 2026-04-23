@@ -1,0 +1,585 @@
+<!-- #Llamar a layout_admin.html -->
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Fortress Educa - Configuración Admin{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = "Configuración del Sistema" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina para la configuración de niveles de prioridad de los tickets
+    -->
+
+    <main class="page-content">
+
+        <h5 class="fw-bold mb-4">
+            <i class="fas fa-sliders-h me-2 text-primary"></i>Reglas del Sistema de Prioridades
+        </h5>
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        <!-- CARD 1 — TIPOS DE AFECTACIÓN -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-exclamation-circle me-2 text-danger"></i>Tipos de Afectación
+                </h6>
+                <button class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearAfectacion">
+                    <i class="fas fa-plus me-1"></i>Agregar
+                </button>
+            </div>
+
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th style="width:160px;">Nivel Prioridad</th>
+                        <th style="width:90px;">Estado</th>
+                        <th style="width:90px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in afectaciones %}
+                    <tr class="{{ '' if a.Estado_Afectacion else 'table-secondary text-muted' }}">
+                        <td class="fw-semibold">{{ a.Nombre_Afectacion }}</td>
+                        <td class="small">{{ a.Descripcion_Afectacion }}</td>
+                        <td>{{ a.Nivel_Prioridad_TC }}</td>
+                        <td>
+                            {% if a.Estado_Afectacion %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                {# Botón editar — abre modal y pasa datos vía data-* #}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarAfectacion"
+                                        data-id="{{ a.ID_Tipo_Afectacion }}"
+                                        data-nombre="{{ a.Nombre_Afectacion }}"
+                                        data-descripcion="{{ a.Descripcion_Afectacion }}"
+                                        data-nivel="{{ a.Nivel_Prioridad_TC }}"
+                                        data-edit-url="{{ url_for('admin.settings_afectacion_editar', id_afectacion=a.ID_Tipo_Afectacion) }}"
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {# Toggle estado — formulario POST independiente por fila #}
+                                <form method="POST"
+                                    action="{{ url_for('admin.settings_afectacion_estado', id_afectacion=a.ID_Tipo_Afectacion) }}">
+                                    {{ form_afectacion.hidden_tag() }}
+                                    <button type="submit"
+                                            class="btn btn-sm {{ 'btn-outline-danger' if a.Estado_Afectacion else 'btn-outline-success' }}"
+                                            title="{{ 'Desactivar' if a.Estado_Afectacion else 'Activar' }}">
+                                        <i class="fas {{ 'fa-toggle-on' if a.Estado_Afectacion else 'fa-toggle-off' }}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">
+                            Sin registros. Agrega el primero.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- CARD 2 — GRUPOS PREFERENCIALES -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-users me-2 text-info"></i>Grupos Preferenciales
+                </h6>
+                <button class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearGrupo">
+                    <i class="fas fa-plus me-1"></i>Agregar
+                </button>
+            </div>
+
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th style="width:160px;">Nivel Prioridad</th>
+                        <th style="width:90px;">Estado</th>
+                        <th style="width:90px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in grupos %}
+                    <tr class="{{ '' if g.Estado_Grupo_Preferencial else 'table-secondary text-muted' }}">
+                        <td class="fw-semibold">{{ g.Nombre_Grupo_Preferencial }}</td>
+                        <td class="small">{{ g.Descripcion_Grupo_Preferencial }}</td>
+                        <td>{{ g.Nivel_Prioridad_GP }}</td>
+                        <td>
+                            {% if g.Estado_Grupo_Preferencial %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarGrupo"
+                                        data-id="{{ g.ID_Grupo_Preferencial }}"
+                                        data-nombre="{{ g.Nombre_Grupo_Preferencial }}"
+                                        data-descripcion="{{ g.Descripcion_Grupo_Preferencial }}"
+                                        data-nivel="{{ g.Nivel_Prioridad_GP }}"
+                                        data-edit-url="{{ url_for('admin.settings_grupo_editar', id_grupo=g.ID_Grupo_Preferencial) }}"
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form method="POST"
+                                    action="{{ url_for('admin.settings_grupo_estado', id_grupo=g.ID_Grupo_Preferencial) }}">
+                                    {{ form_grupo.hidden_tag() }}
+                                    <button type="submit"
+                                            class="btn btn-sm {{ 'btn-outline-danger' if g.Estado_Grupo_Preferencial else 'btn-outline-success' }}"
+                                            title="{{ 'Desactivar' if g.Estado_Grupo_Preferencial else 'Activar' }}">
+                                        <i class="fas {{ 'fa-toggle-on' if g.Estado_Grupo_Preferencial else 'fa-toggle-off' }}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">
+                            Sin registros. Agrega el primero.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- CARD 3 — ESTRATOS SOCIOECONÓMICOS -->
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-layer-group me-2 text-warning"></i>Estratos Socioeconómicos
+                </h6>
+                <button class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearEstrato">
+                    <i class="fas fa-plus me-1"></i>Agregar
+                </button>
+            </div>
+
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th style="width:160px;">Nivel Prioridad</th>
+                        <th style="width:90px;">Estado</th>
+                        <th style="width:90px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in estratos %}
+                    <tr class="{{ '' if e.Estado_Estrato else 'table-secondary text-muted' }}">
+                        <td class="fw-semibold">{{ e.Nombre_Estrato }}</td>
+                        <td class="small">{{ e.Descripcion_Estrato }}</td>
+                        <td>{{ e.Nivel_Prioridad_E }}</td>
+                        <td>
+                            {% if e.Estado_Estrato %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarEstrato"
+                                        data-id="{{ e.ID_Estrato }}"
+                                        data-nombre="{{ e.Nombre_Estrato }}"
+                                        data-descripcion="{{ e.Descripcion_Estrato }}"
+                                        data-nivel="{{ e.Nivel_Prioridad_E }}"
+                                        data-edit-url="{{ url_for('admin.settings_estrato_editar', id_estrato=e.ID_Estrato) }}"
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form method="POST"
+                                    action="{{ url_for('admin.settings_estrato_estado', id_estrato=e.ID_Estrato) }}">
+                                    {{ form_estrato.hidden_tag() }}
+                                    <button type="submit"
+                                            class="btn btn-sm {{ 'btn-outline-danger' if e.Estado_Estrato else 'btn-outline-success' }}"
+                                            title="{{ 'Desactivar' if e.Estado_Estrato else 'Activar' }}">
+                                        <i class="fas {{ 'fa-toggle-on' if e.Estado_Estrato else 'fa-toggle-off' }}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">
+                            Sin registros. Agrega el primero.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- MODALES -->
+        <!-- Modal Crear Afectación -->
+        <div class="modal fade" id="modalCrearAfectacion" tabindex="-1"
+            aria-labelledby="labelCrearAfectacion" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST"
+                        action="{{ url_for('admin.settings_afectacion_crear') }}">
+                        {{ form_afectacion.hidden_tag() }}
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-bold" id="labelCrearAfectacion">
+                                <i class="fas fa-plus-circle me-2 text-primary"></i>
+                                Nueva Afectación
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                {{ form_afectacion.nombre.label(class="form-label fw-bold small") }}
+                                {{ form_afectacion.nombre(class="form-control", placeholder="Ej: Desplazamiento Forzado") }}
+                                {% for err in form_afectacion.nombre.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_afectacion.descripcion.label(class="form-label fw-bold small") }}
+                                {{ form_afectacion.descripcion(class="form-control", placeholder="Descripción breve...") }}
+                                {% for err in form_afectacion.descripcion.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_afectacion.nivel_prioridad.label(class="form-label fw-bold small") }}
+                                {{ form_afectacion.nivel_prioridad(class="form-control", style="width:100px;") }}
+                                <div class="form-text">Valor entre 0 y 99. Mayor = más prioritario.</div>
+                                {% for err in form_afectacion.nivel_prioridad.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Crear Grupo -->
+        <div class="modal fade" id="modalCrearGrupo" tabindex="-1"
+            aria-labelledby="labelCrearGrupo" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST"
+                        action="{{ url_for('admin.settings_grupo_crear') }}">
+                        {{ form_grupo.hidden_tag() }}
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-bold" id="labelCrearGrupo">
+                                <i class="fas fa-plus-circle me-2 text-primary"></i>
+                                Nuevo Grupo Preferencial
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                {{ form_grupo.nombre.label(class="form-label fw-bold small") }}
+                                {{ form_grupo.nombre(class="form-control", placeholder="Ej: Comunidad Indígena") }}
+                                {% for err in form_grupo.nombre.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_grupo.descripcion.label(class="form-label fw-bold small") }}
+                                {{ form_grupo.descripcion(class="form-control", placeholder="Descripción breve...") }}
+                                {% for err in form_grupo.descripcion.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_grupo.nivel_prioridad.label(class="form-label fw-bold small") }}
+                                {{ form_grupo.nivel_prioridad(class="form-control", style="width:100px;") }}
+                                <div class="form-text">Valor entre 0 y 99. Mayor = más prioritario.</div>
+                                {% for err in form_grupo.nivel_prioridad.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Crear Estrato -->
+        <div class="modal fade" id="modalCrearEstrato" tabindex="-1"
+            aria-labelledby="labelCrearEstrato" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST"
+                        action="{{ url_for('admin.settings_estrato_crear') }}">
+                        {{ form_estrato.hidden_tag() }}
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-bold" id="labelCrearEstrato">
+                                <i class="fas fa-plus-circle me-2 text-primary"></i>
+                                Nuevo Estrato
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                {{ form_estrato.nombre.label(class="form-label fw-bold small") }}
+                                {{ form_estrato.nombre(class="form-control", placeholder="Ej: Estrato 1") }}
+                                {% for err in form_estrato.nombre.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_estrato.descripcion.label(class="form-label fw-bold small") }}
+                                {{ form_estrato.descripcion(class="form-control", placeholder="Descripción breve...") }}
+                                {% for err in form_estrato.descripcion.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_estrato.nivel_prioridad.label(class="form-label fw-bold small") }}
+                                {{ form_estrato.nivel_prioridad(class="form-control", style="width:100px;") }}
+                                <div class="form-text">Valor entre 0 y 99. Mayor = más prioritario.</div>
+                                {% for err in form_estrato.nivel_prioridad.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- MODALES — EDITAR  (el action se inyecta vía el pequeño script al final) -->
+        <!-- Modal Editar Afectación -->
+        <div class="modal fade" id="modalEditarAfectacion" tabindex="-1"
+            aria-labelledby="labelEditarAfectacion" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" id="formEditarAfectacion" action="#">
+                        {{ form_afectacion.hidden_tag() }}
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-bold" id="labelEditarAfectacion">
+                                <i class="fas fa-edit me-2 text-secondary"></i>
+                                Editar Afectación
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nombre</label>
+                                <input type="text" name="nombre" id="ea_nombre"
+                                    class="form-control" maxlength="60" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Descripción</label>
+                                <input type="text" name="descripcion" id="ea_descripcion"
+                                    class="form-control" maxlength="150" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nivel de Prioridad</label>
+                                <input type="number" name="nivel_prioridad" id="ea_nivel"
+                                    class="form-control" min="0" max="99"
+                                    style="width:100px;" required>
+                                <div class="form-text">Valor entre 0 y 99.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Actualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar Grupo -->
+        <div class="modal fade" id="modalEditarGrupo" tabindex="-1"
+            aria-labelledby="labelEditarGrupo" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" id="formEditarGrupo" action="#">
+                        {{ form_grupo.hidden_tag() }}
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-bold" id="labelEditarGrupo">
+                                <i class="fas fa-edit me-2 text-secondary"></i>
+                                Editar Grupo Preferencial
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nombre</label>
+                                <input type="text" name="nombre" id="eg_nombre"
+                                    class="form-control" maxlength="30" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Descripción</label>
+                                <input type="text" name="descripcion" id="eg_descripcion"
+                                    class="form-control" maxlength="150" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nivel de Prioridad</label>
+                                <input type="number" name="nivel_prioridad" id="eg_nivel"
+                                    class="form-control" min="0" max="99"
+                                    style="width:100px;" required>
+                                <div class="form-text">Valor entre 0 y 99.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Actualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar Estrato -->
+        <div class="modal fade" id="modalEditarEstrato" tabindex="-1"
+            aria-labelledby="labelEditarEstrato" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" id="formEditarEstrato" action="#">
+                        {{ form_estrato.hidden_tag() }}
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-bold" id="labelEditarEstrato">
+                                <i class="fas fa-edit me-2 text-secondary"></i>
+                                Editar Estrato
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nombre</label>
+                                <input type="text" name="nombre" id="ee_nombre"
+                                    class="form-control" maxlength="10" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Descripción</label>
+                                <input type="text" name="descripcion" id="ee_descripcion"
+                                    class="form-control" maxlength="150" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nivel de Prioridad</label>
+                                <input type="number" name="nivel_prioridad" id="ee_nivel"
+                                    class="form-control" min="0" max="99"
+                                    style="width:100px;" required>
+                                <div class="form-text">Valor entre 0 y 99.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Actualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- poblar los modales de edición con los datos del botón -->
+    <script>
+    (function () {
+        var configs = [
+            {
+                modalId: 'modalEditarAfectacion',
+                formId:  'formEditarAfectacion',
+                fields:  { nombre: 'ea_nombre', descripcion: 'ea_descripcion', nivel: 'ea_nivel' }
+            },
+            {
+                modalId: 'modalEditarGrupo',
+                formId:  'formEditarGrupo',
+                fields:  { nombre: 'eg_nombre', descripcion: 'eg_descripcion', nivel: 'eg_nivel' }
+            },
+            {
+                modalId: 'modalEditarEstrato',
+                formId:  'formEditarEstrato',
+                fields:  { nombre: 'ee_nombre', descripcion: 'ee_descripcion', nivel: 'ee_nivel' }
+            }
+        ];
+
+        configs.forEach(function (cfg) {
+            var modal = document.getElementById(cfg.modalId);
+            if (!modal) return;
+            modal.addEventListener('show.bs.modal', function (e) {
+                var btn = e.relatedTarget;
+                document.getElementById(cfg.fields.nombre).value      = btn.dataset.nombre;
+                document.getElementById(cfg.fields.descripcion).value = btn.dataset.descripcion;
+                document.getElementById(cfg.fields.nivel).value       = btn.dataset.nivel;
+                document.getElementById(cfg.formId).action            = btn.dataset.editUrl;
+            });
+        });
+    }());
+    </script>
+
+{% endblock %}

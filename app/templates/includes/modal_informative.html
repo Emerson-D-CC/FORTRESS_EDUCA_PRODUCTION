@@ -1,0 +1,70 @@
+{% set _modal_id         = modal_id         if modal_id         is defined else "modalInformativo" %}
+{% set _modal_icon       = modal_icon       if modal_icon       is defined else "fas fa-info-circle" %}
+{% set _modal_icon_color = modal_icon_color if modal_icon_color is defined else "primary" %}
+{% set _modal_btn_color  = modal_btn_color  if modal_btn_color  is defined else "primary" %}
+{% set _modal_show       = modal_show       if modal_show       is defined else false %}
+
+    <div class="modal fade"
+        id="{{ _modal_id }}"
+        tabindex="-1"
+        aria-labelledby="{{ _modal_id }}Label"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="{{ _modal_id }}Label">
+                        {{ modal_title }}
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="{{ _modal_icon }} fa-3x text-{{ _modal_icon_color }}"></i>
+                    </div>
+                    <p class="mb-0 fs-5 text-secondary">{{ modal_body }}</p>
+                </div>
+
+                <div class="modal-footer border-0 d-flex justify-content-center pb-4 gap-2">
+                    <button type="button"
+                            class="btn btn-light px-4"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    {% if modal_btn_id is defined %}
+                        <button type="button"
+                                id="{{ modal_btn_id }}"
+                                class="btn btn-{{ _modal_btn_color }} px-4">
+                            {{ modal_btn_label }}
+                        </button>
+                    {% else %}
+                        <a href="{{ modal_redirect }}"
+                        class="btn btn-{{ _modal_btn_color }} px-4">
+                            {{ modal_btn_label }}
+                        </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        
+    </div>
+
+    {% if _modal_show %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = new bootstrap.Modal(
+                document.getElementById('{{ _modal_id }}'),
+                { backdrop: true, keyboard: true }
+            );
+            modal.show();
+        });
+    </script>
+{% endif %}

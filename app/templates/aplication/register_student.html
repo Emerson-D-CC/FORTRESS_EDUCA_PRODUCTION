@@ -1,0 +1,251 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Registrar Estudiante - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Registrar Estudiante" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: register_student.html
+        Función: Formulario de registro de Estudiantes a cago de los Acudientes / Representantes Legales
+    -->
+
+    <main class="page-content">
+
+        <div class="alert alert-info mb-4 small">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Nota:</strong> Complete todos los campos obligatorios (<span class="text-danger fw-bold">*</span>).
+            Esta información será utilizada para el proceso de asignación de cupo educativo.
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-child me-2" style="color: var(--color-accent-green);"></i>
+                        Datos del Menor a Registrar
+                    </h5>
+
+                    <div class="alert alert-light border small py-2 mb-4">
+                        <i class="fas fa-info-circle text-primary me-1"></i>
+                        <strong>ESTOS DATOS SE UTILIZARÁN PARA EL PROCESO DE ASIGNACIÓN DE CUPO</strong>
+                    </div>
+
+                    <form id="formRegistroEstudiante" method="POST"
+                        action="{{ url_for('aplication.register_student') }}">
+                        {{ form.hidden_tag() }}
+
+                        <!-- BLOQUE: Datos de Identidad -->
+                        <h6 class="text-muted fw-bold mb-3 mt-2">
+                            <i class="fas fa-id-card me-1"></i> Identificación del Menor
+                        </h6>
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">
+                                    Tipo de Identificación <span class="text-danger">*</span>
+                                </label>
+                                {{ form.tipo_identificacion(class="form-select", id="tipoIden") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">
+                                    Número de Documento <span class="text-danger">*</span>
+                                </label>
+                                {{ form.numero_documento(class="form-control", placeholder="Ej: 1234567890") }}
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- BLOQUE: Nombre Completo -->
+                        <h6 class="text-muted fw-bold mb-3">
+                            <i class="fas fa-user me-1"></i> Nombre Completo del Menor
+                        </h6>
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">
+                                    Primer Nombre <span class="text-danger">*</span>
+                                </label>
+                                {{ form.primer_nombre(class="form-control", placeholder="Primer nombre") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">Segundo Nombre</label>
+                                {{ form.segundo_nombre(class="form-control", placeholder="Segundo nombre") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">
+                                    Primer Apellido <span class="text-danger">*</span>
+                                </label>
+                                {{ form.primer_apellido(class="form-control", placeholder="Primer apellido") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">Segundo Apellido</label>
+                                {{ form.segundo_apellido(class="form-control", placeholder="Segundo apellido") }}
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- BLOQUE: Datos Demográficos -->
+                        <h6 class="text-muted fw-bold mb-3">
+                            <i class="fas fa-calendar-alt me-1"></i> Datos Demográficos
+                        </h6>
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label for="fechaNacMenor" class="form-label text-muted small fw-bold">
+                                    Fecha de Nacimiento <span class="text-danger">*</span>
+                                </label>
+                                {{ form.fecha_nacimiento(class="form-control", id="fechaNacMenor") }}
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">Edad</label>
+                                <input type="number" class="form-control" id="edadMenor" readonly>
+                                <div class="form-text">Se calcula automáticamente.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label id="Genero_Estudiante" class="form-label text-muted small fw-bold">
+                                    Género <span class="text-danger">*</span>
+                                </label>
+                                {{ form.genero(class="form-select", id="Genero_Estudiante") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label id="grupoPreferencial" class="form-label text-muted small fw-bold">
+                                    Grupo Preferencial <span class="text-danger">*</span>
+                                </label>
+                                {{ form.grupo_preferencial(class="form-select", id="grupoPreferencial") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label id="estudianteParentesco" class="form-label text-muted small fw-bold">
+                                    Parentesco con el Acudiente <span class="text-danger">*</span>
+                                </label>
+                                {{ form.parentesco(class="form-control", id="estudianteParentesco") }}
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- BLOQUE: Datos Académicos -->
+                        <h6 class="text-muted fw-bold mb-3">
+                            <i class="fas fa-graduation-cap me-1"></i> Datos Académicos
+                        </h6>
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">
+                                    Último Grado Aprobado <span class="text-danger">*</span>
+                                </label>
+                                {{ form.grado_actual(class="form-select", id="gradoActual") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">
+                                    Grado a Cursar <span class="text-danger">*</span>
+                                </label>
+                                {{ form.grado_proximo(class="form-select", id="gradoProximo", disabled=True) }}
+                                <input type="hidden" name="grado_proximo" id="gradoProximoHidden">
+                                <div id="gradoProximoMsg" class="form-text text-muted" style="display:none;"></div>
+                                <div class="form-text">Se calcula automáticamente.</div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label id="antiguoColegio" class="form-label text-muted small fw-bold">
+                                    Última Institución Educativa <span class="text-danger">*</span>
+                                </label>
+                                {{ form.colegio_anterior(class="form-select", id="antiguoColegio") }}
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i>Registrar Estudiante
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Panel lateral informativo -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="card border-0 shadow-sm p-4 text-center">
+                    <div class="mb-3" style="font-size: 3.5rem; color: var(--color-accent-green);">
+                        <i class="fas fa-child"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Nuevo Estudiante</h5>
+                    <p class="text-muted small mb-3">Registro inicial del menor a cargo</p>
+                    <span class="badge bg-warning text-dark mb-3">Pendiente de Registro</span>
+                    <p class="text-muted" style="font-size: 0.75rem;">
+                        Complete todos los campos obligatorios para iniciar el proceso
+                        de asignación de cupo educativo. Podrá actualizar estos datos
+                        posteriormente desde su perfil.
+                    </p>
+                </div>
+
+                <div class="card border-0 shadow-sm p-4 mt-3">
+                    <h6 class="fw-bold mb-3 text-muted">
+                        <i class="fas fa-clipboard-list me-1"></i> Recuerde
+                    </h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            Los campos con <span class="text-danger fw-bold">*</span> son obligatorios.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            La edad se calcula automáticamente según la fecha de nacimiento.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            Podrá modificar estos datos desde la sección de Perfil.
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            El tipo de identificación no podrá cambiarse una vez registrado.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock %}
+
+<!-- Bloque de Modal Reutilizable -->
+{% block modal_global %}
+    {% with
+        modal_id         = "modalSalidaRegistro",
+        modal_title      = "¿Seguro que desea salir?",
+        modal_icon       = "fas fa-exclamation-triangle",
+        modal_icon_color = "warning",
+        modal_btn_color  = "warning",
+        modal_btn_id     = "btnConfirmarSalida",
+        modal_redirect   = "#",
+        modal_btn_label  = "Continuar de todas formas",
+        modal_body       = "Si sale ahora, los datos no se guardaran y deberá completar el registro desde el inicio.",
+        modal_show       = false
+    %}
+        {% include "includes/modal_informative.html" %}
+    {% endwith %}
+{% endblock %}

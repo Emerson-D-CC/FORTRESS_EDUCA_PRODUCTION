@@ -1,0 +1,107 @@
+<!-- #Llamar a layout_public.html -->
+{% extends 'layout_public.html' %}
+
+{% block meta_description %} Acceda a su cuenta en la plataforma de cupos educativos de Engativá. {% endblock %}
+
+{% block titulo %}Iniciar Sesión - Fortress Educa{% endblock %}
+
+<!-- Invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: login_user.html
+        Función: Portal de autenticación para acudientes
+    -->
+
+    <!-- Sección navbar -->
+    <section id="navbar">
+        <!-- Llamar narvar.html -->
+        {% include 'includes/home_navbar_1.html' %}
+    </section>
+    
+    <!-- Contenedor de los elementode de Login -->
+    <div class="auth-container fade-in">
+        <div class="text-center mb-4">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style="width:70px; height:70px; background: linear-gradient(135deg, var(--color-primary-dark), var(--color-accent-green));">
+                <i class="fas fa-graduation-cap fa-2x text-white"></i>
+            </div>
+            <h3 class="fw-bold" style="color: var(--color-primary-dark);">Bienvenido/a</h3>
+            <p class="text-muted small">Plataforma de Cupos Educativos · Engativá</p>
+        </div>
+
+        <ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-user-tab" data-bs-toggle="pill" data-bs-target="#pills-user"
+                    type="button" role="tab">
+                    <i class="fas fa-user-friends me-1"></i> Acudientes / Familias
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="pills-tabContent">
+            <!-- Login Acudiente / Familia -->
+            <div class="tab-pane fade show active" id="pills-user" role="tabpanel">
+
+                <form method="POST" action="{{ url_for('auth.login_user') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Documento o Correo Electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username"
+                                placeholder="Ingrese su correo" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Ingrese su contraseña" autocomplete="new-password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <a href="{{ url_for('auth.recover_password_code', next='auth.login_user') }}" class="small text-decoration-none" style="color: var(--color-primary-light);">¿Olvidó
+                            su contraseña?</a>
+                    </div>
+
+                    <!-- Implementación de recaptcha -->
+                    {% if mostrar_recaptcha %}
+                    <div class="mb-3">
+                        <div class="alert alert-warning small py-2">
+                            <i class="fas fa-shield-alt me-1 mx-auto"></i>
+                            Por seguridad, confirme que no es un robot.
+                        </div>
+                        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mt-2" id="btnLoginAcudiente">
+                        <i class="fas fa-sign-in-alt me-2"></i>Ingresar
+                    </button>
+
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href='{{ url_for('auth.register') }}' class="text-decoration-none" style="color: var(--color-primary-light);">
+                        <i class="fas fa-user-plus me-1"></i>¿No tiene cuenta? Regístrese aquí
+                    </a>
+                </div>
+                <div class="alert alert-light border mt-4 small py-2">
+                    <i class="fas fa-info-circle text-primary me-1"></i>
+                    Si tiene problemas para acceder, comuníquese con la Oficina de Educación de Engativá.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Llamar JS de reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+
+{% endblock %}

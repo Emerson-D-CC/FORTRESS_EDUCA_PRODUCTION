@@ -1,0 +1,238 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Fortress Educa - Panel Administrativo{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = "Panel Administrativo" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina de visualización de estadisticas global del sistema
+    -->
+
+    <main class="page-content">
+
+        <!-- BANNER DE BIENVENIDA -->
+        <div class="alert border-0 shadow-sm mb-4 dh-banner" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-shield fa-2x me-3 dh-banner__icon"></i>
+                <div>
+                    <h5 class="alert-heading mb-1 dh-banner__title">
+                        ¡Bienvenido/a, {{ resumen.Nombre_Admin if resumen else 'al Sistema' }}!
+                    </h5>
+                    <p class="mb-0 text-muted small">
+                        Desde este panel puede gestionar el sistema de solicitud de cupo de la localidad de Engativá.
+                        Además de administrar a los usuarios y tecnicos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÉTRICAS -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-value">{{ metricas.total_solicitudes | default(0) }}</div>
+                    <div class="stat-label">Total Solicitudes</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card status-pending" style="border-left: 4px solid var(--color-primary-dark);">
+                    <div class="stat-icon">
+                        <i class="fas fa-users" style="color: var(--color-primary-dark);"></i>
+                    </div>
+                    <div class="stat-value">{{ metricas.total_usuarios | default(0) }}</div>
+                    <div class="stat-label">Total Usuarios</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card security-high">
+                    <div class="stat-icon" style="background: rgba(17,153,142,0.1);">
+                        <i class="fas fa-school" style="color: var(--color-accent-green);"></i>
+                    </div>
+                    <div class="stat-value text-success">{{ metricas.cupos_asignados | default(0) }}</div>
+                    <div class="stat-label">Cupos Asignados</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <div class="stat-value" style="color: var(--color-accent-green);">
+                        {{ metricas.cupos_disponibles_engativa | default(0) }}
+                    </div>
+                    <div class="stat-label">Cupos Disponibles Engativá</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- GRÁFICO DE ACTIVIDAD -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-chart-bar me-2 text-primary"></i>Actividad de Solicitudes
+                        </h5>
+                        <!-- El selector es visual; el SP actualmente retorna siempre 7 días -->
+                        <select class="form-select form-select-sm" style="width: auto;" disabled>
+                            <option>Últimos 7 días</option>
+                        </select>
+                    </div>
+                    <canvas id="activityChart" height="120"></canvas>
+                </div>
+            </div>
+
+            <!-- SOLICITUDES RECIENTES -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-clock me-2 text-warning"></i>Últimas Solicitudes
+                    </h5>
+                    <div class="list-group list-group-flush">
+                        {% for s in ultimas_solicitudes %}
+                        <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold small">#{{ s.ID_Ticket }}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">
+                                        {{ s.Nombre_Estudiante }} · {{ s.Nombre_Grado }}
+                                    </div>
+                                </div>
+                                <span class="badge
+                                    {% if s.Nombre_Estado == 'Revisión' %}bg-warning
+                                    {% elif s.Nombre_Estado == 'Asignado' %}bg-success
+                                    {% elif s.Nombre_Estado == 'Lista espera' %}bg-secondary
+                                    {% elif s.Nombre_Estado == 'Pendiente' %}bg-danger
+                                    {% else %}bg-primary{% endif %}">
+                                    {{ s.Nombre_Estado }}
+                                </span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="list-group-item px-0 py-2 border-0">
+                            <div class="text-muted small">No hay solicitudes recientes</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('admin.cases') }}" class="btn btn-outline-primary btn-sm">Ver Todas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCIONES RÁPIDAS -->
+        <h6 class="fw-bold text-muted mt-4 mb-3">Acciones Rápidas del Administrador</h6>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="{{ url_for('admin.cases') }}"
+                    class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark));">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Gestionar Solicitudes</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('admin.accounts') }}"
+                    class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, var(--color-accent-green), #11998e);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Ver Acudientes</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('admin.history') }}"
+                    class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, #f6d365, #e67e22);">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Auditoría del Sistema</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('admin.settings') }}"
+                    class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, #cb2d3e, #ef473a);">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Configuración</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                const ctx = document.getElementById('activityChart');
+
+                // Guardia: si el canvas no existe, no ejecutar
+                if (!ctx) return;
+
+                // Datos inyectados desde Flask con filtros default([]) por seguridad
+                const labels = {{ chart_data.labels | default([]) | tojson }};
+                const nuevasSolicitudes = {{ chart_data.nuevas_solicitudes  | default([]) | tojson }};
+                const cuposAsignados = {{ chart_data.cupos_asignados | default([]) | tojson }};
+
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Nuevas Solicitudes',
+                                data: nuevasSolicitudes,
+                                backgroundColor: 'rgba(44, 83, 100, 0.8)',
+                                borderRadius: 6,
+                            },
+                            {
+                                label: 'Cupos Asignados',
+                                data: cuposAsignados,
+                                backgroundColor: 'rgba(17, 153, 142, 0.7)',
+                                borderRadius: 6,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, precision: 0 },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            });
+    </script>
+
+{% endblock %}

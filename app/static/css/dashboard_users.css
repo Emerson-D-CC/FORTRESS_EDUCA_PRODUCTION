@@ -1,0 +1,609 @@
+/*
+ * Fortress Educa — Dashboard Users Styles
+ * Estilos para el panel de usuario (dashboard_users/index.html, dashboard_users/request.html, etc.)
+ */
+
+html,
+body {
+    height: 100%;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-bg-body);
+}
+    /* ============================================================
+    STEP INDICATOR — Para dashboard_users/request.html
+    ============================================================ */
+
+    .wizard-step {
+        display: none;
+    }
+
+    .wizard-step.active {
+        display: block;
+    }
+
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #dee2e6;
+        z-index: 1;
+    }
+
+    .step-item {
+        position: relative;
+        z-index: 2;
+        background: white;
+        padding: 0 10px;
+        text-align: center;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        border: 2px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto 5px;
+        transition: all 0.3s;
+    }
+
+    .step-item.active .step-number {
+        background: var(--color-primary-light);
+        border-color: var(--color-primary-light);
+        color: white;
+    }
+
+    .step-item.completed .step-number {
+        background: var(--color-accent-green);
+        border-color: var(--color-accent-green);
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .step-item.active .step-label {
+        color: var(--color-primary-dark);
+    }
+
+    .upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--color-accent-green);
+        background: rgba(56, 239, 125, 0.05);
+    }
+
+/* ============================================================
+   SECURITY — Para dashboard_users/security.html
+   ============================================================ */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--color-accent-green);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+.qr-placeholder {
+    width: 150px;
+    height: 150px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* ============================================================
+   TIMELINE — Para dashboard_users/status.html
+   ============================================================ */
+
+.timeline {
+    position: relative;
+    padding: 20px 0;
+    list-style: none;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 40px;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+    padding-left: 80px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 25px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.timeline-item.completed .timeline-marker {
+    background: var(--color-accent-green);
+    border-color: var(--color-accent-green);
+    color: white;
+}
+
+.timeline-item.active .timeline-marker {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+    color: white;
+    box-shadow: 0 0 10px rgba(44, 83, 100, 0.3);
+}
+
+.timeline-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #dee2e6;
+}
+
+.timeline-item.completed .timeline-content {
+    border-left-color: var(--color-accent-green);
+}
+
+.timeline-item.active .timeline-content {
+    border-left-color: var(--color-primary-light);
+}
+
+/* ============================================================
+   SIDEBAR — Para user_sidebar.html
+   ============================================================ */
+.dashboard-sidebar {
+    width: 68px;
+    background: linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-primary-medium) 100%);
+    color: white;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.20);
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-sidebar:hover {
+    width: 260px;
+}
+
+/* ── Brand / Logo ──────────────────────────────────────────── */
+.dashboard-sidebar .brand-section {
+    /* Eje vertical: (68 - 24) / 2 = 22px → centra el icono de 24px en los 68px del sidebar */
+    padding: 1.3rem 0 1.3rem 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-sidebar:hover .brand-section {
+    padding: 1.3rem 1rem;
+}
+
+/* Icono del brand: mismo ancho fijo que los iconos de nav */
+.dashboard-sidebar .brand-section>i {
+    width: 24px;
+    min-width: 24px;
+    text-align: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    color: var(--color-accent-teal);
+}
+
+.dashboard-sidebar .brand-text {
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    color: white;
+    text-decoration: none;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-left: 0;
+    white-space: nowrap;
+    transition: max-width 0.3s ease, opacity 0.2s ease 0.08s, margin-left 0.3s ease;
+}
+
+.dashboard-sidebar:hover .brand-text {
+    max-width: 180px;
+    opacity: 1;
+    margin-left: 12px;
+}
+
+/* ── Neutralizar el p-2 de Bootstrap en el contenedor nav ──
+   El HTML usa <div class="d-flex flex-column p-2"> que añade
+   8px de padding-left extra. Lo anulamos para que el cálculo
+   de eje sea: margin(6) + padding(16) = 22px (= brand eje) */
+.dashboard-sidebar .d-flex.flex-column {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* ── Nav links ─────────────────────────────────────────────── */
+.dashboard-sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.65);
+    /* EJE: margin(6) + padding(16) = 22px = mismo que brand */
+    padding: 0.8rem 0 0.8rem 16px;
+    border-radius: 8px;
+    margin: 2px 6px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease,
+        padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-sidebar:hover .nav-link {
+    padding: 0.8rem 0 0.8rem 1.1rem;
+}
+
+.dashboard-sidebar .nav-link:hover,
+.dashboard-sidebar .nav-link.active {
+    background: rgba(37, 99, 235, 0.20);
+    color: var(--color-accent-teal);
+    transform: translateX(3px);
+}
+
+/* Icono: contenedor fijo de 24px siempre visible */
+.dashboard-sidebar .nav-link i {
+    width: 24px;
+    min-width: 24px;
+    text-align: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Texto del nav: oculto sin ocupar espacio cuando colapsado */
+.dashboard-sidebar .nav-link span {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-left: 0;
+    transition: max-width 0.3s ease, opacity 0.2s ease 0.08s, margin-left 0.3s ease;
+    pointer-events: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.dashboard-sidebar:hover .nav-link span {
+    max-width: 200px;
+    opacity: 1;
+    margin-left: 14px;
+}
+
+/* ── Sidebar Footer ────────────────────────────────────────── */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 0.5rem 0;
+    /* 0 padding horizontal para mantener eje */
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.sidebar-footer .sidebar-user-info {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    white-space: nowrap;
+    transition: max-width 0.3s ease, opacity 0.2s ease 0.08s;
+}
+
+.dashboard-sidebar:hover .sidebar-footer .sidebar-user-info {
+    max-width: 220px;
+    opacity: 1;
+}
+
+/* ============================================================
+   TOP NAVBAR — Para user_header.html
+   ============================================================ */
+.top-navbar {
+    background: var(--color-bg-card);
+    padding: 0.85rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 0 var(--color-border), 0 2px 8px rgba(15, 23, 42, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.top-navbar h4 {
+    color: var(--color-text-main);
+    font-weight: 700;
+}
+
+.user-mini-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-mini-profile:hover {
+    background: var(--color-bg-card);
+    box-shadow: var(--shadow-soft);
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.80rem;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   MAIN CONTENT — Para dashboard_users templates
+   ============================================================ */
+.dashboard-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.page-content {
+    padding: 2rem;
+    flex-grow: 1;
+}
+
+/* ============================================================
+   STAT CARDS — Para dashboard_users/index.html
+   ============================================================ */
+.stat-card {
+    background: var(--color-bg-card);
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-primary);
+    height: 100%;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-card.security-high {
+    border-left-color: var(--color-danger);
+}
+
+.stat-card.status-pending {
+    border-left-color: var(--color-danger);
+}
+
+.stat-card.status-danger {
+    border-left-color: var(--color-danger);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--color-primary);
+}
+
+.stat-icon.icon-success {
+    background: rgba(20, 184, 166, 0.10);
+    color: var(--color-success);
+}
+
+.stat-icon.icon-warning {
+    background: rgba(245, 158, 11, 0.10);
+    color: var(--color-warning);
+}
+
+.stat-icon.icon-danger {
+    background: rgba(239, 68, 68, 0.10);
+    color: var(--color-danger);
+}
+
+.stat-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    line-height: 1;
+}
+
+.stat-label {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    margin-top: 0.35rem;
+}
+
+/* ── Hover elevate genérico ── */
+.hover-elevate {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hover-elevate:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover) !important;
+}
+
+/* ============================================================
+   MOBILE TOGGLE — Para dashboard_users templates en móvil
+   ============================================================ */
+.mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-text-main);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.mobile-toggle:hover {
+    background: var(--color-bg-alt);
+}
+
+/* ============================================================
+   RESPONSIVE — móvil: sidebar oculto, abre con clic
+   ============================================================ */
+@media (max-width: 991px) {
+    .dashboard-sidebar {
+        position: fixed;
+        left: -280px;
+        width: 260px !important;
+        height: 100%;
+        box-shadow: 5px 0 24px rgba(0, 0, 0, 0.22);
+        transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0s;
+    }
+
+    .dashboard-sidebar.active {
+        left: 0;
+    }
+
+    /* Padding y textos normales cuando está abierto en móvil */
+    .dashboard-sidebar.active .brand-section {
+        padding: 1.3rem 1rem !important;
+    }
+
+    .dashboard-sidebar.active .nav-link {
+        padding: 0.8rem 0 0.8rem 1.1rem !important;
+    }
+
+    .dashboard-sidebar.active .brand-text,
+    .dashboard-sidebar.active .nav-link span,
+    .dashboard-sidebar.active .sidebar-footer .sidebar-user-info {
+        max-width: 200px !important;
+        opacity: 1 !important;
+        margin-left: 14px !important;
+        transition: none !important;
+    }
+
+    .mobile-toggle {
+        display: block;
+    }
+
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.55);
+        z-index: 999;
+        backdrop-filter: blur(2px);
+    }
+
+    .overlay.active {
+        display: block;
+    }
+}

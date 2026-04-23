@@ -1,0 +1,44 @@
+{% extends layout %}
+
+{% block titulo %}{{ error_title }} - Fortress Educa{% endblock %}
+
+{% block meta_description %}Error {{ error_code }} - {{ error_title }}{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/error_handler.css') }}">
+{% endblock %}
+
+{% block Contenido_Pagina %}
+    
+    <div class="container-fluid py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <div class="error-content">
+
+                    <i class="{{ error_icon }} fa-5x {{ error_color }} mb-4"></i>
+
+                    <h1 class="display-1 fw-bold {{ error_color }}">
+                        {{ error_code }}
+                    </h1>
+
+                    <h2 class="h3 mb-3">
+                        {{ error_title }}
+                    </h2>
+                    <br>
+                    <p class="lead mb-4">
+                        {{ error_description }}
+                    </p>
+                    <br><br><br><br>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+
+                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Volver Atrás
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

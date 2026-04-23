@@ -1,0 +1,220 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Configuración Usuario - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Ajustes Adicionales" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: ticket_detail.html
+        Función: Visualización de la información y seguimiento del ticket creado para la solicitud del cupo.
+    -->
+
+    <!-- Contenido de la Pagina -->
+    <main class="page-content">
+        <div class="row g-4">
+
+            <!-- CARD: Preferencias de Notificación -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-bell me-2 text-primary"></i>
+                        Preferencias de Notificación
+                    </h5>
+
+                    <!-- Notificaciones por Correo -->
+                    <form method="POST"
+                        action="{{ url_for('aplication.settings_notif_email') }}"
+                        id="form-notif-email">
+
+                        {{ form_email.hidden_tag() }}
+
+                        <div class="d-flex align-items-center justify-content-between mb-3 py-2
+                                    border-bottom">
+                            <div>
+                                <label class="fw-semibold mb-0" for="emailNotif">
+                                    Alertas por Correo Electrónico
+                                </label>
+                                <p class="text-muted small mb-0">
+                                    Recibirás avisos importantes en tu bandeja de entrada.
+                                </p>
+                            </div>
+                            <!-- Switch vinculado al BooleanField del form -->
+                            <div class="form-check form-switch ms-3 mb-0">
+                                {{ form_email.notificaciones_email(
+                                    class="form-check-input",
+                                    id="emailNotif",
+                                    role="switch",
+                                    style="width:2.5em; height:1.4em; cursor:pointer;"
+                                ) }}
+                            </div>
+                        </div>
+
+                        <!-- Botón de guardado (correo) -->
+                        <div class="text-end mt-1">
+                            {{ form_email.submit_email(
+                                class="btn btn-primary btn-sm px-4"
+                            ) }}
+                        </div>
+
+                    </form>
+
+                    <hr class="my-3">
+
+                    <!-- Notificaciones del Navegador -->
+                    <form action="{{ url_for('aplication.settings_notif_browser') }}"
+                        method="POST">
+
+                        {{ form_navegador.hidden_tag() }}
+
+                        <div class="d-flex align-items-center justify-content-between mb-3 py-2
+                                    border-bottom">
+                            <div>
+                                <label class="fw-semibold mb-0" for="browserNotif">
+                                    Notificaciones en el Navegador
+                                </label>
+                                <p class="text-muted small mb-0">
+                                    Recibe alertas emergentes directamente en tu pantalla.
+                                    <br><small class="text-warning">Nota: Asegúrate de conceder permiso de notificaciones en la configuración de tu navegador.</small>
+                                </p>
+                            </div>
+                            <div class="form-check form-switch ms-3 mb-0">
+                                {{ form_navegador.notificaciones_navegador(
+                                    class="form-check-input",
+                                    id="browserNotif",
+                                    role="switch",
+                                    style="width:2.5em; height:1.4em; cursor:pointer;"
+                                ) }}
+                            </div>
+                        </div>
+
+                        <!-- Botón de guardado (navegador) -->
+                        <div class="text-end mt-1">
+                            {{ form_navegador.submit_navegador(
+                                class="btn btn-primary btn-sm px-4"
+                            ) }}
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <!--  CARD: Idioma  (sin funcionalidad por ahora) -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-globe me-2 text-primary"></i>
+                        Idioma de la Plataforma
+                    </h5>
+                    <select class="form-select" disabled>
+                        <option selected>Español (Colombia)</option>
+                        <option>English (US)</option>
+                        <option>Français</option>
+                    </select>
+                    <p class="small text-muted mt-3">
+                        Esta opción estará disponible próximamente.
+                    </p>
+                </div>
+            </div>
+
+            <!--  CARD: eliminación de cuenta lógica) -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4 border-start border-danger border-4">
+                    <h5 class="fw-bold text-danger mb-3">Zona de Peligro</h5>
+                    <p class="mb-4">
+                        Al eliminar su cuenta, se perderá el acceso a todos sus trámites digitales.
+                        Sus datos físicos en la institución permanecerán según la ley de restitución.
+                    </p>
+
+                    <!-- Botón que dispara el flujo de modales -->
+                    <button type="button" class="btn btn-outline-danger" data-bs-target="#confirmDeleteModal" data-bs-toggle="modal">
+                        Eliminar mi cuenta
+                    </button>
+
+                    <p class="small text-muted mt-2 mb-0">
+                        Esta acción inactiva la cuenta y todos sus datos asociados de forma lógica.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MODAL 1: ADVERTENCIA INICIAL -->
+        <div class="modal fade" id="confirmDeleteModal" aria-hidden="true" aria-labelledby="confirmDeleteLabel" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content logout-modal-content shadow-lg">
+                    <div class="modal-body text-center py-5 px-5">
+                        <div class="mb-4">
+                            <div class="delete-icon-wrapper">
+                                <i class="fas fa-exclamation-triangle fa-3x delete-icon-color"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-2 logout-title">¿Estás absolutamente seguro?</h4>
+                        <p class="text-muted mb-0">Esta acción desactivará tu acceso y eliminara tus datos de forma inmediata.</p>
+                        <p class="text-muted mb-0">Los datos de los estudiantes asociados a la cuenta tambien seran eliminados.</p>
+                    </div>
+                    <div class="modal-footer border-0 d-flex justify-content-center pb-5 px-4">
+                        <button type="button" class="btn btn-light logout-btn-cancel px-4 py-2 me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn delete-btn-confirm px-4 py-2" data-bs-target="#finalDeleteModal" data-bs-toggle="modal">Continuar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: CONFIRMACIÓN FINAL CON CONTRASEÑA -->
+        <div class="modal fade" id="finalDeleteModal" aria-hidden="true" aria-labelledby="finalDeleteLabel" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content logout-modal-content shadow-lg border-0">
+                    
+                    <form method="POST" action="{{ url_for('aplication.settings_delete_account') }}">
+                        {{ form_eliminar.hidden_tag() }}
+                        
+                        <div class="modal-body text-center py-5 px-5">
+                            <div class="mb-4">
+                                <div class="delete-icon-wrapper">
+                                    <i class="fas fa-shield-alt fa-3x delete-icon-color"></i>
+                                </div>
+                            </div>
+                            
+                            <h4 class="fw-bold mb-2 logout-title">Verifica tu identidad</h4>
+                            <p class="text-muted mb-4 px-2">Por seguridad, ingresa tu contraseña actual para confirmar la eliminación definitiva.</p>
+                            
+                            <!-- Campo de Contraseña -->
+                            <div class="mx-auto" style="max-width: 340px;">
+                                <label class="form-label fw-semibold small text-muted d-block text-start">Contraseña de acceso</label>
+                                <div class="input-group">
+                                    {# Renderizamos el campo con un ID específico para tu función JS #}
+                                    {{ form_eliminar.contraseña(class="form-control logout-input", id="password_delete", placeholder="Ingresa tu clave") }}
+                                    
+                                    <button class="btn btn-outline-light border-2 logout-btn-eye" type="button" 
+                                            onclick="togglePassword('password_delete', this)">
+                                        <i class="fas fa-eye text-muted"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="modal-footer border-0 d-flex justify-content-center pb-5 px-4">
+                            <button type="button" class="btn btn-light logout-btn-cancel px-4 py-2 me-2" 
+                                    data-bs-target="#confirmDeleteModal" data-bs-toggle="modal">
+                                Atrás
+                            </button>
+                            
+                            <button type="submit" class="btn delete-btn-confirm px-4 py-2">
+                                Confirmar y Eliminar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock %}

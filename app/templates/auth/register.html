@@ -1,0 +1,589 @@
+<!-- #Llamar a layout_public.html -->
+{% extends 'layout_public.html' %}
+
+{% block meta_description %} Plataforma institucional para la asignación de cupos educativos en Engativá. {% endblock %}
+
+{% block titulo %}Registro de Acudiente - Fortress Educa{% endblock %}
+
+<!-- Invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: register.html
+        Función: Formulario de registro de Acudientes / Representantes Legales
+            -->
+
+    <!-- Sección navbar -->
+    <section id="navbar">
+        <!-- Llamar narvar.html -->
+        {% include 'includes/home_navbar_1.html' %}
+    </section>
+
+
+    <!-- Registration Section -->
+    <section class="section-padding fade-in">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card shadow-sm border-0">
+
+                        <div class="card-header p-4"
+                            style="background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-light));">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                    style="width:55px; height:55px; background:rgba(255,255,255,0.15);">
+                                    <i class="fas fa-user-plus fa-lg text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 text-white fw-bold">Registro de Acudiente / Representante Legal</h3>
+                                    <p class="mb-0 text-white opacity-75 small">Plataforma de Cupos Educativos · Engativá, Bogotá D.C.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 p-md-5">
+
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Los campos marcados con asterisco (<strong>*</strong>) son obligatorios.
+                                Esta información será utilizada para el proceso de asignación de cupo educativo.
+                            </div>
+
+                            <form id="formRegistroAcudiente" method="POST" action="{{ url_for('auth.register') }}" novalidate autocomplete="off">
+
+                                {{ form.hidden_tag() }}
+
+                                <div class="row g-3">
+
+                                    <!-- 1. DATOS DEL ACUDIENTE -->
+                                    <div class="col-12">
+                                        <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                                            <i class="fas fa-user me-2"></i>1. Datos del Acudiente / Representante Legal
+                                        </h5>
+                                    </div>
+
+                                    <!-- BLOQUE: Identificación del Acudiente -->
+                                    <div class="col-12">
+                                        <h6 class="text-muted fw-bold mb-3 mt-2">
+                                            <i class="fas fa-id-card me-1"></i> Identificación del Acudiente
+                                        </h6>
+                                    </div>
+
+                                    <!-- Tipo Documento -->
+                                    <div class="col-md-4">
+                                        <label for="tipoDocumento" class="form-label">Tipo de Documento *</label>
+                                        {% if form.tipo_documento.errors %}
+                                            {{ form.tipo_documento(class="form-select is-invalid", id="tipoDocumento") }}
+                                        {% else %}
+                                            {{ form.tipo_documento(class="form-select", id="tipoDocumento") }}
+                                        {% endif %}
+                                        <!-- Mostrar errores de validación del campo -->
+                                        {% if form.tipo_documento.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.tipo_documento.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Documento -->
+                                    <div class="col-md-4">
+                                        <label for="documento" class="form-label">Número de Documento *</label>
+                                        <div class="input-group has-validation">
+                                            {% if form.documento.errors %}
+                                                <input type="text" class="form-control is-invalid" name="documento" id="documento"
+                                                    value="{{ form.documento.data or '' }}" required inputmode="numeric"
+                                                    placeholder="Ej: 1234567890">
+                                            {% else %}
+                                                <input type="text" class="form-control" name="documento" id="documento"
+                                                    value="{{ form.documento.data or '' }}"
+                                                    required inputmode="numeric" placeholder="Ej: 1234567890" autocomplete="off">
+                                            {% endif %}
+                                        </div>
+                                        {% if form.documento.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.documento.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Nacionalidad (fijo, deshabilitado) -->
+                                    <div class="col-md-4">
+                                        <label for="nacionalidad" class="form-label">Nacionalidad *</label>
+                                        <input type="text" class="form-control" id="nacionalidad"
+                                            value="Colombiano" disabled readonly>
+                                    </div>
+
+                                    <div class="col-12"><hr class="my-2"></div>
+
+                                    <!-- BLOQUE: Nombre Completo del Acudiente -->
+                                    <div class="col-12">
+                                        <h6 class="text-muted fw-bold mb-3">
+                                            <i class="fas fa-user me-1"></i> Nombre Completo del Acudiente
+                                        </h6>
+                                    </div>
+
+                                    <!-- Primer Nombre -->
+                                    <div class="col-md-3">
+                                        <label for="primerNombre" class="form-label">Primer Nombre *</label>
+                                        {% if form.primer_nombre.errors %}
+                                            <input type="text" class="form-control is-invalid" name="primer_nombre" id="primerNombre"
+                                                value="{{ form.primer_nombre.data or '' }}" required>
+                                        {% else %}
+                                            <input type="text" class="form-control" name="primer_nombre" id="primerNombre"
+                                                value="{{ form.primer_nombre.data or '' }}" required>
+                                        {% endif %}
+                                        {% if form.primer_nombre.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.primer_nombre.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Segundo Nombre (opcional) -->
+                                    <div class="col-md-3">
+                                        <label for="segundoNombre" class="form-label">Segundo Nombre</label>
+                                        {% if form.segundo_nombre.errors %}
+                                            <input type="text" class="form-control is-invalid" name="segundo_nombre" id="segundoNombre"
+                                                value="{{ form.segundo_nombre.data or '' }}">
+                                        {% else %}
+                                            <input type="text" class="form-control" name="segundo_nombre" id="segundoNombre"
+                                                value="{{ form.segundo_nombre.data or '' }}">
+                                        {% endif %}
+                                        {% if form.segundo_nombre.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.segundo_nombre.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Primer Apellido -->
+                                    <div class="col-md-3">
+                                        <label for="primerApellido" class="form-label">Primer Apellido *</label>
+                                        {% if form.primer_apellido.errors %}
+                                            <input type="text" class="form-control is-invalid" name="primer_apellido" id="primerApellido"
+                                                value="{{ form.primer_apellido.data or '' }}" required>
+                                        {% else %}
+                                            <input type="text" class="form-control" name="primer_apellido" id="primerApellido"
+                                                value="{{ form.primer_apellido.data or '' }}" required>
+                                        {% endif %}
+                                        {% if form.primer_apellido.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.primer_apellido.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Segundo Apellido (opcional) -->
+                                    <div class="col-md-3">
+                                        <label for="segundoApellido" class="form-label">Segundo Apellido</label>
+                                        {% if form.segundo_apellido.errors %}
+                                            <input type="text" class="form-control is-invalid" name="segundo_apellido" id="segundoApellido"
+                                                value="{{ form.segundo_apellido.data or '' }}">
+                                        {% else %}
+                                            <input type="text" class="form-control" name="segundo_apellido" id="segundoApellido"
+                                                value="{{ form.segundo_apellido.data or '' }}">
+                                        {% endif %}
+                                        {% if form.segundo_apellido.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.segundo_apellido.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-12"><hr class="my-2"></div>
+
+                                    <!-- Datos Personales y de Contacto -->
+                                    <div class="col-12">
+                                        <h6 class="text-muted fw-bold mb-3">
+                                            <i class="fas fa-address-book me-1"></i> Datos Personales y de Contacto
+                                        </h6>
+                                    </div>
+
+                                    <!-- Fecha de Nacimiento -->
+                                    <div class="col-md-4">
+                                        <label for="fechaNacimiento" class="form-label text-muted small fw-bold">
+                                            Fecha de Nacimiento <span class="text-danger">*</span>
+                                        </label>
+                                        {% if form.fecha_nacimiento.errors %}
+                                            {{ form.fecha_nacimiento(type="date", class="form-control is-invalid", id="fechaNacimiento", min=fecha_min, max=fecha_max, onkeydown="return false;", onpaste="return false;") }}
+                                        {% else %}
+                                            {{ form.fecha_nacimiento(type="date", class="form-control", id="fechaNacimiento", min=fecha_min, max=fecha_max, onkeydown="return false;", onpaste="return false;") }}
+                                        {% endif %}
+                                        {% if form.fecha_nacimiento.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.fecha_nacimiento.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="form-text">Solo mayores de 18 años.</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Parentesco -->
+                                    <div class="col-md-4">
+                                        <label for="tipoParentesco" class="form-label">Parentesco con el Menor *</label>
+                                        {% if form.parentesco.errors %}
+                                            {{ form.parentesco(class="form-select is-invalid", id="tipoParentesco") }}
+                                        {% else %}
+                                            {{ form.parentesco(class="form-select", id="tipoParentesco") }}
+                                        {% endif %}
+                                        {% if form.parentesco.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.parentesco.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Teléfono -->
+                                    <div class="col-md-4">
+                                        <label for="telefono" class="form-label">Teléfono / Celular *</label>
+                                        {% if form.telefono.errors %}
+                                            <input type="tel" class="form-control is-invalid" name="telefono" id="telefono"
+                                                value="{{ form.telefono.data or '' }}" required inputmode="numeric"
+                                                placeholder="Ej: 3001234567">
+                                        {% else %}
+                                            <input type="tel" class="form-control" name="telefono" id="telefono"
+                                                value="{{ form.telefono.data or '' }}"
+                                                required placeholder="Ej: 3001234567">
+                                        {% endif %}
+                                        {% if form.telefono.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.telefono.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-4">
+                                        <label for="email" class="form-label">Correo Electrónico *</label>
+                                        {% if form.email.errors %}
+                                            <input type="email" class="form-control is-invalid" name="email" id="email"
+                                                value="{{ form.email.data or '' }}" required
+                                                placeholder="correo@ejemplo.com">
+                                        {% else %}
+                                            <input type="email" class="form-control" name="email" id="email"
+                                                value="{{ form.email.data or '' }}"
+                                                required placeholder="correo@ejemplo.com" autocomplete="off">
+                                        {% endif %}
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.email.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="form-text">Correo activo.</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Dirección -->
+                                    <div class="col-md-5">
+                                        <label for="direccion" class="form-label">Dirección de Residencia *</label>
+                                        {% if form.direccion.errors %}
+                                            <input type="text" class="form-control is-invalid" name="direccion" id="direccion"
+                                                value="{{ form.direccion.data or '' }}" required
+                                                placeholder="Ej: Cra 80 #65-12">
+                                        {% else %}
+                                            <input type="text" class="form-control" name="direccion" id="direccion"
+                                                value="{{ form.direccion.data or '' }}"
+                                                required placeholder="Ej: Cra 80 #65-12">
+                                        {% endif %}
+                                        {% if form.direccion.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.direccion.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Barrio -->
+                                    <div class="col-md-3">
+                                        <label for="barrio" class="form-label">Barrio *</label>
+                                        {% if form.barrio.errors %}
+                                            {{ form.barrio(class="form-select is-invalid", id="barrio") }}
+                                        {% else %}
+                                            {{ form.barrio(class="form-select", id="barrio") }}
+                                        {% endif %}
+                                        {% if form.barrio.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.barrio.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="form-text text-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                El servicio aplica principalmente para residentes de Engativá.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-12"><hr class="my-2"></div>
+
+                                    <!-- 2. SEGURIDAD -->
+                                    <div class="col-12">
+                                        <h5 class="text-primary mt-4 mb-3 pb-2 border-bottom">
+                                            <i class="fas fa-lock me-2"></i>2. Seguridad de la Cuenta
+                                        </h5>
+                                    </div>
+
+                                    <!-- BLOQUE: Contraseña -->
+                                    <div class="col-12">
+                                        <h6 class="text-muted fw-bold mb-3">
+                                            <i class="fas fa-key me-1"></i> Contraseña de Acceso
+                                        </h6>
+                                    </div>
+
+                                    <!-- Contraseña -->
+                                    <div class="col-md-6">
+                                        <label for="password" class="form-label">Contraseña *</label>
+                                        {% if form.password.errors %}
+                                            <div class="input-group">
+                                                <input type="password" class="form-control is-invalid" name="password" id="password" required>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" name="password" id="password" required>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>                                                   
+                                            </div>                                          
+                                        {% endif %}
+                                        
+                                        <!-- Mostrar errores de contraseña en primer lugar -->
+                                        {% if form.password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.password.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Requisitos de contraseña -->
+                                        <div class="form-text small text-muted mt-2">
+                                            <i class="fas fa-info-circle"></i> Requisitos Obligatorios:
+                                            <ul class="mb-0 ps-3 mt-2">
+                                                <li>NO incluir información personal (nombre, documento).</li>
+                                                <li>Mínimo 10 caracteres (recomendado +12).</li>
+                                                <li>Combinar mayúsculas, minúsculas, números y símbolos.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Confirmar Contraseña -->
+                                    <div class="col-md-6">
+                                        <label for="confirmPassword" class="form-label">Confirmar Contraseña *</label>
+                                        {% if form.confirm_password.errors %}
+                                            <div class="input-group">
+                                                <input type="password" class="form-control is-invalid" name="confirm_password"
+                                                    id="confirmPassword" required>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword', this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>        
+                                            </div>                                        
+                                        {% else %}
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" name="confirm_password"
+                                                    id="confirmPassword" required>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword', this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>   
+                                            </div>
+                                        {% endif %}
+                                        {% if form.confirm_password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.confirm_password.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-12"><hr class="my-2"></div>
+
+                                    <!-- 3. TÉRMINOS -->
+                                    <div class="col-12 mt-4">
+                                        <div class="form-check">
+                                            <!-- Repoblar estado del checkbox de términos -->
+                                            {% if form.terms.errors %}
+                                                <input class="form-check-input is-invalid" type="checkbox" name="terms" id="terms"
+                                                    {{ 'checked' if request.form.get('terms') }} required>
+                                            {% else %}
+                                                <input class="form-check-input" type="checkbox" name="terms" id="terms"
+                                                    {{ 'checked' if request.form.get('terms') }} required>
+                                            {% endif %}
+                                            <label class="form-check-label" for="terms">
+                                                Declaro bajo la gravedad de juramento que la información suministrada es
+                                                veraz y autorizo el tratamiento de mis datos personales y los del menor
+                                                de acuerdo con la Ley 1581 de 2012 (Habeas Data). Acepto los <a href="{{ url_for('home.terms_of_use') }}" class="text-decoration-none">Terminos de Uso y Condiciones</a> y la <a href="{{ url_for('home.privacy_policy') }}" class="text-decoration-none">Politica de Privacidad</a> de la plataforma Fortress Educa.
+                                            </label>
+                                        </div>
+                                        {% if form.terms.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                
+                                                {% for error in form.terms.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- reCAPTCHA -->
+                                    <div class="col-12 mt-3">
+                                        <div class="d-flex justify-content-center">
+                                            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                                        </div>
+                                        {% if recaptcha_error %}
+                                            <div class="text-danger small text-center mt-2">
+                                                {{ recaptcha_error }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Botón Enviar -->
+                                    <div class="col-12 mt-4">
+                                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold" id="btnRegistrar">
+                                            <i class="fas fa-user-plus me-2"></i>Crear Cuenta de Acudiente
+                                        </button>
+                                        <p class="text-center mt-3 text-muted small">
+                                            ¿Ya tiene cuenta?
+                                            <a href="{{ url_for('auth.login_user') }}" class="text-decoration-none">
+                                                Inicie sesión aquí
+                                            </a>
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loading-box">
+            <div id="spinner" class="loader"></div>
+            <div id="successCheck" class="checkmark-circle">
+                <i class="fas fa-check checkmark"></i>
+            </div>
+            <h5 id="loadingText">Procesando registro...</h5>
+            <p class="text-muted small mb-0 mt-2">Por favor espere mientras validamos su información.</p>
+        </div>
+    </div>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <script>
+        // LIMPIAR FORMULARIO AL RECARGAR (F5)
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formRegistroAcudiente');
+            
+            if (form) {
+                if (performance.navigation.type === 1) {
+                    console.log('[REGISTRO] Reload detectado - limpiando formulario');
+                    form.reset();
+                    
+                    const selectFields = form.querySelectorAll('select');
+                    selectFields.forEach(select => {
+                        select.value = '';
+                    });
+                }
+            }
+        });
+
+        // LIMPIAR FORMULARIO AL NAVEGAR ATRÁS/ADELANTE
+        window.addEventListener('pageshow', function(event) {
+            const form = document.getElementById('formRegistroAcudiente');
+            
+            if (form && event.persisted) {
+                console.log('[REGISTRO] Navegación desde cache detectada - limpiando formulario');
+                
+                form.reset();
+                
+                const selectFields = form.querySelectorAll('select');
+                selectFields.forEach(select => {
+                    select.value = '';
+                });
+                
+                if (typeof grecaptcha !== 'undefined') {
+                    grecaptcha.reset();
+                }
+            }
+        });
+
+        // PREVENIR REENVÍO DUPLICADO
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formRegistroAcudiente');
+            const btnRegistrar = document.getElementById('btnRegistrar');
+            
+            if (form && btnRegistrar) {
+                form.addEventListener('submit', function(e) {
+                    btnRegistrar.disabled = true;
+                    btnRegistrar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+                });
+            }
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formRegistroAcudiente');
+            const fechaInput = document.getElementById('fechaNacimiento');
+            
+            if (form && fechaInput) {
+                // NUEVO: Limpiar campo de fecha al recargar
+                if (performance.navigation.type === 1) {
+                    console.log('[REGISTRO] Limpiando campo de fecha...');
+                    fechaInput.value = '';  // Vaciar el valor
+                }
+            }
+        });
+        
+        window.addEventListener('pageshow', function(event) {
+            const form = document.getElementById('formRegistroAcudiente');
+            const fechaInput = document.getElementById('fechaNacimiento');
+            
+            if (form && event.persisted) {
+                console.log('[REGISTRO] Limpiando campo de fecha desde cache...');
+                fechaInput.value = '';  // Vaciar el valor
+            }
+        });
+    </script>
+    
+{% endblock %}

@@ -1,0 +1,355 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Centro de  Seguridad - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Centro de Seguridad" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: security.html
+        Función: Configuraciones basica de seguridad (MFA), y administración de la cuenta (sesiones Y Contraseña)
+    -->
+
+    <!-- CSS del modal (igual que logout_modal) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
+
+    <main class="page-content">
+        <div class="row g-4">
+
+            <!--  2FA -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-4 h-100 text-center">
+                    <i class="fas fa-shield-alt fa-3x mb-3 text-primary"></i>
+                    <h5 class="fw-bold">Autenticación de Dos Factores (2FA)</h5>
+                    <p class="text-muted small">
+                        Proteja su cuenta con Microsoft Authenticator.
+                        Después de ingresar su contraseña, se le pedirá un código de 6 dígitos.
+                    </p>
+
+                    {% set mfa_activo = session.get('double_factor') == 'ACTIVE' %}
+
+                    <div class="d-flex align-items-center justify-content-center gap-3 my-4">
+                        <span class="fw-bold small">{% if mfa_activo %}Activado{% else %}Desactivado{% endif %}</span>
+                        <div class="badge {% if mfa_activo %}bg-success{% else %}bg-secondary{% endif %} px-3 py-2">
+                            {% if mfa_activo %}
+                                <i class="fas fa-check-circle me-1"></i> ACTIVO
+                            {% else %}
+                                <i class="fas fa-times-circle me-1"></i> INACTIVO
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if not mfa_activo %}
+                        <form method="POST" action="{{ url_for('aplication.security_mfa_start') }}" class="mb-3">
+                            {{ form_mfa_activar.hidden_tag() if form_mfa_activar else '' }}
+                            <p class="small text-muted mb-3">
+                                <strong>Paso 1:</strong> Haga clic para generar el código QR.<br>
+                                <strong>Paso 2:</strong> Escanee con Microsoft Authenticator.<br>
+                                <strong>Paso 3:</strong> Ingrese el código de 6 dígitos.
+                            </p>
+                            <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">
+                                <i class="fas fa-qrcode me-2"></i> Generar Código QR
+                            </button>
+                        </form>
+
+                        {% if session.get('mfa_qr_temp') %}
+                            <div class="card card-body bg-light mb-3">
+                                <p class="small text-muted mb-2">Código QR temporal:</p>
+                                <div class="d-flex justify-content-center">
+                                    <img src="{{ session.get('mfa_qr_temp') }}" alt="QR MFA" style="width:160px;height:160px;border-radius:8px;">
+                                </div>
+                                <p class="small text-muted mt-2">Clave manual (si es necesario):</p>
+                                <code class="d-block mb-2 user-select-all fs-6" style="word-break: break-all;">
+                                    {{ session.get('mfa_secret_temp', 'No disponible') }}
+                                </code>
+                            </div>
+
+                            <form method="POST" action="{{ url_for('aplication.security_mfa_confir') }}" class="needs-validation">
+                                {{ form_mfa_activar.hidden_tag() }}
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Ingrese el código de 6 dígitos</label>
+                                    {{ form_mfa_activar.codigo_mfa(class="form-control text-center fw-bold", placeholder="_ _ _ _ _ _", maxlength="6", inputmode="numeric", autocomplete="off") }}
+                                    {% if form_mfa_activar.codigo_mfa.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form_mfa_activar.codigo_mfa.errors %}
+                                                <small>{{ error }}</small><br>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm w-100">
+                                    <i class="fas fa-check-circle me-1"></i> Confirmar y Activar 2FA
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if mfa_activo %}
+                        <div class="alert alert-info small mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Su cuenta está protegida con autenticación de dos factores.
+                        </div>
+                        <form method="POST" action="{{ url_for('aplication.security_mfa_disable') }}" class="needs-validation">
+                            {{ form_mfa_desactivar.hidden_tag() }}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Ingrese un código vigente para desactivar</label>
+                                {{ form_mfa_desactivar.codigo_mfa(class="form-control text-center fw-bold", placeholder="_ _ _ _ _ _", maxlength="6", inputmode="numeric", autocomplete="off") }}
+                                {% if form_mfa_desactivar.codigo_mfa.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form_mfa_desactivar.codigo_mfa.errors %}
+                                            <small>{{ error }}</small><br>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-times me-1"></i> Desactivar 2FA
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ── Cambiar Contraseña -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-lock me-2 text-primary"></i>Actualizar Contraseña
+                    </h5>
+                    <form method="POST" action="{{ url_for('aplication.security_hange_password') }}" class="needs-validation" novalidate>
+                        {{ form_password.hidden_tag() }}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Contraseña Actual</label>
+                            <div class="input-group">
+                                {{ form_password.contraseña_actual(class="form-control", id="antiguaContraseña", autocomplete="current-password") }}
+                                <button class="btn btn-outline-primary" type="button" onclick="togglePassword('antiguaContraseña', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form_password.contraseña_actual.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form_password.contraseña_actual.errors %}
+                                        <small>{{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nueva Contraseña</label>
+                            <div class="input-group">
+                                {{ form_password.nueva_contraseña(class="form-control", id="nuevaContraseña", autocomplete="new-password") }}
+                                <button class="btn btn-outline-primary" type="button" onclick="togglePassword('nuevaContraseña', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text text-muted small">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Mínimo 12 caracteres, mayúsculas, minúsculas, número y carácter especial.
+                            </div>
+                            {% if form_password.nueva_contraseña.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form_password.nueva_contraseña.errors %}
+                                        <small>{{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Confirmar Nueva Contraseña</label>
+                            <div class="input-group">
+                                {{ form_password.confirmar_contraseña(class="form-control", id="confirmarNuevaContraseña", autocomplete="new-password") }}
+                                <button class="btn btn-outline-primary" type="button" onclick="togglePassword('confirmarNuevaContraseña', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form_password.confirmar_contraseña.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form_password.confirmar_contraseña.errors %}
+                                        <small>{{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>Actualizar Contraseña
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sesiones Activas -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-monitor me-2 text-primary"></i>Sesiones Activas
+                        </h5>
+                        {% if sesiones|length > 1 %}
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalCerrarTodasSesiones">
+                                <i class="fas fa-times me-1"></i> Cerrar todas las otras sesiones
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Dispositivo</th>
+                                    <th>IP</th>
+                                    <th>Inicio</th>
+                                    <th>Último acceso</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if sesiones and sesiones|length > 0 %}
+                                    {% for sesion in sesiones %}
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-desktop me-2 text-primary"></i>
+                                                {{ 'Sesión desde ' + sesion.ip }}
+                                            </td>
+                                            <td><code>{{ sesion.ip }}</code></td>
+                                            <td>{{ sesion.inicio }}</td>
+                                            <td>{{ sesion.ultimo }}</td>
+                                            <td>
+                                                {% if sesion.es_actual %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Sesión Actual
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-circle me-1"></i>Activa
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if not sesion.es_actual %}
+                                                    <!-- 
+                                                        Dispara el modal de confirmación.
+                                                        Los data-* pasan el JTI y el nombre del dispositivo al modal.
+                                                    -->
+                                                    <button type="button"
+                                                            class="btn btn-outline-danger btn-sm btn-confirmar-cierre"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalCerrarUnaSesion"
+                                                            data-jti="{{ sesion.JTI }}"
+                                                            data-dispositivo="{{ 'Sesión desde ' + sesion.ip }}"
+                                                            data-url="{{ url_for('aplication.security_cerrar_sesion', jti_sesion=sesion.JTI) }}">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox me-2"></i>Sin sesiones registradas.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+
+    <!-- MODAL: Cerrar una sesión específica -->
+    <div class="modal fade" id="modalCerrarUnaSesion" tabindex="-1" aria-labelledby="modalCerrarUnaSesionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content logout-modal-content shadow-lg">
+
+                <div class="modal-body text-center py-5 px-5">
+                    <div class="mb-4">
+                        <div class="logout-icon-wrapper">
+                            <i class="fas fa-sign-out-alt fa-3x logout-icon-color"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-2 logout-title">¿Cerrar esta sesión?</h4>
+                    <p class="text-muted mb-0">
+                        Está a punto de cerrar la sesión del dispositivo:<br>
+                        <strong id="modalDispositivoNombre" class="d-block mt-2">—</strong>
+                    </p>
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Deberá volver a iniciar sesión desde ese dispositivo.
+                    </p>
+                </div>
+
+                <div class="modal-footer border-0 d-flex justify-content-center pb-5 px-4">
+                    <button type="button" class="btn btn-light logout-btn-cancel px-4 py-2 me-2" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <form id="formCerrarUnaSesion" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn logout-btn-confirm px-4 py-2">
+                            <i class="fas fa-check me-1"></i>Sí, cerrar sesión
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL: Cerrar todas las sesiones -->
+    <div class="modal fade" id="modalCerrarTodasSesiones" tabindex="-1" aria-labelledby="modalCerrarTodasSesionesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content logout-modal-content shadow-lg">
+
+                <div class="modal-body text-center py-5 px-5">
+                    <div class="mb-4">
+                        <div class="logout-icon-wrapper">
+                            <i class="fas fa-sign-out-alt fa-3x logout-icon-color"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-2 logout-title">¿Cerrar todas las sesiones?</h4>
+                    <p class="text-muted mb-0">
+                        Esta acción cerrará <strong>todas las demás sesiones</strong> activas,
+                        excepto la sesión actual.
+                    </p>
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Los usuarios deberán volver a iniciar sesión desde esos dispositivos.
+                    </p>
+                </div>
+
+                <div class="modal-footer border-0 d-flex justify-content-center pb-5 px-4">
+                    <button type="button" class="btn btn-light logout-btn-cancel px-4 py-2 me-2" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <form method="POST" action="{{ url_for('aplication.security_cerrar_sesiones') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn logout-btn-confirm px-4 py-2">
+                            <i class="fas fa-check me-1"></i>Sí, cerrar todas
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/security.js') }}"></script>
+
+    {% endblock %}

@@ -1,0 +1,144 @@
+/* ================================================================ */
+/* Estilos para el Modal de Logout */
+/* ================================================================ */
+
+/* Modifica el ancho del modal */
+#logoutModal .modal-dialog {
+    max-width: 500px; /* Ajusta este valor a tu gusto */
+    width: 90%;       /* Asegura que sea responsivo en móviles */
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.logout-modal-content {
+    border-radius: 15px !important;
+    border: none !important;
+}
+
+.logout-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa; /* bg-light */
+    border-radius: 50%;
+}
+
+.logout-icon-color {
+    color: #2563eb; /* Azul institucional */
+}
+
+.logout-title {
+    color: #334155;
+}
+
+.logout-btn-cancel {
+    border-radius: 8px !important;
+    color: #334155 !important;
+    font-weight: 600;
+}
+
+.logout-btn-confirm {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn-confirm:hover {
+    background-color: #1d4ed8 !important;
+}
+
+
+
+#logoutModal .modal-dialog, #loginErrorModal .modal-dialog {
+    max-width: 500px;
+    max-height: 300px;
+}
+
+
+/* ================================================================ */
+/* Estilos para Modal de Eliminación */
+/* ================================================================ */
+
+.delete-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fef2f2; /* Rojo muy claro */
+    border-radius: 50%;
+}
+
+.delete-icon-color {
+    color: #dc2626; /* Rojo peligro */
+}
+
+.delete-btn-confirm {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+.delete-btn-confirm:hover {
+    background-color: #b91c1c !important;
+}
+
+/* Aplicar el mismo ancho que el de logout */
+#confirmDeleteModal .modal-dialog, #finalDeleteModal .modal-dialog {
+    max-width: 500px;
+    width: 90%;
+    margin: auto;
+}
+
+.logout-modal-content .form-control {
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+    background-color: #f8fafc;
+    font-size: 0.95rem;
+}
+
+.logout-modal-content .form-control:focus {
+    border-color: #dc2626; /* Color rojo si es el de eliminación */
+    box-shadow: none;
+    background-color: #fff;
+}
+
+/* Estilo para el input de los modales */
+.logout-input {
+    border: 2px solid #f1f5f9 !important;
+    border-right: none !important; /* Elimina borde derecho para unir al botón */
+    background-color: #f8fafc !important;
+    border-radius: 10px 0 0 10px !important;
+    padding: 0.75rem 1rem;
+}
+
+.logout-input:focus {
+    border-color: #dc2626 !important; /* Rojo peligro al enfocar */
+    box-shadow: none !important;
+    background-color: #fff !important;
+}
+
+/* Estilo para el botón del ojo */
+.logout-btn-eye {
+    border: 2px solid #f1f5f9 !important;
+    border-left: none !important;
+    background-color: #f8fafc !important;
+    border-radius: 0 10px 10px 0 !important;
+    color: #64748b !important;
+}
+
+.logout-btn-eye:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* Si el input tiene foco, el botón también debe cambiar de borde */
+.input-group:focus-within .logout-btn-eye {
+    border-color: #dc2626 !important;
+}

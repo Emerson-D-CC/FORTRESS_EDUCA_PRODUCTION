@@ -1,0 +1,414 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Solicitud {{ ticket.ID_Ticket }} - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Detalle de Solicitud #" + ticket.ID_Ticket %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: ticket_detail.html
+        Función: Visualización de la información y seguimiento del ticket creado para la solicitud del cupo.
+    -->
+
+    <main class="page-content">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('aplication.ticket_status') }}">Mis Solicitudes</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">#{{ ticket.ID_Ticket }}</li>
+            </ol>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Fila 1: Datos del Ticket + Timeline -->
+        <div class="row g-4 mb-4">
+
+            <!-- Datos completos del Ticket -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                <i class="fas fa-ticket-alt me-2 text-primary"></i>
+                                {{ ticket.Titulo_Ticket }}
+                            </h5>
+                            <span class="text-muted small">ID: <strong>#{{ ticket.ID_Ticket }}</strong></span>
+                        </div>
+                        <div class="text-end">
+                            {% if ticket.Nombre_Estado == 'En Revisión' %}
+                                <span class="badge bg-warning text-dark fs-6">{{ ticket.Nombre_Estado }}</span>
+                            {% elif ticket.Nombre_Estado == 'Cerrado' or ticket.Nombre_Estado == 'Archivado' %}
+                                <span class="badge bg-secondary fs-6">{{ ticket.Nombre_Estado }}</span>
+                            {% elif ticket.Nombre_Estado == 'Asignación de Cupo' %}
+                                <span class="badge bg-info text-dark fs-6">{{ ticket.Nombre_Estado }}</span>
+                            {% elif ticket.Nombre_Estado == 'Confirmación Final' %}
+                                <span class="badge bg-success fs-6">{{ ticket.Nombre_Estado }}</span>
+                            {% else %}
+                                <span class="badge bg-primary fs-6">{{ ticket.Nombre_Estado }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Descripción -->
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-muted text-uppercase small mb-2">Descripción</h6>
+                        <p class="mb-0">{{ ticket.Descripcion_Ticket }}</p>
+                    </div>
+
+                    <!-- Datos del Menor -->
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-muted text-uppercase small mb-3">
+                            <i class="fas fa-child me-1"></i>Datos del Menor
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Estudiante</small>
+                                    <span class="fw-semibold">{{ ticket.Nombre_Estudiante }}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Grado Actual</small>
+                                    <span class="fw-semibold">{{ ticket.Nombre_Grado_Actual }}</span>
+                                </div>
+                            </div>
+                            {% if ticket.Grado_Proximo %}
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Grado Solicitado</small>
+                                    <span class="fw-semibold">{{ ticket.Nombre_Grado_Proximo }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Barrio de Residencia</small>
+                                    <span class="fw-semibold">{{ ticket.Nombre_Barrio }}</span>
+                                </div>
+                            </div>
+                            {% if ticket.Tiempo_Residencia %}
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Tiempo de Residencia</small>
+                                    <span class="fw-semibold">{{ ticket.Tiempo_Residencia }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Preferencias y Asignación -->
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-muted text-uppercase small mb-3">
+                            <i class="fas fa-school me-1"></i>Preferencias y Asignación
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Colegio de Preferencia</small>
+                                    <span class="fw-semibold">{{ ticket.Colegio_Preferencia }}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Jornada Preferida</small>
+                                    <span class="fw-semibold">{{ ticket.Jornada_Preferencia }}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Tipo de Afectación</small>
+                                    <span class="fw-semibold">{{ ticket.Nombre_Afectacion }}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 {% if ticket.Colegio_Asignado != 'Sin asignar' %}bg-success bg-opacity-10 border border-success{% else %}bg-light{% endif %} rounded">
+                                    <small class="text-muted d-block">Colegio Asignado</small>
+                                    <span class="fw-semibold {% if ticket.Colegio_Asignado != 'Sin asignar' %}text-success{% endif %}">
+                                        {{ ticket.Colegio_Asignado }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadatos -->
+                    <div>
+                        <h6 class="fw-semibold text-muted text-uppercase small mb-3">
+                            <i class="fas fa-info-circle me-1"></i>Información del Proceso
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Fecha de Apertura</small>
+                                    <span class="fw-semibold">
+                                        {{ ticket.Fecha_Creacion.strftime('%d/%m/%Y %I:%M %p') if ticket.Fecha_Creacion else '—' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Fecha de Cierre</small>
+                                    <span class="fw-semibold">
+                                        {{ ticket.Fecha_Cierre.strftime('%d/%m/%Y %I:%M %p') if ticket.Fecha_Cierre else 'En proceso' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Funcionario Asignado</small>
+                                    <span class="fw-semibold">
+                                        {{ ticket.Nombre_Tecnico if ticket.Nombre_Tecnico else 'Sin asignar' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded">
+                                    <small class="text-muted d-block">Puntaje de Prioridad</small>
+                                    <span class="fw-semibold">{{ ticket.Puntaje_Prioridad }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm p-4 h-100"
+                     style="background: linear-gradient(135deg, #f8fff9, #f0f9f4);">
+
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-stream me-2"
+                           style="color: var(--color-accent-green);"></i>
+                        Línea de Tiempo
+                    </h5>
+                    <p class="text-muted small mb-4">
+                        Solicitud <strong>#{{ ticket.ID_Ticket }}</strong>
+                        · {{ ticket.Nombre_Estudiante }}
+                    </p>
+
+                    <!-- Banner contextual según el tipo de cierre -->
+                    {% if timeline_tipo == 'exitoso' %}
+                    <div class="alert alert-success py-2 small mb-4">
+                        <i class="fas fa-check-circle me-1"></i>
+                        <strong>¡Cupo asignado!</strong>
+                        Su solicitud ha sido resuelta satisfactoriamente.
+                    </div>
+                    {% elif timeline_tipo == 'rechazo' %}
+                    <div class="alert alert-danger py-2 small mb-4">
+                        <i class="fas fa-times-circle me-1"></i>
+                        <strong>Solicitud cerrada:</strong>
+                        {{ ticket.Nombre_Estado }}.
+                        Puede abrir una nueva solicitud si lo requiere.
+                    </div>
+                    {% endif %}
+
+                    <!-- Pasos del timeline -->
+                    <ul class="timeline">
+                        {% for paso in timeline %}
+                        <li class="timeline-item
+                            {% if paso.estado == 'completed' %}completed
+                            {% elif paso.estado == 'active' %}active
+                            {% elif paso.estado == 'warning' %}active
+                            {% endif %}">
+
+                            <div class="timeline-marker
+                                {% if paso.estado == 'warning' %}bg-warning border-warning{% endif %}">
+                                {% if paso.estado == 'completed' %}
+                                    <i class="fas fa-check"></i>
+                                {% elif paso.estado == 'warning' %}
+                                    <i class="fas fa-exclamation"></i>
+                                {% else %}
+                                    <i class="fas {{ paso.icono }}"></i>
+                                {% endif %}
+                            </div>
+
+                            <div class="timeline-content
+                                {% if paso.estado %}shadow-sm{% endif %}">
+                                <h6 class="fw-bold mb-1
+                                    {% if not paso.estado %}text-muted{% endif %}
+                                    {% if paso.estado == 'warning' %}text-warning{% endif %}">
+                                    {{ paso.label }}
+                                </h6>
+                                <p class="small text-muted mb-0">
+                                    {% if paso.estado == 'completed' %}
+                                        Completado
+                                    {% elif paso.estado == 'active' %}
+                                        En proceso
+                                    {% elif paso.estado == 'warning' %}
+                                        Requiere su atención
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Nota aclaratoria para estado de acción de usuario -->
+                    {% if ticket.Nombre_Estado == 'Pendiente Acción de Usuario' %}
+                    <div class="alert alert-warning py-2 small mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Un funcionario ha solicitado información adicional.
+                        Por favor revise los <strong>comentarios</strong> de esta solicitud.
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        <!-- Fila 2: Comentarios + Documentos -->
+        <div class="row g-4">
+
+            <!-- Comentarios -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-comments me-2 text-primary"></i>
+                        Comentarios del Proceso
+                    </h5>
+
+                    {% if comentarios %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for com in comentarios %}
+                            <div class="p-3 rounded border bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <span class="fw-semibold">{{ com.Nombre_Usuario }}</span>
+                                        <span class="badge bg-secondary ms-2 small">{{ com.Nombre_Rol }}</span>
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ com.Fecha_Comentario.strftime('%d/%m/%Y %I:%M %p') if com.Fecha_Comentario else '' }}
+                                    </small>
+                                </div>
+                                <p class="mb-0 small">{{ com.Comentario }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-comment-slash fa-2x mb-2 d-block mx-auto"></i>
+                            <p class="mb-0">Aún no hay comentarios en esta solicitud.</p>
+                        </div>                     
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documentos -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-paperclip me-2 text-primary"></i>
+                        Documentos
+                    </h5>
+
+                    <!-- Lista de documentos existentes -->
+                    <h6 class="fw-semibold text-muted text-uppercase small mb-3">Documentos Adjuntos</h6>
+                    {% if documentos %}
+                        <div class="list-group list-group-flush mb-4">
+                            {% for doc in documentos %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% set ext = doc.Nombre_Original.rsplit('.', 1)[-1].lower() %}
+                                    {% if ext == 'pdf' %}
+                                        <i class="fas fa-file-pdf text-danger fa-lg"></i>
+                                    {% elif ext in ['jpg', 'jpeg', 'png'] %}
+                                        <i class="fas fa-file-image text-info fa-lg"></i>
+                                    {% else %}
+                                        <i class="fas fa-file text-secondary fa-lg"></i>
+                                    {% endif %}
+                                    <div>
+                                        <span class="fw-semibold small d-block">{{ doc.Nombre_Original }}</span>
+                                        <span class="text-muted" style="font-size: 0.75rem;">
+                                            {{ doc.Nombre_Tipo_Doc }} ·
+                                            {{ doc.Fecha_Subida.strftime('%d/%m/%Y') if doc.Fecha_Subida else '' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('aplication.ticket_download_doc', id_ticket=ticket.ID_Ticket, id_doc=doc.ID_Doc_Ticket) }}"
+                                   class="btn btn-outline-primary btn-sm"
+                                   title="Descargar {{ doc.Nombre_Original }}">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small mb-4">No hay documentos adjuntos en esta solicitud.</p>
+                    {% endif %}
+
+                    <hr>
+
+                    <!-- Formulario para subir nuevo documento -->
+                    <h6 class="fw-semibold text-muted text-uppercase small mb-3">
+                        <i class="fas fa-upload me-1"></i>Subir Nuevo Documento
+                    </h6>
+
+                    {% if ticket.Estado_Final == 0 %}
+                        <form method="POST"
+                              action="{{ url_for('aplication.ticket_detail', id_ticket=ticket.ID_Ticket) }}"
+                              enctype="multipart/form-data"
+                              novalidate>
+                            {{ form.hidden_tag() }}
+
+                            <!-- Tipo de documento -->
+                            <div class="mb-3">
+                                {{ form.tipo_documento.label(class="form-label fw-semibold small") }}
+                                {{ form.tipo_documento(class="form-select form-select-sm" + (" is-invalid" if form.tipo_documento.errors else "")) }}
+                                {% for error in form.tipo_documento.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Archivo -->
+                            <div class="mb-3">
+                                {{ form.archivo.label(class="form-label fw-semibold small") }}
+                                {{ form.archivo(class="form-control form-control-sm" + (" is-invalid" if form.archivo.errors else ""), accept=".pdf,.jpg,.jpeg,.png") }}
+                                <div class="form-text">Formatos permitidos: PDF, JPG, PNG. Máx. 5 MB.</div>
+                                {% for error in form.archivo.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-upload me-1"></i>Subir Documento
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-secondary py-2 small mb-0">
+                            <i class="fas fa-lock me-1"></i>
+                            Esta solicitud está cerrada. No es posible adjuntar nuevos documentos.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock %}

@@ -1,0 +1,217 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Seguimiento - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Seguimiento de Solicitudes de Cupo" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: ticket_status.html
+        Función: Visualización de tickets creados para la solicitud del cupo.
+    -->
+
+    <main class="page-content">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('aplication.ticket_status') }}">Mis Solicitudes</a>
+                </li>
+            </ol>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Alerta de responsabilidad -->
+        <div class="alert alert-warning small mb-4 d-flex align-items-center">
+            <!-- Columna del Icono -->
+            <div class="pe-3">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+            </div>
+            <!-- Columna del Texto -->
+            <div>
+                Es su responsabilidad validar constantemente el estado del ticket y los comentarios dejados por el técnico asignado.
+                Si se solicita información y/o documentos y no hay respuesta en <strong>3 DÍAS</strong>, el ticket será <strong>RECHAZADO</strong>
+                automaticamente por el sistema, <strong>SIN POSIBILIDAD DE REAPERTURA</strong>.
+            </div>
+        </div>
+
+        <!-- Tickets Abiertos -->
+        <div class="row g-4 mb-4">
+            <!-- Tabla de Solicitudes -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-list me-2 text-primary"></i>Solicitudes de Cupo Abiertas
+                        </h5>
+                        <a href="{{ url_for('aplication.ticket_request') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> Nueva
+                        </a>
+                    </div>
+
+                    <!-- Lista de tickets abiertos -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Menor</th>
+                                    <th>Grado</th>
+                                    <th>Estado</th>
+                                    <th>Colegio Asignado</th>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tickets_ab in tickets_ab %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('aplication.ticket_detail', id_ticket=tickets_ab.ID_Ticket) }}"
+                                           class="fw-bold text-primary text-decoration-none">
+                                            #{{ tickets_ab.ID_Ticket }}
+                                        </a>
+                                    </td>
+                                    <td>{{ tickets_ab.Titulo_Ticket }}</td>
+                                    <td>{{ tickets_ab.Nombre_Estudiante }}</td>
+                                    <td>{{ tickets_ab.Nombre_Grado }}</td>
+                                    <td>
+                                        {% if tickets_ab.Nombre_Estado == 'En Revisión' %}
+                                            <span class="badge bg-warning text-dark">{{ tickets_ab.Nombre_Estado }}</span>
+                                        {% elif tickets_ab.Nombre_Estado == 'Cerrado' or tickets_ab.Nombre_Estado == 'Archivado' %}
+                                            <span class="badge bg-secondary">{{ tickets_ab.Nombre_Estado }}</span>
+                                        {% elif tickets_ab.Nombre_Estado == 'Asignación de Cupo' %}
+                                            <span class="badge bg-info text-dark">{{ tickets_ab.Nombre_Estado }}</span>
+                                        {% elif tickets_ab.Nombre_Estado == 'Confirmación Final' %}
+                                            <span class="badge bg-success">{{ tickets_ab.Nombre_Estado }}</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">{{ tickets_ab.Nombre_Estado }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">{{ tickets_ab.Nombre_Colegio }}</span>
+                                    </td>
+                                    <td>
+                                        <small>{{ tickets_ab.Fecha_Creacion.strftime('%d %b %Y') if tickets_ab.Fecha_Creacion else '—' }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('aplication.ticket_detail', id_ticket=tickets_ab.ID_Ticket) }}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block mx-auto"></i>
+                                        <p class="mb-0">No tiene solicitudes registradas.</p>
+                                        <a href="{{ url_for('aplication.ticket_request') }}" class="mt-2 d-inline-block">Crear una nueva</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Cerrados -->
+        <div class="row g-4">
+            <!-- Tabla de Solicitudes -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-list me-2 text-primary"></i>Solicitudes de Cupo Solucionadas / Cerradas
+                        </h5>
+                    </div>
+
+                    <!-- Lista de tickets cerrados -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Menor</th>
+                                    <th>Grado</th>
+                                    <th>Estado</th>
+                                    <th>Colegio Asignado</th>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tickets_cer in tickets_cer %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('aplication.ticket_detail', id_ticket=tickets_cer.ID_Ticket) }}"
+                                           class="fw-bold text-primary text-decoration-none">
+                                            #{{ tickets_cer.ID_Ticket }}
+                                        </a>
+                                    </td>
+                                    <td>{{ tickets_cer.Titulo_Ticket }}</td>
+                                    <td>{{ tickets_cer.Nombre_Estudiante }}</td>
+                                        {% if tickets_cer.Nombre_Estado == 'En Revisión' %}
+                                            <span class="badge bg-warning text-dark">{{ tickets_cer.Nombre_Estado }}</span>
+                                        {% elif tickets_cer.Nombre_Estado == 'Cerrado' or tickets_cer.Nombre_Estado == 'Archivado' %}
+                                            <span class="badge bg-secondary">{{ tickets_cer.Nombre_Estado }}</span>
+                                        {% elif tickets_cer.Nombre_Estado == 'Asignación de Cupo' %}
+                                            <span class="badge bg-info text-dark">{{ tickets_cer.Nombre_Estado }}</span>
+                                        {% elif tickets_cer.Nombre_Estado == 'Confirmación Final' %}
+                                            <span class="badge bg-success">{{ tickets_cer.Nombre_Estado }}</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">{{ tickets_cer.Nombre_Estado }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">{{ tickets_cer.Nombre_Colegio }}</span>
+                                    </td>
+                                    <td>
+                                        <small>{{ tickets_cer.Fecha_Creacion.strftime('%d %b %Y') if tickets_cer.Fecha_Creacion else '—' }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('aplication.ticket_detail', id_ticket=tickets_cer.ID_Ticket) }}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block mx-auto"></i>
+                                        <p class="mb-0">No tiene solicitudes solucionadas.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </main>
+
+{% endblock %}

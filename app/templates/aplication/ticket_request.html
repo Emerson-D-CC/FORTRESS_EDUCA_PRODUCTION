@@ -1,0 +1,603 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Nueva Solicitud - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Nueva Solicitud de Cupo Educativo" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: ticket_request.html
+        Función: Formulario de registro de Tickets para la solicitud de un cupo.
+    -->
+
+    <main class="page-content">
+
+        <div class="alert alert-info small mb-4 d-flex align-items-center">
+            <!-- Columna del Icono -->
+            <div class="pe-3">
+                <i class="fas fa-info-circle fa-2x"></i>
+            </div>
+            <!-- Columna del Texto -->
+            <div>
+                Complete todos los pasos del formulario para solicitar un cupo en un colegio público de Engativá.
+                <strong>ESTA INFORMACIÓN SE UTILIZARÁ PARA BUSCAR CUPOS DISPONIBLES EN COLEGIOS DE ENGATIVÁ.</strong>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4 mx-auto" style="max-width: 900px;">
+
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step-item active" id="stepIndicator1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Menor</div>
+                </div>
+                <div class="step-item" id="stepIndicator2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Vulnerabilidad</div>
+                </div>
+                <div class="step-item" id="stepIndicator3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Ubicación</div>
+                </div>
+                <div class="step-item" id="stepIndicator4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Preferencias</div>
+                </div>
+                <div class="step-item" id="stepIndicator5">
+                    <div class="step-number">5</div>
+                    <div class="step-label">Documentos</div>
+                </div>
+                <div class="step-item" id="stepIndicator6">
+                    <div class="step-number">6</div>
+                    <div class="step-label">Confirmar</div>
+                </div>
+            </div>
+
+            <form id="requestWizard" method="POST"
+                action="{{ url_for('aplication.ticket_request') }}"
+                enctype="multipart/form-data">
+
+                {{ form_p1.hidden_tag() }}
+
+                <!-- PASO 1: Selección del Menor -->
+                <div class="wizard-step active" id="step1">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">
+                        <i class="fas fa-child me-2 text-primary"></i>Paso 1: Selección del Menor
+                    </h5>
+
+                    <div class="alert alert-light border small py-2 mb-4">
+                        <i class="fas fa-info-circle text-primary me-1"></i>
+                        Seleccione el estudiante para el cual está solicitando el cupo.
+                        Si necesita agregar un nuevo menor, puede hacerlo desde
+                        <a href="{{ url_for('aplication.profile', tab='menor') }}" target="_blank">
+                            su perfil
+                        </a>.
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">
+                                Estudiante <span class="text-danger">*</span>
+                            </label>
+                            {{ form_p1.id_estudiante(
+                                class="form-select form-select-lg" +
+                                (" is-invalid" if form_p1.id_estudiante.errors else "")
+                            ) }}
+                            {% for error in form_p1.id_estudiante.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">
+                                Solo se muestran los estudiantes registrados en su perfil.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2: Vulnerabilidad -->
+                <div class="wizard-step" id="step2">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">
+                        <i class="fas fa-heart me-2" style="color: var(--color-danger);"></i>
+                        Paso 2: Información de Vulnerabilidad
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">
+                                Tipo de Afectación / Condición de Vulnerabilidad
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            {# Radio buttons generados dinámicamente desde la BD #}
+                            <div class="row g-2">
+                                {% for afectacion in tipos_afectacion %}
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 border rounded-3 h-100
+                                        {% if form_p2.id_tipo_afectacion.data == afectacion.ID_Tipo_Afectacion %}
+                                            border-primary bg-primary bg-opacity-10
+                                        {% endif %}">
+                                        <input class="form-check-input" type="radio"
+                                            name="{{ form_p2.id_tipo_afectacion.name }}"
+                                            id="afectacion_{{ afectacion.ID_Tipo_Afectacion }}"
+                                            value="{{ afectacion.ID_Tipo_Afectacion }}"
+                                            {% if form_p2.id_tipo_afectacion.data == afectacion.ID_Tipo_Afectacion %}
+                                                checked
+                                            {% endif %}>
+                                        <label class="form-check-label fw-bold"
+                                            for="afectacion_{{ afectacion.ID_Tipo_Afectacion }}">
+                                            {% if afectacion.Nombre_Afectacion == 'Desplazamiento Forzado' %}
+                                                <i class="fas fa-route me-1 text-danger"></i>
+                                            {% elif afectacion.Nombre_Afectacion == 'Víctima del Conflicto Armado' %}
+                                                <i class="fas fa-dove me-1 text-primary"></i>
+                                            {% elif afectacion.Nombre_Afectacion == 'Vulnerabilidad Económica' %}
+                                                <i class="fas fa-hand-holding-heart me-1 text-warning"></i>
+                                            {% elif afectacion.Nombre_Afectacion == 'No Escolarizado' %}
+                                                <i class="fas fa-user-graduate me-1 text-secondary"></i>
+                                            {% else %}
+                                                <i class="fas fa-ellipsis-h me-1 text-muted"></i>
+                                            {% endif %}
+                                            {{ afectacion.Nombre_Afectacion }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            {% for error in form_p2.id_tipo_afectacion.errors %}
+                                <div class="text-danger small mt-2">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">
+                                Descripción del Caso <span class="text-danger">*</span>
+                            </label>
+                            {{ form_p2.descripcion(
+                                class="form-control" +
+                                (" is-invalid" if form_p2.descripcion.errors else ""),
+                                rows=5,
+                                placeholder="Describa brevemente la situación del menor y las circunstancias que motivaron la solicitud de cupo educativo. Sea lo más detallado posible para una mejor evaluación del caso..."
+                            ) }}
+                            {% for error in form_p2.descripcion.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">
+                                Mínimo 50 caracteres. Esta información es confidencial.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3: Ubicación -->
+                <div class="wizard-step" id="step3">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">
+                        <i class="fas fa-map-marker-alt me-2 text-danger"></i>Paso 3: Ubicación Actual
+                    </h5>
+
+                    <div class="alert alert-warning small py-2">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <strong>Importante:</strong> El servicio de cupos está orientado a residentes de la
+                        Localidad de Engativá, Bogotá D.C.
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold">
+                                Barrio de Residencia <span class="text-danger">*</span>
+                            </label>
+                            {{ form_p3.id_barrio(
+                                class="form-select" +
+                                (" is-invalid" if form_p3.id_barrio.errors else "")
+                            ) }}
+                            {% for error in form_p3.id_barrio.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Localidad</label>
+                            <input type="text" class="form-control" value="Engativá" readonly>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">
+                                Tiempo de Residencia en Engativá <span class="text-danger">*</span>
+                            </label>
+                            {{ form_p3.id_tiempo_residencia(
+                                class="form-select" +
+                                (" is-invalid" if form_p3.id_tiempo_residencia.errors else "")
+                            ) }}
+                            {% for error in form_p3.id_tiempo_residencia.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4: Preferencias Educativas -->
+                <div class="wizard-step" id="step4">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">
+                        <i class="fas fa-school me-2" style="color: var(--color-accent-green);"></i>
+                        Paso 4: Preferencias Educativas
+                    </h5>
+
+                    <div class="alert alert-light border small py-2 mb-3">
+                        <i class="fas fa-info-circle text-primary me-1"></i>
+                        La asignación de colegio dependerá de la disponibilidad de cupos.
+                        Las preferencias son indicativas y no garantizan la asignación al colegio deseado.
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">
+                                Jornada Preferida <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex flex-column gap-2">
+                                {% for id_jornada, nombre_jornada in form_p4.id_jornada.choices %}
+                                    {% if id_jornada != 0 %}
+                                        <div class="form-check p-3 border rounded-3">
+                                            <input class="form-check-input" type="radio"
+                                                name="{{ form_p4.id_jornada.name }}"
+                                                id="jornada_{{ id_jornada }}"
+                                                value="{{ id_jornada }}"
+                                                {% if form_p4.id_jornada.data == id_jornada %}checked{% endif %}>
+                                            <label class="form-check-label fw-bold" for="jornada_{{ id_jornada }}">
+                                                {% if nombre_jornada == 'Mañana' %}
+                                                    <i class="fas fa-sun me-1 text-warning"></i>
+                                                    Mañana (6:00 AM - 12:00 M)
+                                                {% elif nombre_jornada == 'Tarde' %}
+                                                    <i class="fas fa-cloud-sun me-1 text-primary"></i>
+                                                    Tarde (12:00 M - 6:00 PM)
+                                                {% elif nombre_jornada == 'Nocturna' %}
+                                                    <i class="fas fa-moon me-1 text-secondary"></i>
+                                                    Nocturna (6:00 PM - 9:30 PM) <br> Para mayores de 13 años                                        
+                                                {% elif nombre_jornada == 'Única' %}
+                                                    <i class="fas fa-sun me-1 text-warning"></i>
+                                                    Única (7:00 AM - 3:00 PM)             
+                                                {% elif nombre_jornada == 'Completa' %}
+                                                    <i class="fas fa-cloud-sun-rain me-1 text-primary"></i>
+                                                    Completa (7:00 AM - 4:00 PM)  
+                                                {% else %}
+                                                    <i class="fas fa-calendar-week me-1 text-secondary"></i>
+                                                    Fin de Semana (7:00 PM - 4:00 PM) <br> Para mayores de 13 años
+                                                {% endif %}
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% for error in form_p4.id_jornada.errors %}
+                                <div class="text-danger small mt-2">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tipo de Institución</label>
+                            <div class="form-check p-3 border rounded-3 mb-3"
+                                style="background: rgba(17,153,142,0.05);">
+                                <input class="form-check-input" type="checkbox" checked disabled>
+                                <label class="form-check-label fw-bold">
+                                    <i class="fas fa-school me-1 text-success"></i> Colegio Público
+                                    <span class="upload-req-badge">Único disponible</span>
+                                </label>
+                                <p class="text-muted small mb-0 mt-1">
+                                    La plataforma gestiona exclusivamente cupos en colegios públicos de Engativá.
+                                </p>
+                            </div>
+
+                            <label class="form-label small fw-bold">
+                                ¿Tiene preferencia por algún colegio específico?
+                            </label>
+                            {{ form_p4.id_colegio(
+                                class="form-select" +
+                                (" is-invalid" if form_p4.id_colegio.errors else "")
+                            ) }}
+                            {% for error in form_p4.id_colegio.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">
+                                La disponibilidad de cupos es definida por el sistema.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 5: Documentos -->
+                <div class="wizard-step" id="step5">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">
+                        <i class="fas fa-paperclip me-2 text-primary"></i>Paso 5: Adjuntar Documentos
+                    </h5>
+
+                    <p class="text-muted small mb-4">
+                        Adjunte los documentos requeridos. Los marcados con
+                        <span class="badge bg-danger">Obligatorio</span> son indispensables.
+                    </p>
+
+                    <div class="row g-3">
+
+                        <!-- Documento Acudiente — OBLIGATORIO -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">
+                                Documento del Acudiente
+                                <span class="badge bg-danger">Obligatorio</span>
+                            </label>
+                            {# label envuelve el área — clic nativo sin JS #}
+                            <label for="{{ form_p5.doc_acudiente.id }}"
+                                class="upload-area d-block {% if form_p5.doc_acudiente.errors %}border-danger{% endif %}"
+                                style="cursor:pointer;">
+                                <i class="fas fa-id-card fa-2x text-muted mb-2"></i>
+                                <h6 class="mb-1">Cédula del Acudiente</h6>
+                                <p class="small text-muted mb-1">PDF, JPG, PNG (Máx 5MB)</p>
+                                <span class="small text-muted fst-italic" id="nombre_doc_acudiente">
+                                    Ningún archivo seleccionado
+                                </span>
+                                {# Input oculto — el label activa el clic #}
+                                {{ form_p5.doc_acudiente(class="d-none") }}
+                            </label>
+                            {% for error in form_p5.doc_acudiente.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Documento Menor — RECOMENDADO -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">
+                                Documento del Menor (si tiene)
+                                <span class="badge bg-warning text-dark">Recomendado</span>
+                            </label>
+                            <label for="{{ form_p5.doc_menor.id }}"
+                                class="upload-area d-block"
+                                style="cursor:pointer;">
+                                <i class="fas fa-child fa-2x text-muted mb-2"></i>
+                                <h6 class="mb-1">Tarjeta de Identidad / Registro Civil</h6>
+                                <p class="small text-muted mb-1">PDF, JPG, PNG (Máx 5MB)</p>
+                                <span class="small text-muted fst-italic" id="nombre_doc_menor">
+                                    Ningún archivo seleccionado
+                                </span>
+                                {{ form_p5.doc_menor(class="d-none") }}
+                            </label>
+                        </div>
+
+                        <!-- Certificados — OPCIONAL -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">
+                                Certificados / Boletines Anteriores
+                                <span class="badge bg-secondary">Opcional</span>
+                            </label>
+                            <label for="{{ form_p5.doc_certificados.id }}"
+                                class="upload-area d-block"
+                                style="cursor:pointer;">
+                                <i class="fas fa-file-alt fa-2x text-muted mb-2"></i>
+                                <h6 class="mb-1">Boletines o Carné Escolar</h6>
+                                <p class="small text-muted mb-1">PDF, JPG, PNG (Máx 10MB)</p>
+                                <span class="small text-muted fst-italic" id="nombre_doc_certificados">
+                                    Ningún archivo seleccionado
+                                </span>
+                                {{ form_p5.doc_certificados(class="d-none") }}
+                            </label>
+                        </div>
+
+                        <!-- Documento Víctima — SI APLICA -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">
+                                Documento de Víctima / Declaración
+                                <span class="badge bg-info text-dark">Si aplica</span>
+                            </label>
+                            <label for="{{ form_p5.doc_victima.id }}"
+                                class="upload-area d-block"
+                                style="cursor:pointer;">
+                                <i class="fas fa-file-shield fa-2x text-muted mb-2"></i>
+                                <h6 class="mb-1">Certificado de la Unidad de Víctimas</h6>
+                                <p class="small text-muted mb-1">PDF, JPG, PNG (Máx 5MB)</p>
+                                <span class="small text-muted fst-italic" id="nombre_doc_victima">
+                                    Ningún archivo seleccionado
+                                </span>
+                                {{ form_p5.doc_victima(class="d-none") }}
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-info py-2 mt-3 small">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Todos sus documentos son almacenados de forma segura y se usan únicamente
+                        para el proceso de asignación de cupo educativo.
+                    </div>
+                </div>
+
+                <!-- PASO 6: Confirmación -->
+                <div class="wizard-step" id="step6">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom">
+                        <i class="fas fa-check-circle me-2 text-success"></i>Paso 6: Confirmación y Envío
+                    </h5>
+
+                    <div class="p-4 rounded-3 border mb-4"
+                        style="background: linear-gradient(135deg, #f0f9f4, #e8f4fd);">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-clipboard-list text-primary me-2"></i>
+                            Verificación Final de la Solicitud
+                        </h6>
+                        <p class="small text-muted mb-3">
+                            Al enviar esta solicitud, usted declara que la información proporcionada
+                            es verídica y podrá ser verificada por las autoridades competentes.
+                            El proceso de revisión puede tomar entre 5 a 15 días hábiles.
+                        </p>
+
+                        <div class="row g-2 small">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 p-2 bg-white rounded border">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Estudiante seleccionado</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 p-2 bg-white rounded border">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Condición de vulnerabilidad registrada</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 p-2 bg-white rounded border">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Ubicación en Engativá confirmada</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 p-2 bg-white rounded border">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Preferencias educativas registradas</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 p-2 bg-white rounded border">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Documentos adjuntados</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="form-check {% if form_p6.acepta_terminos.errors %}is-invalid{% endif %}">
+                                {{ form_p6.acepta_terminos(class="form-check-input") }}
+                                <label class="form-check-label small" for="{{ form_p6.acepta_terminos.id }}">
+                                    <strong>Acepto y declaro</strong> que la información proporcionada es
+                                    verídica. Entiendo que proporcionar información falsa puede resultar en
+                                    la cancelación del cupo asignado y acciones legales correspondientes.
+                                </label>
+                            </div>
+                            {% for error in form_p6.acepta_terminos.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-light px-4" id="prevBtn" disabled>
+                        <i class="fas fa-arrow-left me-1"></i> Anterior
+                    </button>
+                    <button type="button" class="btn btn-primary px-4" id="nextBtn">
+                        Siguiente <i class="fas fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <script> 
+        document.addEventListener('DOMContentLoaded', function () {
+            let currentStep = 1;
+            const totalSteps = 6;
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            function updateWizard() {
+                document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active', 'completed'));
+
+                document.getElementById('step' + currentStep).classList.add('active');
+
+                for (let i = 1; i <= totalSteps; i++) {
+                    const ind = document.getElementById('stepIndicator' + i);
+                    if (i < currentStep) {
+                        ind.classList.add('completed');
+                        ind.querySelector('.step-number').innerHTML = '<i class="fas fa-check"></i>';
+                    } else if (i === currentStep) {
+                        ind.classList.add('active');
+                    }
+                }
+
+                prevBtn.disabled = (currentStep === 1);
+
+                if (currentStep === totalSteps) {
+                    nextBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Enviar Solicitud';
+                    nextBtn.classList.replace('btn-primary', 'btn-success');
+                } else {
+                    nextBtn.innerHTML = 'Siguiente <i class="fas fa-arrow-right ms-1"></i>';
+                    nextBtn.classList.replace('btn-success', 'btn-primary');
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            nextBtn.addEventListener('click', function () {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateWizard();
+                } else {
+                    document.getElementById('requestWizard').submit();
+                }
+            });
+
+            prevBtn.addEventListener('click', function () {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateWizard();
+                }
+            });
+
+            /* Mostrar nombre de archivo seleccionado — feedback visual */
+            const fileMap = {
+                'doc_acudiente':   'nombre_doc_acudiente',
+                'doc_menor':       'nombre_doc_menor',
+                'doc_certificados':'nombre_doc_certificados',
+                'doc_victima':     'nombre_doc_victima',
+            };
+            Object.entries(fileMap).forEach(([inputId, spanId]) => {
+                const input = document.getElementById(inputId);
+                const span  = document.getElementById(spanId);
+                if (input && span) {
+                    input.addEventListener('change', function () {
+                        if (this.files && this.files.length > 0) {
+                            span.textContent = this.files.length > 1
+                                ? `${this.files.length} archivos seleccionados`
+                                : this.files[0].name;
+                            span.classList.replace('text-muted', 'text-success');
+                        } else {
+                            span.textContent = 'Ningún archivo seleccionado';
+                            span.classList.replace('text-success', 'text-muted');
+                        }
+                    });
+                }
+            });
+
+        });
+    </script>
+{% endblock %}
+
+
+
+<!-- MODAL OBLIGATORIO: Sin estudiante registrado -->
+{% block modal_global %}
+    {% if mostrar_modal_estudiante %}
+        {% with
+            modal_id         = "modalEstudiante",
+            modal_title      = "Registro de Estudiante Requerido",
+            modal_icon       = "fas fa-user-graduate",
+            modal_icon_color = "warning",
+            modal_btn_color  = "warning",
+            modal_redirect   = url_for('aplication.register_student'),
+            modal_btn_label  = "Registrar Estudiante",
+            modal_body       = "Para continuar debe registrar los datos del estudiante a su cargo.",
+            modal_show       = true
+        %}
+            {% include "includes/modal_mandatory.html" %}
+        {% endwith %}
+    {% endif %}
+{% endblock %}

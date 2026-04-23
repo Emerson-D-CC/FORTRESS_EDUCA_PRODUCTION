@@ -1,0 +1,347 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Cuentas del Sistema - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = "Cuentas del Sistema" %}
+
+<!-- Invocar el Bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina de visualización global de usuarios
+    -->
+
+    <main class="page-content">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- MÉTRICAS -->
+        <div class="row g-4 mb-4">
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary-dark);">
+                    <div class="fs-3 fw-bold">{{ metricas.total_usuarios | default(0) }}</div>
+                    <div class="stat-label">TOTAL USUARIOS</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary);">
+                    <div class="fs-3 fw-bold">{{ metricas.acudientes_con | default(0) }}</div>
+                    <div class="stat-label">ACUDIENTES ACTIVOS</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-tec);">
+                    <div class="fs-3 fw-bold">{{ metricas.tecnicos_con | default(0) }}</div>
+                    <div class="stat-label">TÉCNICOS ACTIVOS</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-admin);">
+                    <div class="fs-3 fw-bold">{{ metricas.administradores_con | default(0) }}</div>
+                    <div class="stat-label">ADMINISTRADORES ACTIVOS</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑAS -->
+        <ul class="nav nav-tabs mb-4" id="accountTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {% if tab_activo != 'acciones' %}active{% endif %}"
+                        data-bs-toggle="tab" data-bs-target="#access_history" type="button">
+                    <i class="fas fa-user-clock me-1"></i> Historial de Acceso
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {% if tab_activo == 'acciones' %}active{% endif %}"
+                        data-bs-toggle="tab" data-bs-target="#actions_history" type="button">
+                    <i class="fas fa-user-lock me-1"></i> Historial de Acciones
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <!-- ── TAB 1: Historial de Acceso ── -->
+            <div class="tab-pane fade {% if tab_activo != 'acciones' %}show active{% endif %}" id="access_history">
+
+                <!-- Filtros -->
+                <div class="card border-0 shadow-sm p-3 mb-4">
+                    <form method="GET" action="{{ url_for('admin.accounts') }}">
+                        <input type="hidden" name="tab" value="acceso">
+                        <div class="row g-3 align-items-end">
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Filtrar por Rol</label>
+                                <select class="form-select form-select-sm" name="rol">
+                                    <option value="">Todos los Roles</option>
+                                    {% for r in roles %}
+                                    <option value="{{ r.ID_Rol }}"
+                                        {% if filtros_acceso.rol == r.ID_Rol %}selected{% endif %}>
+                                        {{ r.Nombre_Rol }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Filtrar por Evento</label>
+                                <select class="form-select form-select-sm" name="evento">
+                                    <option value="">Todos los Eventos</option>
+                                    {% for ev in eventos_acceso %}
+                                    <option value="{{ ev.Nombre_Evento }}"
+                                        {% if filtros_acceso.evento == ev.Nombre_Evento %}selected{% endif %}>
+                                        {{ ev.Nombre_Evento }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Tipo de Navegador</label>
+                                <select class="form-select form-select-sm" name="navegador">
+                                    <option value="">Todos los Navegadores</option>
+                                    {% for nav in navegadores %}
+                                    <option value="{{ nav.Nombre_Navegador }}"
+                                        {% if filtros_acceso.navegador == nav.Nombre_Navegador %}selected{% endif %}>
+                                        {{ nav.Nombre_Navegador }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-filter me-1"></i>Filtrar
+                                </button>
+                                <a href="{{ url_for('admin.accounts') }}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-times me-1"></i>Limpiar
+                                </a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla -->
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-table me-2 text-primary"></i>
+                            Historial de Acceso
+                            <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
+                                {{ historial_acceso | length }}
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Evento</th>
+                                    <th>IP</th>
+                                    <th>Navegador</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for h in historial_acceso %}
+                                <tr>
+                                    <td>{{ h.ID_Auditoria }}</td>
+                                    <td>{{ h.Nombre_Usuario }}</td>
+                                    <td>
+                                        {% if h.Nombre_Rol == 'Admin' %}
+                                            <span class="badge bg-dark">{{ h.Nombre_Rol | upper }}</span>
+                                        {% elif h.Nombre_Rol == 'Tecnico' %}
+                                            <span class="badge bg-secondary">{{ h.Nombre_Rol | upper }}</span>                                   
+                                        {% else %}
+                                            <span class="badge bg-primary">{{ h.Nombre_Rol | upper }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if h.Evento in ['LOGIN', 'LOGIN_MFA'] %}
+                                            <span class="badge bg-success">{{ h.Evento }}</span>
+                                        {% elif h.Evento in ['LOGOUT'] %}
+                                            <span class="badge bg-warning text-dark">{{ h.Evento }}</span>
+                                        {% elif h.Evento in ['PENDING_MFA', 'MFA_SETUP_OK'] %}
+                                            <span class="badge bg-primary text-dark">{{ h.Evento }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ h.Evento }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small">{{ h.IP }}</td>
+                                    <td class="small">{{ h.Navegador }}</td>
+                                    <td class="small">{{ h.Fecha_Evento.strftime('%d %b %Y, %I:%M %p') if h.Fecha_Evento else '—' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                        
+                                        <p class="mb-0">
+                                            No se encontraron registros de acceso
+                                            {% if filtros_acceso.rol or filtros_acceso.evento or filtros_acceso.navegador is not none %} 
+                                                con ese estado.
+                                                <a href="{{ url_for('admin.accounts') }}" class="ms-1">Limpiar</a>
+                                            {% else %} 
+                                                en el sistema.
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                </tr>
+                                {% endfor %}     
+
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if historial_acceso %}
+                    <small class="text-muted mt-3 d-block">
+                        Mostrando <strong>{{ historial_acceso | length }}</strong> registro{{ 's' if historial_acceso | length != 1 else '' }}
+                        {% if filtros_acceso.rol or filtros_acceso.evento or filtros_acceso.navegador %}(con filtros activos){% endif %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div><!-- /access_history -->
+
+
+            <!-- ── TAB 2: Historial de Acciones ── -->
+            <div class="tab-pane fade {% if tab_activo == 'acciones' %}show active{% endif %}" id="actions_history">
+
+                <!-- Filtros -->
+                <div class="card border-0 shadow-sm p-3 mb-4">
+                    <form method="GET" action="{{ url_for('admin.accounts') }}">
+                        <input type="hidden" name="tab" value="acciones">
+                        <div class="row g-3 align-items-end">
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Filtrar por Rol</label>
+                                <select class="form-select form-select-sm" name="rol_ac">
+                                    <option value="">Todos los Roles</option>
+                                    {% for r in roles %}
+                                    <option value="{{ r.ID_Rol }}"
+                                        {% if filtros_acciones.rol == r.ID_Rol %}selected{% endif %}>
+                                        {{ r.Nombre_Rol }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Filtrar por Evento</label>
+                                <select class="form-select form-select-sm" name="evento_ac">
+                                    <option value="">Todos los Eventos</option>
+                                    {% for ev in eventos_auditoria %}
+                                    <option value="{{ ev.Nombre_Evento }}"
+                                        {% if filtros_acciones.evento == ev.Nombre_Evento %}selected{% endif %}>
+                                        {{ ev.Nombre_Evento }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-filter me-1"></i>Filtrar
+                                </button>
+                                <a href="{{ url_for('admin.accounts') }}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-times me-1"></i>Limpiar
+                                </a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla -->
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-table me-2 text-primary"></i>
+                            Historial de Acciones
+                            <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
+                                {{ historial_acciones | length }}
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Evento</th>
+                                    <th>Usuario Ejecutor</th>
+                                    <th>IP</th>
+                                    <th>Dato Antiguo</th>
+                                    <th>Dato Nuevo</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in historial_acciones %}
+                                <tr>
+                                    <td>{{ a.ID_Auditoria }}</td>
+                                    <td>
+                                        {% if 'DELETE' in a.Evento or 'DEACTIVATE' in a.Evento %}
+                                            <span class="badge bg-danger">{{ a.Evento }}</span>
+                                        {% elif 'UPDATE' in a.Evento %}
+                                            <span class="badge bg-primary">{{ a.Evento }}</span>
+                                        {% elif 'CREATE' in a.Evento or 'ACTIVATE' in a.Evento %}
+                                            <span class="badge bg-success">{{ a.Evento }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ a.Evento }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ a.ID_Formateado }}</strong></td>
+                                    <td class="small">{{ a.IP }}</td>
+                                    <td class="small text-muted">{{ a.Dato_Antiguo }}</td>
+                                    <td class="small">{{ a.Dato_Nuevo }}</td>
+                                    <td class="small">{{ a.Fecha_Evento.strftime('%d %b %Y, %I:%M %p') if a.Fecha_Evento else '—' }}</td>
+                                </tr>
+
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                        
+                                        <p class="mb-0">
+                                            No se encontraron registros de acciones
+                                            {% if filtros_acciones.rol or filtros_acciones.evento is not none %} 
+                                                con ese estado.
+                                                <a href="{{ url_for('admin.accounts') }}" class="ms-1">Limpiar</a>
+                                            {% else %} 
+                                                en el sistema.
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if historial_acciones %}
+                    <small class="text-muted mt-3 d-block">
+                        Mostrando <strong>{{ historial_acciones | length }}</strong> registro{{ 's' if historial_acciones | length != 1 else '' }}
+                        {% if filtros_acciones.rol or filtros_acciones.evento %}(con filtros activos){% endif %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div><!-- /actions_history -->
+
+        </div><!-- /tab-content -->
+    </main>
+
+{% endblock %}

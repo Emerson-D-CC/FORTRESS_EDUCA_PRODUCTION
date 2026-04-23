@@ -1,0 +1,235 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Usuarios del Sistema - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = "Cuentas de Usuarios (Acudientes)" %}
+
+<!-- Invocar el Bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina de visualización especifica de usuarios (acudientes y sus estudiantes)
+    -->
+
+    <main class="page-content">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- MÉTRICAS -->
+        <div class="row g-4 mb-4">
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary);">
+                    <div class="fs-3 fw-bold">{{ metricas.acudientes | default(0) }}</div>
+                    <div class="stat-label">USUARIOS (ACUDIENTES)</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary);">
+                    <div class="fs-3 fw-bold">{{ metricas.estudiantes | default(0) }}</div>
+                    <div class="stat-label">ESTUDIANTES</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-success);">
+                    <div class="fs-3 fw-bold">{{ metricas.usuarios_mfa | default(0) }}</div>
+                    <div class="stat-label">USUARIOS CON MFA</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑAS -->
+        <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {% if tab_activo != 'estudiantes' %}active{% endif %}"
+                        data-bs-toggle="tab" data-bs-target="#acudientes" type="button">
+                    <i class="fas fa-user-friends me-1"></i> Acudientes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {% if tab_activo == 'estudiantes' %}active{% endif %}"
+                        data-bs-toggle="tab" data-bs-target="#estudiantes" type="button">
+                    <i class="fas fa-chalkboard-teacher me-1"></i> Estudiantes
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <!-- ── TAB: Acudientes ── -->
+            <div class="tab-pane fade {% if tab_activo != 'estudiantes' %}show active{% endif %}" id="acudientes">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-table me-2 text-primary"></i>
+                            Acudientes Registrados
+                            <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
+                                {{ acudientes | length }}
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>MFA</th>
+                                    <th>Correo</th>
+                                    <th>Solicitudes</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for acu in acudientes %}
+                                <tr>
+                                    <td><strong>{{ acu.ID_Formateado }}</strong></td>
+                                    <td>{{ acu.Nombre_Completo }}</td>
+                                    <td>
+                                        {% if acu.MFA == 'ACTIVE' %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small">{{ acu.Email or '—' }}</td>
+                                    <td><span class="badge bg-primary">{{ acu.Total_Solicitudes }}</span></td>
+                                    <td>
+                                        {% if acu.Estado_Usuario == 1 %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Eliminado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if acu.Estado_Usuario == 1 %}
+                                            {# Desactivar #}
+                                            <form method="POST"
+                                                action="{{ url_for('admin.accounts_user_toggle_estado', id_usuario=acu.ID_Usuario) }}"
+                                                style="display:inline;">
+                                                {{ form_toggle.hidden_tag() }}
+                                                <input type="hidden" name="nuevo_estado" value="0">
+                                                <button class="btn btn-outline-danger btn-sm" title="Deshabilitar">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            {# Activar #}
+                                            <form method="POST"
+                                                action="{{ url_for('admin.accounts_user_toggle_estado', id_usuario=acu.ID_Usuario) }}"
+                                                style="display:inline;">
+                                                {{ form_toggle.hidden_tag() }}
+                                                <input type="hidden" name="nuevo_estado" value="1">
+                                                <button class="btn btn-outline-success btn-sm" title="Habilitar">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                        <p class="mb-0">No hay acudientes registrados</p>
+                                    </td>                                       
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TAB: Estudiantes ── -->
+            <div class="tab-pane fade {% if tab_activo == 'estudiantes' %}show active{% endif %}" id="estudiantes">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-table me-2 text-primary"></i>
+                            Estudiantes Registrados
+                            <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
+                                {{ estudiantes | length }}
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Acudiente</th>
+                                    <th>Edad</th>
+                                    <th>Género</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in estudiantes %}
+                                <tr>
+                                    <td><strong>{{ est.ID_Formateado }}</strong></td>
+                                    <td>{{ est.Nombre_Estudiante }}</td>
+                                    <td class="small">{{ est.Nombre_Acudiente }}</td>
+                                    <td class="small">{{ est.Edad }} años</td>
+                                    <td class="small">{{ est.Genero }}</td>
+                                    <td>
+                                        {% if est.Estado_Estudiante == 1 %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Eliminado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if est.Estado_Estudiante == 1 %}
+                                            <form method="POST"
+                                                action="{{ url_for('admin.accounts_estudiante_toggle_estado', id_estudiante=est.ID_Estudiante) }}"
+                                                style="display:inline;">
+                                                {{ form_toggle.hidden_tag() }}
+                                                <input type="hidden" name="nuevo_estado" value="0">
+                                                <button class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <form method="POST"
+                                                action="{{ url_for('admin.accounts_estudiante_toggle_estado', id_estudiante=est.ID_Estudiante) }}"
+                                                style="display:inline;">
+                                                {{ form_toggle.hidden_tag() }}
+                                                <input type="hidden" name="nuevo_estado" value="1">
+                                                <button class="btn btn-outline-success btn-sm" title="Restaurar">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                        <p class="mb-0">No hay estudiantes registrados</p>
+                                    </td>                                      
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+{% endblock %}

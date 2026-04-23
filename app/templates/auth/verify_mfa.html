@@ -1,0 +1,66 @@
+<!-- #Llamar a layout_public.html -->
+{% extends 'layout_public.html' %}
+
+{% block titulo %}Verificación MFA - Fortress Educa{% endblock %}
+
+<!-- Invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: verify_mfa.html
+        Función: Formulario de registro de Acudientes / Representantes Legales
+    -->
+        
+    <section id="navbar">
+        {% include 'includes/home_navbar_1.html' %}
+    </section>
+
+    <!-- Bloque de contenido -->
+    <div class="auth-container fade-in">
+        <div class="text-center mb-4">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style="width:70px;height:70px;background:linear-gradient(135deg,var(--color-primary-dark),var(--color-accent-green));">
+                <i class="fas fa-shield-alt fa-2x text-white"></i>
+            </div>
+            <h3 class="fw-bold" style="color:var(--color-primary-dark);">Verificación en dos pasos</h3>
+            <br>
+            <p class="text-muted small">Tu cuenta está protegida con Multiple Factor de Autenticación (MFA).<br>Para finalizar el inicio de sesión, introduce el código de 6 dígitos de Microsoft Authenticator a continuación.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.verify_mfa') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.codigo_mfa(
+                    class="form-control text-center fw-bold fs-4 letter-spacing-wide",
+                    placeholder="_ _ _ _ _ _",
+                    maxlength="6",
+                    inputmode="numeric",
+                    autocomplete="one-time-code",
+                    autofocus=True
+                ) }}
+                {% if form.codigo_mfa.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.codigo_mfa.errors %}
+                            <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                <i class="fas fa-check-circle me-2"></i>Verificar
+            </button>
+        </form>
+        <!-- Recuadro de Alerta -->
+        <div class="alert alert-light border mt-4 small py-2">
+            <i class="fas fa-info-circle text-primary me-1"></i>
+            Si tiene problemas para acceder o ya no cuenta con la aplicación de Microsoft Authenticator, comuníquese indicando la novedad al siguiente correo: fortres.educa.soporte@gmail.com
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.login_user') }}" class="small text-decoration-none"
+            style="color:var(--color-primary-light);">
+                <i class="fas fa-arrow-left me-1"></i>Volver al inicio de sesión
+            </a>
+        </div>
+    </div>
+{% endblock %}

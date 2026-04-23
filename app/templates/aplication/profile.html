@@ -1,0 +1,428 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Tu Perfil - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Tu Perfil" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: profile.html
+        Función: Formulario de visualización y actualización de datos de Acudiente y/o Estudiante
+    -->
+
+    <main class="page-content">
+
+        <div class="alert alert-info mb-4 small">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Nota:</strong> La información de este perfil será utilizada para el proceso de asignación de cupo
+            educativo. Mantenga sus datos siempre actualizados.
+        </div>
+
+        <!-- TABS  -->
+        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {% if active_tab == 'acudiente' %}active{% endif %}"
+                        id="tab-acudiente" data-bs-toggle="tab"
+                        data-bs-target="#datos-acudiente" type="button">
+                    <i class="fas fa-user me-1"></i> Datos del Acudiente
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {% if active_tab == 'menor' %}active{% endif %}"
+                        id="tab-menor" data-bs-toggle="tab"
+                        data-bs-target="#datos-menor" type="button">
+                    <i class="fas fa-child me-1"></i> Datos Estudiantes
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <!-- TAB 1 — DATOS DEL ACUDIENTE -->
+            <div class="tab-pane fade {% if active_tab == 'acudiente' %}show active{% endif %}" id="datos-acudiente">
+
+                <div class="row">
+
+                    <!-- Panel lateral -->
+                    <div class="col-lg-4 mb-4 mb-lg-0">
+                        <div class="card border-0 shadow-sm p-3 text-center mt-4 mt-lg-0">
+                            <div class="user-avatar mx-auto mb-3"
+                                style="width:100px;height:100px;font-size:2.5rem;">
+                                {{ user.iniciales }}
+                            </div>
+                            <h5 class="fw-bold mb-1">{{ user.nombre_acudiente }}</h5>
+                            <p class="text-muted small mb-2">Acudiente Registrado</p>
+                            <span class="badge bg-success mb-3">Cuenta Activa</span>
+                            <p class="text-muted" style="font-size:0.75rem;">
+                                La información de identidad está vinculada a su documento oficial
+                                y no puede ser modificada manualmente desde este panel.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Formulario principal -->
+                    <div class="col-lg-8">
+                        <form method="POST" action="{{ url_for('aplication.profile') }}">
+                            <input type="hidden" name="form_type" value="acudiente">
+                            {{ form_acu.hidden_tag() }}
+
+                            <!-- SECCIÓN: Identidad (solo lectura) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-id-card me-1"></i> Identidad
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Primer Nombre</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Primer_Nombre }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Segundo Nombre</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Segundo_Nombre or '—' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Primer Apellido</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Primer_Apellido }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Segundo Apellido</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Segundo_Apellido or '—' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Tipo de Documento</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Nombre_Tipo_Iden }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Número de Documento</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Numero_Documento }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Parentesco con el Menor</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Nombre_Parentesco }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Fecha de Creación</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Fecha_Creacion }}" readonly>
+                                    </div>
+                                </div>
+                                <small class="text-danger mt-2 d-block">
+                                    <i class="fas fa-lock me-1"></i>
+                                    Estos campos están vinculados a su documento oficial y no pueden modificarse.
+                                </small>
+                            </div>
+
+                            <!-- SECCIÓN: Contacto (editable) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-phone me-1"></i> Contacto
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Teléfono / Celular <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_acu.telefono(class="form-control", placeholder="Ej: 3012345678") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Correo Electrónico</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ datos_acu_fijos.Email }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN: Ubicación (editable) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i> Ubicación
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Barrio <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_acu.barrio(class="form-select") }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Localidad se muestra como solo lectura, derivada del barrio en BD -->
+                                        <label class="form-label text-muted small fw-bold">Localidad</label>
+                                        <input type="text" class="form-control"
+                                            {# value="{{ datos_acu.Nombre_Localidad }}" readonly> #}
+                                            value="Engativá" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Estrato <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_acu.estrato(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN: Datos Preferenciales (editable) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-users me-1"></i> Datos Demográficos
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Género <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_acu.genero(class="form-select") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Grupo Preferencial <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_acu.grupo_preferencial(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mb-4">
+                                <button type="button" class="btn btn-light">Cancelar</button>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB 2 — DATOS DE LOS ESTUDIANTES -->
+            <div class="tab-pane fade {% if active_tab == 'menor' %}show active{% endif %}" id="datos-menor">
+                <div class="alert alert-light border small py-2 mb-4">
+                    <i class="fas fa-info-circle text-primary me-1"></i>
+                    <strong>ESTOS DATOS SE UTILIZARÁN PARA EL PROCESO DE ASIGNACIÓN DE CUPO</strong>
+                </div>
+
+                <div class="row">
+
+                    <!-- Columna izquierda: lista de estudiantes registrados -->
+                    <div class="col-lg-4 mb-4 mb-lg-0">
+                        <div class="card border-0 shadow-sm p-3">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0 text-muted">
+                                    <i class="fas fa-users me-1"></i> Estudiantes Registrados
+                                </h6>
+                                <a href="{{ url_for('aplication.register_student') }}"
+                                class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-plus me-1"></i> Agregar
+                                </a>
+                            </div>
+
+                            <!-- Tarjetas de estudiantes -->
+                            {% if lista_est %}
+                                {% for est in lista_est %}
+                                <a href="{{ url_for('aplication.profile', tab='menor', estudiante=est.ID_Estudiante) }}"
+                                class="text-decoration-none">
+                                    <div class="card border mb-2 p-3
+                                        {% if estudiante_activo and est.ID_Estudiante == estudiante_activo.ID_Estudiante %}
+                                            border-primary bg-primary bg-opacity-10
+                                        {% else %}
+                                            bg-light
+                                        {% endif %}">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle bg-primary bg-opacity-25 d-flex align-items-center
+                                                        justify-content-center flex-shrink-0"
+                                                style="width:40px;height:40px;font-size:1rem;color:var(--bs-primary);">
+                                                <i class="fas fa-child"></i>
+                                            </div>
+                                            <div class="overflow-hidden">
+                                                <p class="fw-bold small mb-0 text-truncate">
+                                                    {{ est.Primer_Nombre }} {{ est.Primer_Apellido }}
+                                                </p>
+                                                <p class="text-muted mb-0" style="font-size:0.72rem;">
+                                                    {{ est.Nombre_Grado_Proximo or est.Nombre_Grado_Actual }}
+                                                </p>
+                                            </div>
+                                            {% if estudiante_activo and est.ID_Estudiante == estudiante_activo.ID_Estudiante %}
+                                            <i class="fas fa-chevron-right ms-auto text-primary small"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted small text-center py-3">
+                                    No hay estudiantes registrados.
+                                </p>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <!-- Columna derecha: formulario del estudiante seleccionado -->
+                    <div class="col-lg-8">
+                        {% if estudiante_activo %}
+
+                        <form method="POST" action="{{ url_for('aplication.profile', tab='menor', estudiante=estudiante_activo.ID_Estudiante) }}">
+                            <input type="hidden" name="form_type" value="estudiante">
+                            {{ form_est.hidden_tag() }}
+                            {{ form_est.id_estudiante() }}  {# campo oculto con el ID del estudiante #}
+
+                            <!-- SECCIÓN: Identificación (solo lectura) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-id-card me-1"></i> Identificación del Menor
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Tipo de Identificación</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ estudiante_activo.Nombre_Tipo_Iden }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Número de Documento</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ estudiante_activo.Numero_Documento }}" readonly>
+                                    </div>
+                                </div>
+                                <small class="text-info mt-2 d-block">
+                                    <i class="fas fa-lock me-1"></i>
+                                    El tipo de identificación no puede modificarse una vez registrado.
+                                </small>
+                            </div>
+
+                            <!-- SECCIÓN: Nombre Completo (editable) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-user me-1"></i> Nombre Completo del Menor
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Primer Nombre <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.primer_nombre(class="form-control", placeholder="Primer nombre") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Segundo Nombre</label>
+                                        {{ form_est.segundo_nombre(class="form-control", placeholder="Segundo nombre") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Primer Apellido <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.primer_apellido(class="form-control", placeholder="Primer apellido") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">Segundo Apellido</label>
+                                        {{ form_est.segundo_apellido(class="form-control", placeholder="Segundo apellido") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN: Datos Demográficos (editable) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i> Datos Demográficos
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Fecha de Nacimiento <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.fecha_nacimiento(class="form-control", id="fechaNacMenorActualizar") }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small fw-bold">Edad</label>
+                                        <input type="number" class="form-control" id="edadMenorActualizar" readonly>
+                                        <div class="form-text">Se calcula automáticamente.</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Género <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.genero(class="form-select") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Grupo Preferencial <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.grupo_preferencial(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN: Datos Académicos (editable) -->
+                            <div class="card border-0 shadow-sm p-4 mb-4">
+                                <h6 class="fw-bold mb-3 text-muted">
+                                    <i class="fas fa-graduation-cap me-1"></i> Datos Académicos
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Último Grado Aprobado <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.grado_actual(class="form-select", id="gradoActualPerfilActualizar") }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Grado a Cursar <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.grado_proximo(class="form-select",
+                                            id="gradoProximoPerfilActualizar", disabled=true) }}
+                                        <input type="hidden" name="grado_proximo"
+                                            id="gradoProximoHiddenPerfilActualizar">
+                                        <div id="gradoProximoMsgPerfilActualizar"
+                                            class="form-text text-muted" style="display:none;"></div>
+                                        <div class="form-text">Se calcula automáticamente.</div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label text-muted small fw-bold">
+                                            Última Institución Educativa <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form_est.colegio_anterior(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mb-4">
+                                <a href="{{ url_for('aplication.profile', tab='menor', estudiante=estudiante_activo.ID_Estudiante) }}"
+                                class="btn btn-light">Cancelar</a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-save me-1"></i> Guardar Datos del Menor
+                                </button>
+                            </div>
+
+                        </form>
+
+                        {% else %}
+                        <!-- Estado vacío — no debería ocurrir dado el guard en cargar_perfil() -->
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-child fa-3x mb-3 opacity-25"></i>
+                            <p>No hay estudiantes registrados.</p>
+                            <a href="{{ url_for('aplication.register_student') }}"
+                            class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Registrar estudiante
+                            </a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+
+{% endblock %}

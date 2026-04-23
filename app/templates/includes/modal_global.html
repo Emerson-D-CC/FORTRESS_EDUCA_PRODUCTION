@@ -1,0 +1,49 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    <!-- Enlace al CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
+
+    <div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <!-- clase logout-modal-content para heredar el border-radius y sombras -->
+            <div class="modal-content logout-modal-content shadow-lg">
+                
+                <div class="modal-body text-center py-5 px-5">
+                    <!-- Icono de Alerta -->
+                    <div class="mb-4">
+                        <div class="logout-icon-wrapper">
+                            <i class="fas fa-exclamation-circle fa-3x logout-icon-color"></i>
+                        </div>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-3 logout-title">Atención</h4>
+                    
+                    <!-- Renderizado de mensajes flasheados -->
+                    <div class="text-muted">
+                        {% for category, message in messages %}
+                            <p class="mb-2">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Acciones centradas y sin bordes -->
+                <div class="modal-footer border-0 d-flex justify-content-center pb-5 px-4">
+                    <button type="button" class="btn logout-btn-confirm px-5 py-2" data-bs-dismiss="modal">
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modalElement = document.getElementById('loginErrorModal');
+            if (modalElement) {
+                var modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+        });
+    </script>
+{% endif %}
+{% endwith %}

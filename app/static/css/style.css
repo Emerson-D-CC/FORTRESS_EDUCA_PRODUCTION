@@ -1,0 +1,482 @@
+/* 
+ * Fortress Educa — Sistema de Cupos Educativos Engativá
+ * Paleta SaaS Moderna: Azul Profesional + Turquesa + Ámbar
+ */
+
+/* ============================================================
+   DESIGN TOKENS — Fuente única de verdad para colores
+   ============================================================ */
+:root {
+    /* ── Primarios ── */
+    --color-primary: #2563EB;
+    /* Azul profesional principal */
+    --color-primary-dark: #0F172A;
+    /* Fondo sidebar / navy oscuro */
+    --color-primary-medium: #1E293B;
+    /* Navbar / superficies oscuras */
+    --color-primary-light: #3B82F6;
+    /* Hover / estados activos */
+
+    /* ── Secundario (Turquesa) ── */
+    --color-accent-green: #14B8A6;
+    /* Turquesa — éxito / acción secundaria */
+    --color-accent-teal: #2DD4BF;
+    /* Turquesa claro — hover/glow */
+
+    /* ── Acento (Ámbar) ── */
+    --color-accent-amber: #F59E0B;
+    /* Naranja suave — CTAs / advertencias */
+    --color-accent-amber-light: #FCD34D;
+    /* Ámbar luminoso */
+
+    /* ── Estados funcionales ── */
+    --color-success: #14B8A6;
+    --color-success-end: #0D9488;
+    --color-warning: #e67e22;
+    --color-warning-end: #FBBF24;
+    --color-danger: #EF4444;
+    --color-danger-end: #F87171;
+    --color-info: #0dcaf0;
+    
+    /* --Badges */
+    --color-admin: #212529;
+    --color-tec: #3a5b77;
+
+    /* ── Fondos ── */
+    --color-bg-body: #F8FAFC;
+    /* Fondo principal — casi blanco azulado */
+    --color-bg-card: #FFFFFF;
+    /* Tarjetas */
+    --color-bg-alt: #F1F5F9;
+    /* Filas alternas / secciones */
+
+
+    /* ── Texto ── */
+    --color-text-main: #0F172A;
+    /* Texto principal — navy oscuro */
+    --color-text-muted: #64748B;
+    /* Texto secundario / labels */
+    --color-text-light: #94A3B8;
+    /* Texto deshabilitado / placeholders */
+
+    /* ── Bordes ── */
+    --color-border: #E2E8F0;
+    --color-border-focus: #2563EB;
+
+    /* ── Sombras ── */
+    --shadow-soft: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+    --shadow-hover: 0 8px 24px rgba(37, 99, 235, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
+    --shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.30);
+    --shadow-card: 0 0 0 1px var(--color-border), 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.bg-tec {
+    background-color: #4b7192;
+    color: white; /* Asegura que el texto se lea bien */
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+body {
+    font-family: 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+    background-color: var(--color-bg-body);
+    color: var(--color-text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   UTILIDADES DE GRADIENTE
+   ============================================================ */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-green) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btn-primary,
+.btn-login-nav {
+    background: var(--color-primary);
+    border: none;
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    box-shadow: var(--shadow-primary);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-login-nav:hover {
+    background: var(--color-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.40);
+    color: white;
+}
+
+.btn-primary:active,
+.btn-login-nav:active {
+    background: #1D4ED8;
+    transform: translateY(0);
+}
+
+.btn-outline-primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+/* Botón de acción secundaria (turquesa) */
+.btn-success {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: white;
+    font-weight: 600;
+}
+
+.btn-success:hover {
+    background: var(--color-success-end);
+    border-color: var(--color-success-end);
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-card);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: transparent;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+/* ============================================================
+   SIDEBAR CLÁSICO (páginas no-dashboard)
+   ============================================================ */
+.sidebar {
+    height: 100vh;
+    background: linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-primary-medium) 100%);
+    color: white;
+    padding-top: 1rem;
+    width: 80px;
+    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow-x: hidden;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1000;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.20);
+}
+
+.sidebar:hover {
+    width: 280px;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.70);
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    border-left: 3px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.sidebar .nav-link i {
+    min-width: 30px;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-right: 15px;
+    transition: color 0.25s;
+}
+
+.sidebar .nav-link span {
+    opacity: 0;
+    transition: opacity 0.2s ease 0.1s;
+    font-weight: 500;
+}
+
+.sidebar:hover .nav-link span {
+    opacity: 1;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: rgba(37, 99, 235, 0.15);
+    color: white;
+    border-left-color: var(--color-accent-teal);
+}
+
+.sidebar .nav-link:hover i,
+.sidebar .nav-link.active i {
+    color: var(--color-accent-teal);
+    text-shadow: 0 0 8px rgba(45, 212, 191, 0.40);
+}
+
+.sidebar-logo-text {
+    display: none;
+    background: linear-gradient(to right, #fff, #94A3B8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sidebar:hover .sidebar-logo-text {
+    display: inline;
+}
+
+.sidebar::after {
+    content: '\f105';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: var(--color-primary);
+    color: white;
+    width: 18px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    cursor: pointer;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.20);
+    transition: all 0.3s;
+    font-size: 0.75rem;
+}
+
+.sidebar:hover::after {
+    opacity: 0;
+    right: -20px;
+}
+
+/* ============================================================
+   TABLAS
+   ============================================================ */
+.table thead th {
+    background-color: var(--color-bg-alt);
+    border-bottom: 2px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.04);
+    transform: scale(1.002);
+    transition: transform 0.15s ease;
+}
+
+/* ============================================================
+   BADGES — Pill moderno
+   ============================================================ */
+.badge {
+    padding: 0.4em 0.85em;
+    font-weight: 600;
+    font-size: 0.78em;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+}
+
+.bg-success {
+    background-color: rgba(20, 184, 166, 0.12) !important;
+    color: #0D9488 !important;
+}
+
+.bg-warning {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    color: #B45309 !important;
+}
+
+.bg-danger {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    color: #DC2626 !important;
+}
+
+.bg-secondary {
+    background-color: rgba(100, 116, 139, 0.12) !important;
+    color: #475569 !important;
+}
+
+.bg-primary {
+    background-color: rgba(37, 99, 235, 0.12) !important;
+    color: var(--color-primary) !important;
+}
+
+.bg-dark {
+    background-color: rgba(15, 23, 42, 0.85) !important;
+    color: #E2E8F0 !important;
+}
+
+/* ============================================================
+   FORMULARIOS
+   ============================================================ */
+.input-group-text,
+.form-control,
+.form-select {
+    border-color: var(--color-border);
+    color: var(--color-text-main);
+    background-color: var(--color-bg-card);
+    border-radius: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background-color: #fff;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--color-text-main);
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-content {
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+}
+
+.modal-header .btn-close {
+    background-color: var(--color-bg-alt);
+    border-radius: 50%;
+    padding: 0.8rem;
+    opacity: 1;
+}
+
+/* ============================================================
+   LOADING OVERLAY
+   ============================================================ */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(248, 250, 252, 0.96);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loader {
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(37, 99, 235, 0.12);
+    border-top: 4px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.checkmark-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--color-success);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: popIn 0.5s ease;
+}
+
+.checkmark {
+    color: white;
+    font-size: 28px;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    80% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ============================================================
+   SECCIONES GENERALES
+   ============================================================ */
+.section-padding {
+    padding: 5rem 0;
+}
+
+.section-title {
+    color: var(--color-text-main);
+    font-weight: 800;
+    margin-bottom: 3rem;
+    text-align: center;
+    position: relative;
+    letter-spacing: 0.5px;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 4px;
+    background: linear-gradient(to right, var(--color-primary), var(--color-accent-green));
+    margin: 1rem auto 0;
+    border-radius: 2px;
+}
+
+
+

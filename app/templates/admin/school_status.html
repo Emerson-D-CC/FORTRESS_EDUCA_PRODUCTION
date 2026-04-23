@@ -1,0 +1,342 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Fortress Educa - Configuración Admin{% endblock %}
+
+{% set admin_header_title = "Configuración de Colegios" %}
+
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Gestión escalable de colegios, jornadas y cupos por grado
+    -->
+
+    <main class="page-content">
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show small py-2" role="alert">
+                <i class="fas fa-info-circle me-1"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- ===== RESUMEN ESTADÍSTICO ===== -->
+        <!-- DATA: stats → sp_admin_colegios_estadisticas() -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+                            <i class="fas fa-school fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">COLEGIOS REGISTRADOS</div>
+                            <div class="h3 fw-bold mb-0">{{ stats.Total_Colegios | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-success);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-success bg-opacity-10">
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">COLEGIOS ACTIVOS</div>
+                            <div class="h3 fw-bold mb-0">{{ stats.Total_Activos | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-warning);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-warning bg-opacity-10">
+                            <i class="fas fa-tasks fa-lg text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">COLEGIOS CONFIG.</div>
+                            <div class="h3 fw-bold mb-0">{{ stats.Total_Configurados | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-info);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-info bg-opacity-10">
+                            <i class="fas fa-users fa-lg text-info"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">CUPOS DISPONIBLES</div>
+                            <div class="h3 fw-bold mb-0">{{ stats.Total_Cupos | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== BARRA DE FILTROS ===== -->
+        <!--
+            Filtro por GET: los parámetros se leen en FormFiltroColegios(request.args)
+            y el servicio aplica _filtrar_colegios() + insertion/selection sort.
+        -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-3">
+                <form method="GET" action="{{ url_for('admin.school_status') }}" id="formFiltro">
+                    <div class="row g-2 align-items-end">
+
+                        <!-- Búsqueda por nombre -->
+                        <div class="col-12 col-md-6">
+                            <label class="form-label small fw-bold">Buscar por Nombre</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                {{ form_filtro.nombre(class="form-control border-start-0 ps-0") }}
+                            </div>
+                            {% for error in form_filtro.nombre.errors %}
+                                <div class="text-danger" style="font-size:.75rem">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small fw-bold">Estado</label>
+                            {{ form_filtro.estado(class="form-select form-select-sm") }}
+                        </div>
+
+                        <!-- Barrio -->
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small fw-bold">Barrio</label>
+                            {{ form_filtro.id_barrio(class="form-select form-select-sm") }}
+                        </div>
+
+                        <!-- Jornada -->
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small fw-bold">Jornada</label>
+                            {{ form_filtro.id_jornada(class="form-select form-select-sm") }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex gap-2">
+                            <!-- Abre el modal de agregar (no envía el form GET) -->
+                            <button type="button"
+                                    class="btn btn-primary btn-sm me-auto"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalAgregarColegio">
+                                <i class="fas fa-plus me-1"></i>Agregar Colegio
+                            </button>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-filter me-1"></i>Filtrar
+                            </button>
+                            <a href="{{ url_for('admin.school_status') }}"
+                            class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== TABLA DE COLEGIOS ===== -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3
+                        d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-school me-2 text-primary"></i>
+                    Colegios Públicos - Localidad de Engativá
+                </h6>
+                <small class="text-muted">
+                    Mostrando
+                    <span class="fw-semibold">{{ total_colegios }}</span>
+                    de
+                    <span class="fw-semibold">{{ stats.Total_Colegios | default(0) }}</span>
+                    colegios
+                </small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3" style="width:40px">
+                                <span class="text-muted small">ID</span>
+                            </th>
+                            <th style="width:280px">Institución Educativa</th>
+                            <th class="d-none d-md-table-cell" style="width:140px">Código DANE</th>
+                            <th class="d-none d-lg-table-cell" style="width:160px">Barrio</th>
+                            <th class="d-none d-md-table-cell" style="width:220px">Dirección</th>
+                            <th class="text-center" style="width:110px">Cupos Totales</th>
+                            <th class="text-center" style="width:90px">Estado</th>
+                            <th class="text-center pe-3" style="width:110px">Gestión</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for colegio in colegios %}
+                        <tr>
+                            <td class="ps-3 text-muted">{{ colegio.ID_Colegio }}</td>
+
+                            <td class="fw-semibold {% if not colegio.Estado_Colegio %}text-muted{% endif %}">
+                                {{ colegio.Nombre_Colegio }}
+                            </td>
+
+                            <td class="d-none d-md-table-cell">
+                                <code class="text-dark">{{ colegio.Codigo_DANE }}</code>
+                            </td>
+
+                            <td class="d-none d-lg-table-cell">{{ colegio.Nombre_Barrio }}</td>
+
+                            <td class="d-none d-md-table-cell">{{ colegio.Direccion_Colegio }}</td>
+
+                            <td class="text-center">{{ colegio.Total_Cupos }}</td>
+
+                            <td class="text-center">
+                                {% if colegio.Estado_Colegio %}
+                                    <span class="badge bg-success rounded-pill">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill">Inactivo</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center pe-3">
+                                <!--
+                                    Lleva a school_config.html pasando el ID del colegio.
+                                    Ruta: admin.school_config con id_colegio=colegio.ID_Colegio
+                                -->
+                                <a href="{{ url_for('admin.school_config', id_colegio=colegio.ID_Colegio) }}"
+                                class="btn btn-sm {% if colegio.Estado_Colegio %}btn-outline-primary{% else %}btn-outline-secondary{% endif %}"
+                                title="Gestionar colegio">
+                                    <i class="fas fa-sliders me-1"></i>Gestionar
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                <i class="fas fa-search me-1"></i>
+                                No se encontraron colegios con los filtros aplicados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white border-top py-2 px-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        {{ total_colegios }} registro{{ 's' if total_colegios != 1 }} mostrado{{ 's' if total_colegios != 1 }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- =====================================================================
+        MODAL: AGREGAR COLEGIO
+        Action → POST admin.school_agregar
+        Procesado por School_Status_Service.agregar_colegio()
+        ===================================================================== -->
+    <div class="modal fade" id="modalAgregarColegio" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-school me-2 text-primary"></i>Registrar Nuevo Colegio
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!--
+                    FormAgregarColegio — incluye token CSRF de Flask-WTF.
+                    Los errores de validación se muestran como flash messages
+                    después del redirect.
+                -->
+                <form method="POST" action="{{ url_for('admin.school_agregar') }}" novalidate>
+                    {{ form_agregar.hidden_tag() }}
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+
+                            <!-- Nombre -->
+                            <div class="col-12">
+                                {{ form_agregar.nombre.label(class="form-label fw-semibold small mb-1") }}
+                                <span class="text-danger">*</span>
+                                {{ form_agregar.nombre(class="form-control form-control-sm") }}
+                                <div class="form-text">Nombre oficial completo según SIE Bogotá.</div>
+                            </div>
+
+                            <!-- DANE y Barrio -->
+                            <div class="col-sm-6">
+                                {{ form_agregar.dane.label(class="form-label fw-semibold small mb-1") }}
+                                <span class="text-danger">*</span>
+                                {{ form_agregar.dane(class="form-control form-control-sm") }}
+                            </div>
+                            <div class="col-sm-6">
+                                {{ form_agregar.id_barrio.label(class="form-label fw-semibold small mb-1") }}
+                                <span class="text-danger">*</span>
+                                {{ form_agregar.id_barrio(class="form-select form-select-sm") }}
+                            </div>
+
+                            <!-- Dirección -->
+                            <div class="col-12">
+                                {{ form_agregar.direccion.label(class="form-label fw-semibold small mb-1") }}
+                                <span class="text-danger">*</span>
+                                {{ form_agregar.direccion(class="form-control form-control-sm",
+                                                        placeholder="Ej: Cl 67 No. 77-50") }}
+                            </div>
+
+                            <!-- Email y Teléfono -->
+                            <div class="col-sm-6">
+                                {{ form_agregar.email.label(class="form-label fw-semibold small mb-1") }}
+                                {{ form_agregar.email(class="form-control form-control-sm") }}
+                            </div>
+                            <div class="col-sm-6">
+                                {{ form_agregar.telefono.label(class="form-label fw-semibold small mb-1") }}
+                                {{ form_agregar.telefono(class="form-control form-control-sm") }}
+                            </div>
+
+                            <!-- Jornadas (MultiCheckboxField) -->
+                            <div class="col-12">
+                                {{ form_agregar.jornadas.label(class="form-label fw-semibold small mb-2") }}
+                                <span class="text-danger">*</span>
+                                <div class="d-flex gap-3 flex-wrap">
+                                    {% for subfield in form_agregar.jornadas %}
+                                    <div class="form-check">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label small") }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text">
+                                    Pueden modificarse en la gestión individual del colegio.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light"
+                                data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-1"></i>Registrar Colegio
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

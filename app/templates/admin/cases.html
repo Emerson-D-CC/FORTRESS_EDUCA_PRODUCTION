@@ -1,0 +1,291 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Todas las Solicitudes - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = "Todas las Solicitudes de Cupo" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina de visualización global de tickets
+    -->
+
+    <main class="page-content">
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- TARJETAS DE MÉTRICAS -->
+        <div class="row g-4 mb-4">
+
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini">
+                    <div class="fs-3 fw-bold">
+                        {{ metricas.total_solicitudes | default(0) }}
+                    </div>
+                    <div class="stat-label">Total Solicitudes</div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini status-pending">
+                    <div class="fs-3 fw-bold">
+                        {{ metricas.en_revision | default(0) }}
+                    </div>
+                    <div class="stat-label">En Revisión</div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-accent-green);">
+                    <div class="fs-3 fw-bold">
+                        {{ metricas.solucionados | default(0) }}
+                    </div>
+                    <div class="stat-label">Solucionados</div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary);">
+                    <div class="fs-3 fw-bold">
+                        {{ metricas.cupos_disponibles | default(0) }}
+                    </div>
+                    <div class="stat-label">Cupos Disponibles</div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card mini" style="border-left: 4px solid var(--color-accent-green);">
+                    <div class="fs-3 fw-bold">
+                        {{ metricas.cupos_asignados | default(0) }}
+                    </div>
+                    <div class="stat-label">Cupos Asignados</div>
+                </div>
+            </div>
+
+        </div><!-- /metricas -->
+
+
+        <!-- FILTROS -->
+        <div class="card border-0 shadow-sm p-3 mb-4">
+            <form method="GET" action="{{ url_for('admin.cases') }}" id="filtrosForm">
+                <div class="row g-3 align-items-end">
+
+                    {# Filtro: Estado #}
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold" for="filtroEstado">
+                            Filtrar por Estado
+                        </label>
+                        <select class="form-select form-select-sm" id="filtroEstado" name="estado">
+                            <option value="">Todos los estados</option>
+                            {% for est in estados %}
+                            <option value="{{ est.ID_Estado_Ticket }}"
+                                {% if filtros.estado == est.ID_Estado_Ticket %}selected{% endif %}>
+                                {{ est.Nombre_Estado }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Filtro: Grado #}
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold" for="filtroGrado">
+                            Filtrar por Grado
+                        </label>
+                        <select class="form-select form-select-sm" id="filtroGrado" name="grado">
+                            <option value="">Todos los grados</option>
+                            {% for gr in grados %}
+                            <option value="{{ gr.ID_Grado }}"
+                                {% if filtros.grado == gr.ID_Grado %}selected{% endif %}>
+                                {{ gr.Nombre_Grado }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Filtro: Tipo de Afectación #}
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold" for="filtroAfectacion">
+                            Tipo de Afectación
+                        </label>
+                        <select class="form-select form-select-sm" id="filtroAfectacion" name="afectacion">
+                            <option value="">Todas</option>
+                            {% for af in afectaciones %}
+                            <option value="{{ af.ID_Tipo_Afectacion }}"
+                                {% if filtros.afectacion == af.ID_Tipo_Afectacion %}selected{% endif %}>
+                                {{ af.Nombre_Afectacion }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Botones #}
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-filter me-1"></i>Filtrar
+                        </button>
+                        {# Limpiar filtros: redirige a la ruta sin params #}
+                        <a href="{{ url_for('admin.cases') }}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-times me-1"></i>Limpiar
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div> <!-- \filtros -->
+
+
+        <!-- TABLA DE TICKETS -->
+        <div class="card border-0 shadow-sm p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-table me-2 text-primary"></i>
+                    Tabla de Solicitudes de Cupos
+                    {# Contador de resultados #}
+                    <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
+                        {{ tickets | length }}
+                    </span>
+                </h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre del Menor</th>
+                            <th>Acudiente</th>
+                            <th>Edad</th>
+                            <th>Grado</th>
+                            <th>Afectación</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Colegio Asignado</th>
+                            <th>Técnico</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tickets %}
+                        <tr>
+
+                            {# ID → enlace al panel del ticket #}
+                            <td>
+                                <a href="{{ url_for('admin.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
+                                class="fw-bold text-primary text-decoration-none" target="_blank">
+                                    #{{ t.ID_Ticket }}
+                                </a>
+                            </td>
+
+                            <td><strong>{{ t.Nombre_Estudiante }}</strong></td>
+
+                            <td class="small">{{ t.Nombre_Acudiente }}</td>
+
+                            <td class="small">{{ t.Edad_Estudiante }} años</td>
+
+                            <td class="small">{{ t.Nombre_Grado }}</td>
+
+                            <td class="small">{{ t.Nombre_Afectacion }}</td>
+
+                            {# Badge de estado #}
+                            <td>
+                                {% if t.Nombre_Estado == 'En Revisión' %}
+                                    <span class="badge bg-warning text-dark">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado in ['Rechazado', 'Cancelado a Petición'] %}
+                                    <span class="badge bg-danger">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Solucionado' %}
+                                    <span class="badge bg-success">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Asignación de Cupo' %}
+                                    <span class="badge bg-info text-dark">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Validación de Documentos' %}
+                                    <span class="badge bg-secondary">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Pendiente Acción de Usuario' %}
+                                    <span class="badge bg-warning text-dark">{{ t.Nombre_Estado }}</span>
+                                {% else %}
+                                    <span class="badge bg-primary">{{ t.Nombre_Estado }}</span>
+                                {% endif %}
+                            </td>
+
+                            {# Badge de prioridad según puntaje #}
+                            <td>
+                                {% if t.Puntaje_Prioridad >= 80 %}
+                                    <span class="badge bg-danger">Alta ({{ t.Puntaje_Prioridad }})</span>
+                                {% elif t.Puntaje_Prioridad >= 50 %}
+                                    <span class="badge bg-warning text-dark">Media ({{ t.Puntaje_Prioridad }})</span>
+                                {% else %}
+                                    <span class="badge bg-success">Baja ({{ t.Puntaje_Prioridad }})</span>
+                                {% endif %}
+                            </td>
+
+                            {# Colegio asignado #}
+                            <td>
+                                {% if t.Colegio_Asignado != 'Sin asignar' %}
+                                    <span class="text-success small fw-bold">{{ t.Colegio_Asignado }}</span>
+                                {% else %}
+                                    <span class="text-muted small">Sin asignar</span>
+                                {% endif %}
+                            </td>
+
+                            {# Técnico asignado #}
+                            <td class="text-muted small">
+                                {{ t.Nombre_Tecnico }}
+                            </td>
+
+                            {# Botón de acción → ticket_panel.html #}
+                            <td class="text-center">
+                                <a href="{{ url_for('admin.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
+                                class="btn btn-outline-primary btn-sm" target="_blank">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="11" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50 mx-auto"></i>
+                                No se encontraron solicitudes
+                                {% if filtros.estado or filtros.grado or filtros.afectacion %}
+                                    con los filtros seleccionados.
+                                    <a href="{{ url_for('admin.cases') }}" class="ms-1">Limpiar filtros</a>
+                                {% else %}
+                                    en el sistema.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}                     
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Contador de resultados al pie de la tabla -->
+            {% if tickets %}
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">
+                    Mostrando <strong>{{ tickets | length }}</strong>
+                    solicitud{{ 'es' if tickets | length != 1 else '' }}
+                    {% if filtros.estado or filtros.grado or filtros.afectacion %}
+                        (con filtros activos)
+                    {% endif %}
+                </small>
+            </div>
+            {% endif %}
+
+        </div><!--\tabla -->
+
+    </main>
+
+{% endblock %}

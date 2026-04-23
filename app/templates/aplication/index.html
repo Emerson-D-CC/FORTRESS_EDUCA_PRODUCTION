@@ -1,0 +1,344 @@
+<!-- #Llamar a layout_dashboard.html -->
+{% extends 'layout_dashboard.html' %}
+
+{% block titulo %}Panel Principal - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set header_title = "Panel Principal" %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: index.html
+        Función: Panel inicial de información y opciones varias de todo el sistema de dashboard y los tickets
+    -->
+
+    <main class="page-content">
+
+        <!-- BANNER DE BIENVENIDA -->
+        <div class="alert border-0 shadow-sm mb-4 dh-banner" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-graduation-cap fa-2x me-3 dh-banner__icon"></i>
+                <div>
+                    <h5 class="alert-heading mb-1 dh-banner__title">
+                        ¡Bienvenido/a, {{ resumen.Nombre_Acudiente if resumen else 'al Sistema' }}!
+                    </h5>
+                    <p class="mb-0 text-muted small">
+                        Desde este panel puede gestionar la solicitud de cupo educativo para su menor a cargo
+                        en los colegios públicos de la localidad de Engativá.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CASO: SIN ESTUDIANTE REGISTRADO -->
+        {% if not resumen %}
+        <div class="card border-0 shadow-sm p-5 text-center mb-4">
+            <i class="fas fa-user-graduate fa-3x text-muted mb-3"></i>
+            <h5 class="fw-bold mb-2">Aún no tiene un estudiante registrado</h5>
+            <p class="text-muted mb-4">
+                Para iniciar el proceso de solicitud de cupo, primero debe registrar
+                los datos del menor a su cargo.
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('aplication.register_student') }}"
+                class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Registrar Estudiante
+                </a>
+            </div>
+        </div>
+
+        <!-- CASO: CON ESTUDIANTE - TIENE O NO TIENE TICKET -->
+        {% else %}
+
+        <!-- TARJETAS DE RESUMEN -->
+        <div class="row g-4 mb-4">
+
+            <!-- Estado del Cupo -->
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card {% if resumen.ID_Ticket %}
+                    {% if resumen.Nombre_Estado == 'En Revisión' %}status-pending
+                    {% elif resumen.Nombre_Estado == 'Confirmación Final' %}status-success
+                    {% else %}{% endif %}
+                {% endif %}">
+                    <div class="stat-icon">
+                        <i class="fas {% if resumen.ID_Ticket %}
+                            {% if resumen.Nombre_Estado == 'Confirmación Final' %}fa-check-circle
+                            {% elif resumen.Nombre_Estado == 'En Revisión' %}fa-hourglass-half
+                            {% elif resumen.Nombre_Estado == 'Asignación de Cupo' %}fa-school
+                            {% else %}fa-spinner
+                            {% endif %}
+                        {% else %}fa-inbox{% endif %}"></i>
+                    </div>
+                    <div class="stat-value h6 mb-0">
+                        {{ resumen.Nombre_Estado if resumen.ID_Ticket else 'Sin solicitud' }}
+                    </div>
+                    <div class="stat-label">Estado del Cupo</div>
+                </div>
+            </div>
+
+            <!-- Colegio Asignado -->
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-school" style="color: var(--color-primary);"></i>
+                    </div>
+                    <div class="stat-value h6 mb-0
+                        {{ 'text-success fw-bold' if resumen.Colegio_Asignado != 'Sin asignar' else 'text-muted' }}">
+                        {{ resumen.Colegio_Asignado }}
+                    </div>
+                    <div class="stat-label">Colegio Asignado</div>
+                </div>
+            </div>
+
+            <!-- Total de Solicitudes -->
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <div class="stat-value">{{ resumen.Total_Tickets }}</div>
+                    <div class="stat-label">Total de Solicitudes</div>
+                </div>
+            </div>
+
+            <!-- Nivel de Prioridad -->
+            <div class="col-md-6 col-xl-3">
+                {% if resumen.ID_Ticket and prioridad %}
+                <div class="stat-card {% if prioridad[1] == 'danger' %}security-high{% endif %}">
+                    <div class="stat-icon dh-stat-icon--danger">
+                        <i class="fas {{ prioridad[2] }} text-{{ prioridad[1] }}"></i>
+                    </div>
+                    <div class="stat-value text-{{ prioridad[1] }}">{{ prioridad[0] }}</div>
+                    <div class="stat-label">Nivel de Prioridad</div>
+                </div>
+                {% else %}
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-minus-circle text-muted"></i>
+                    </div>
+                    <div class="stat-value h6 text-muted mb-0">Sin datos</div>
+                    <div class="stat-label">Nivel de Prioridad</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- INFORMACIÓN DEL CASO + ESTADO DEL PROCESO -->
+        <div class="row g-4 mb-4">
+
+            <!-- Información del caso -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-id-card me-2 text-primary"></i>Información del Caso
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-borderless small mb-0">
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted fw-bold w-50">Acudiente:</td>
+                                    <td class="fw-bold">{{ resumen.Nombre_Acudiente }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-bold">Menor registrado:</td>
+                                    <td class="fw-bold">{{ resumen.Nombre_Estudiante }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-bold">Grado actual:</td>
+                                    <td>{{ resumen.Grado_Actual }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-bold">Grado solicitado:</td>
+                                    <td>{{ resumen.Grado_Proximo }}</td>
+                                </tr>
+                                {% if resumen.ID_Ticket %}
+                                <tr>
+                                    <td class="text-muted fw-bold">Tipo de afectación:</td>
+                                    <td>
+                                        <span class="badge bg-danger">{{ resumen.Nombre_Afectacion }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-bold">Última solicitud:</td>
+                                    <td>
+                                        <a href="{{ url_for('aplication.ticket_detail', id_ticket=resumen.ID_Ticket) }}"
+                                        class="text-primary fw-bold text-decoration-none">
+                                            #{{ resumen.ID_Ticket }}
+                                            <i class="fas fa-external-link-alt ms-1 small"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-bold">Fecha de apertura:</td>
+                                    <td>
+                                        <small>
+                                            {{ resumen.Fecha_Ticket.strftime('%d %b %Y, %I:%M %p')
+                                            if resumen.Fecha_Ticket else '—' }}
+                                        </small>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="alert alert-info py-2 small mb-0">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Aún no ha iniciado una solicitud de cupo.
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if resumen.Tickets_Sin_Documentos and resumen.Tickets_Sin_Documentos > 0 %}
+                    <div class="alert alert-warning py-2 small mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Tiene <strong>{{ resumen.Tickets_Sin_Documentos }}</strong>
+                        solicitud(es) sin documentos adjuntos.
+                        <a href="{{ url_for('aplication.ticket_status') }}"
+                        class="alert-link ms-1">Revisar</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Estado visual del proceso -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 h-100 dh-process-card">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-tasks me-2 text-success"></i>Estado del Proceso
+                    </h5>
+
+                    {% if resumen.ID_Ticket %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for paso in pasos %}
+                        <div class="d-flex align-items-center
+                            {% if paso.cls == '' %}opacity-50{% endif %}">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center
+                                        me-3 dh-step-circle dh-step-circle--{{ paso.cls if paso.cls else 'pending' }}">
+                                {% if paso.cls == 'done' %}
+                                    <i class="fas fa-check text-white small"></i>
+                                {% else %}
+                                    <i class="fas {{ paso.icono }} text-white small"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-bold small {{ 'text-muted' if paso.cls == '' }}">
+                                    {{ paso.label }}
+                                </div>
+                                <div class="text-muted dh-step-sublabel">
+                                    {% if paso.cls == 'done' %}Completado
+                                    {% elif paso.cls == 'active' %}En proceso
+                                    {% else %}Pendiente{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{{ url_for('aplication.ticket_detail', id_ticket=resumen.ID_Ticket) }}"
+                        class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i>Ver detalle completo de la solicitud
+                        </a>
+                    </div>
+
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-stream fa-2x mb-3 d-block opacity-50"></i>
+                        <p class="small mb-3">
+                            El estado del proceso se mostrará una vez que
+                            inicie su primera solicitud de cupo.
+                        </p>
+                        <a href="{{ url_for('aplication.ticket_request') }}"
+                        class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Iniciar Solicitud
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCIONES RÁPIDAS -->
+        <h5 class="mb-3 text-muted">Acciones Rápidas</h5>
+        <div class="row g-3">
+
+            {% if not resumen.ID_Ticket %}
+            <div class="col-md-4">
+                <a href="{{ url_for('aplication.ticket_request') }}"
+                class="card h-100 p-3 text-decoration-none border-0 shadow-sm hover-elevate">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle text-white p-3 me-3 dh-qa-icon--green">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 text-dark fw-bold">Nueva Solicitud de Cupo</h6>
+                            <small class="text-muted">Inicie el proceso de asignación.</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if resumen.ID_Ticket %}
+            <div class="col-md-4">
+                <a href="{{ url_for('aplication.ticket_detail', id_ticket=resumen.ID_Ticket) }}"
+                class="card h-100 p-3 text-decoration-none border-0 shadow-sm hover-elevate">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle text-white p-3 me-3 dh-qa-icon--blue">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 text-dark fw-bold">Ver Mi Solicitud</h6>
+                            <small class="text-muted">Detalle y documentos de #{{ resumen.ID_Ticket }}.</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="col-md-4">
+                <a href="{{ url_for('aplication.ticket_status') }}"
+                class="card h-100 p-3 text-decoration-none border-0 shadow-sm hover-elevate">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle text-white p-3 me-3 dh-qa-icon--blue">
+                            <i class="fas fa-list-alt"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 text-dark fw-bold">Mis Solicitudes</h6>
+                            <small class="text-muted">Historial completo de solicitudes.</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{{ url_for('aplication.profile') }}"
+                class="card h-100 p-3 text-decoration-none border-0 shadow-sm hover-elevate">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle text-white p-3 me-3 dh-qa-icon--orange">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 text-dark fw-bold">Actualizar Perfil</h6>
+                            <small class="text-muted">Mantenga sus datos actualizados.</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+        {% endif %}
+
+    </main>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5><i class="fas fa-graduation-cap me-2"></i>FORTRESS EDUCA</h5>
+                <p class="mb-0 small">
+                    Plataforma Institucional de Asignación de Cupos Educativos<br>
+                    en Colegios Públicos de la Localidad de Engativá.
+                </p>
+                <br>
+                <p class="mb-0 small">
+                    En alianza con la Secretaría de Educación del Distrito.
+                </p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Enlaces Rápidos</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{{ url_for('home.public_home') }}">Inicio</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">Registro de Acudiente</a></li>
+                    <li><a href="{{ url_for('auth.login_user') }}">Iniciar Sesión</a></li>
+                    <li><a href="{{ url_for('auth.login_admin') }}">Inicio Funcionarios</a></li>
+                    <li><a href="{{ url_for('home.privacy_policy') }}">Política de Privacidad</a></li>
+                    <li><a href="{{ url_for('home.terms_of_use') }}">Terminos de Uso y Condiciones</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Contacto Institucional</h5>
+                <p class="mb-0 small">
+                    <i class="fas fa-map-marker-alt me-2"></i> Localidad de Engativá, Bogotá D.C.<br>
+                    <i class="fas fa-envelope me-2"></i> fortres.educa.soporte@gmail.com<br>
+                    <i class="fas fa-phone me-2"></i> (+57) 601 392 2229<br>
+                    <i class="fas fa-clock me-2"></i> Lun-Vie: 7:00 AM - 5:00 PM
+                </p>
+            </div>
+        </div>
+        <div class="text-center mt-4 pt-4 border-top border-secondary">
+            <p class="mb-0 small">&copy; 2026 Fortress Educa - Alcaldía Local de Engativá. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>

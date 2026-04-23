@@ -1,0 +1,19 @@
+<!-- Header del dashboard de los usuarios -->
+
+<header class="top-navbar">
+    <button id="mobileToggle" class="mobile-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <h4 class="mb-0 d-none d-md-block text-muted">
+        {{ header_title }}
+    </h4>
+    <div class="user-mini-profile">
+        <div class="text-end me-2 d-none d-sm-block">
+            <small class="d-block text-muted" style="line-height:1">Bienvenido/a,</small>
+            <!-- Muestra el nombre real desde la base de datos -->
+            <span class="fw-bold text-dark">{{ user.nombre_acudiente }}</span>
+        </div>
+        <!-- Muestra las iniciales generadas -->
+        <div class="user-avatar">{{ user.iniciales }}</div>
+    </div>
+</header>

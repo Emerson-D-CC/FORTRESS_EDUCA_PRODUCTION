@@ -1,0 +1,652 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Fortress Educa - Gestión de Colegio{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = colegio.Nombre_Colegio %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina para la configuración de paremtros/información y cupos de los colegios
+    -->
+
+
+<main class="page-content">
+
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show small py-2" role="alert">
+            <i class="fas fa-info-circle me-1"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endwith %}
+
+    <!-- NAVEGACIÓN DE REGRESO -->
+    <div class="mb-3">
+        <a href="{{ url_for('admin.school_status') }}"
+           class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver a Colegios
+        </a>
+    </div>
+
+    <!-- CABECERA DEL COLEGIO -->
+    <!-- DATA: colegio → sp_admin_colegio_detalle(id_colegio) -->
+    <div class="card border-0 shadow-sm mb-4"
+         style="border-left: 4px solid var(--color-primary) !important;">
+        <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+
+                <div class="col-12 col-md-auto">
+                    <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center
+                                justify-content-center" style="width:64px;height:64px;">
+                        <i class="fas fa-school fa-2x text-primary"></i>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md">
+                    <h5 class="fw-bold mb-1">{{ colegio.Nombre_Colegio }}</h5>
+                    <div class="d-flex flex-wrap gap-3">
+                        <small class="text-muted">
+                            <i class="fas fa-barcode me-1"></i>
+                            <span class="fw-semibold">DANE:</span> {{ colegio.Codigo_DANE }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span class="fw-semibold">Barrio:</span> {{ colegio.Nombre_Barrio }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="fas fa-road me-1"></i>
+                            <span class="fw-semibold">Dir:</span> {{ colegio.Direccion_Colegio }}
+                        </small>
+                        {% if colegio.Email %}
+                        <small class="text-muted">
+                            <i class="fas fa-envelope me-1"></i>{{ colegio.Email }}
+                        </small>
+                        {% endif %}
+                        {% if colegio.Telefono %}
+                        <small class="text-muted">
+                            <i class="fas fa-phone me-1"></i>{{ colegio.Telefono }}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Estado y jornadas activas -->
+                <div class="col-12 col-md-auto d-flex flex-column align-items-md-end gap-2">
+                    {% if colegio.Estado_Colegio %}
+                        <span class="badge bg-success rounded-pill px-3 py-2">
+                            <i class="fas fa-circle-check me-1"></i>Activo
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                            <i class="fas fa-circle-xmark me-1"></i>Inactivo
+                        </span>
+                    {% endif %}
+
+                    <!-- Jornadas activas del colegio -->
+                    <!-- DATA: jornadas_activas → sp_admin_colegio_jornadas_activas() -->
+                    <div class="d-flex gap-1 flex-wrap justify-content-md-end">
+                        {% for jornada in jornadas_activas %}
+                            {% if jornada.Nombre_Jornada == 'Mañana' %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                    {{ jornada.Nombre_Jornada }}
+                                </span>
+                            {% elif jornada.Nombre_Jornada == 'Tarde' %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                    {{ jornada.Nombre_Jornada }}
+                                </span>
+                            {% elif jornada.Nombre_Jornada == 'Nocturna' %}
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                    {{ jornada.Nombre_Jornada }}
+                                </span>
+                            {% elif jornada.Nombre_Jornada == 'Única' %}
+                                <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                    {{ jornada.Nombre_Jornada }}
+                                </span>
+                            {% elif jornada.Nombre_Jornada == 'Completa' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    {{ jornada.Nombre_Jornada }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                    {{ jornada.Nombre_Jornada }}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-muted">Sin jornadas</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN POR SECCIONES -->
+    <div class="mb-4">
+        <ul class="nav nav-pills gap-1 flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link active" href="#seccion-datos">
+                    <i class="fas fa-pen-to-square me-1"></i>Datos del Colegio
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#seccion-jornadas">
+                    <i class="fas fa-clock me-1"></i>Jornadas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#seccion-cupos">
+                    <i class="fas fa-table-cells me-1"></i>Cupos por Grado
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#seccion-estado">
+                    <i class="fas fa-toggle-on me-1"></i>Estado del Colegio
+                </a>
+            </li>
+        </ul>
+    </div>
+
+
+    <!-- SECCIÓN 1 — EDITAR DATOS DEL COLEGIO -->
+    <div class="card border-0 shadow-sm mb-4" id="seccion-datos">
+        <div class="card-header bg-white border-bottom py-3">
+            <h6 class="fw-bold mb-0">
+                <i class="fas fa-pen-to-square me-2 text-primary"></i>Datos del Colegio
+            </h6>
+            <small class="text-muted">Modifique la información institucional y guarde los cambios.</small>
+        </div>
+
+        <form method="POST"
+              action="{{ url_for('admin.school_config_datos', id_colegio=colegio.ID_Colegio) }}"
+              novalidate>
+            {{ form_datos.hidden_tag() }}
+
+            <div class="card-body p-4">
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        {{ form_datos.nombre.label(class="form-label fw-semibold small mb-1") }}
+                        <span class="text-danger">*</span>
+                        {{ form_datos.nombre(class="form-control form-control-sm") }}
+                    </div>
+
+                    <div class="col-sm-6">
+                        {{ form_datos.dane.label(class="form-label fw-semibold small mb-1") }}
+                        <span class="text-danger">*</span>
+                        {{ form_datos.dane(class="form-control form-control-sm") }}
+                    </div>
+
+                    <div class="col-sm-6">
+                        {{ form_datos.id_barrio.label(class="form-label fw-semibold small mb-1") }}
+                        <span class="text-danger">*</span>
+                        {{ form_datos.id_barrio(class="form-select form-select-sm") }}
+                    </div>
+
+                    <div class="col-12">
+                        {{ form_datos.direccion.label(class="form-label fw-semibold small mb-1") }}
+                        <span class="text-danger">*</span>
+                        {{ form_datos.direccion(class="form-control form-control-sm") }}
+                    </div>
+
+                    <div class="col-sm-6">
+                        {{ form_datos.email.label(class="form-label fw-semibold small mb-1") }}
+                        {{ form_datos.email(class="form-control form-control-sm") }}
+                    </div>
+
+                    <div class="col-sm-6">
+                        {{ form_datos.telefono.label(class="form-label fw-semibold small mb-1") }}
+                        {{ form_datos.telefono(class="form-control form-control-sm") }}
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-top py-3 px-4
+                        d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary btn-sm px-4">
+                    <i class="fas fa-save me-1"></i>Guardar Datos
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- SECCIÓN 2 — JORNADAS DEL COLEGIO -->
+    <div class="card border-0 shadow-sm mb-4" id="seccion-jornadas">
+        <div class="card-header bg-white border-bottom py-3">
+            <h6 class="fw-bold mb-0">
+                <i class="fas fa-clock me-2 text-primary"></i>Jornadas del Colegio
+            </h6>
+            <small class="text-muted">
+                Defina las jornadas activas. Los cambios afectarán los cupos disponibles.
+            </small>
+        </div>
+
+        <form method="POST"
+              action="{{ url_for('admin.school_config_jornadas', id_colegio=colegio.ID_Colegio) }}"
+              novalidate>
+            {{ form_jornadas.hidden_tag() }}
+
+            <div class="card-body p-4">
+                <p class="small text-muted mb-3">
+                    Active o desactive jornadas. Al menos una debe permanecer activa.
+                </p>
+
+                <div class="row g-3">
+                    {% set iconos_jornada = {
+                        'Mañana':        ('fa-sun',           'primary'),
+                        'Tarde':         ('fa-cloud-sun',     'warning'),
+                        'Nocturna':      ('fa-moon',          'secondary'),
+                        'Única':         ('fa-circle',        'info'),
+                        'Completa':      ('fa-check-double',  'success'),
+                        'Fin de Semana': ('fa-calendar-week', 'secondary')
+                    } %}
+
+                    {% for subfield in form_jornadas.jornadas_activas %}
+                        {% set nombre_jornada = subfield.label.text %}
+                        {% set icono = iconos_jornada.get(nombre_jornada, ('fa-clock', 'secondary')) %}
+                        {% set esta_activa = subfield.data %}
+
+                        <!-- Conteo de grados configurados para esta jornada -->
+                        {% set grados_conf = 0 %}
+                        {% for j in jornadas_activas %}
+                            {% if j.Nombre_Jornada == nombre_jornada %}
+                                {% set grados_conf = j.Grados_Configurados %}
+                            {% endif %}
+                        {% endfor %}
+
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card border h-100 {% if not esta_activa %}opacity-75{% endif %}">
+                            <div class="card-body p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-3 p-2 bg-{{ icono[1] }} bg-opacity-10">
+                                    <i class="fas {{ icono[0] }} fa-lg text-{{ icono[1] }}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold small
+                                        {% if not esta_activa %}text-muted{% endif %}">
+                                        {{ nombre_jornada }}
+                                    </div>
+                                    <div class="text-muted" style="font-size:.72rem">
+                                        {% if esta_activa and grados_conf > 0 %}
+                                            {{ grados_conf }} grado{{ 's' if grados_conf != 1 }} configurado{{ 's' if grados_conf != 1 }}
+                                        {% else %}
+                                            Sin cupos configurados
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <!--
+                                    Checkbox del MultiCheckboxField.
+                                    Bootstrap form-switch para mejor UX.
+                                -->
+                                <div class="form-check form-switch mb-0">
+                                    {{ subfield(class="form-check-input",
+                                                style="width:2.2rem;height:1.1rem") }}
+                                    <label class="form-check-label visually-hidden"
+                                           for="{{ subfield.id }}">
+                                        {{ nombre_jornada }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-3">
+                    <div class="alert alert-warning border-0 py-2 mb-0 small">
+                        <i class="fas fa-triangle-exclamation me-1"></i>
+                        <strong>Nota:</strong> Desactivar una jornada oculta sus cupos de la plataforma
+                        pero <strong>no elimina</strong> los registros. Se conservan para futuras reactivaciones.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-top py-3 px-4
+                        d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary btn-sm px-4">
+                    <i class="fas fa-save me-1"></i>Guardar Jornadas
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- SECCIÓN 3 — CUPOS POR GRADO Y JORNADA -->
+    <div class="card border-0 shadow-sm mb-4" id="seccion-cupos">
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="fw-bold mb-0">
+                        <i class="fas fa-table-cells me-2 text-primary"></i>Cupos por Grado y Jornada
+                    </h6>
+                    <small class="text-muted">
+                        Configure los cupos disponibles. Guarde cambios en Jornadas primero si agregó nuevas.
+                    </small>
+                </div>
+                <div class="text-end d-none d-md-block">
+                    <div class="h4 fw-bold mb-0 text-primary">{{ total_cupos }}</div>
+                    <div class="small text-muted">cupos totales</div>
+                </div>
+            </div>
+        </div>
+
+        {% if matriz_cupos.jornadas %}
+        <form method="POST"
+              action="{{ url_for('admin.school_config_cupos', id_colegio=colegio.ID_Colegio) }}"
+              novalidate>
+            <!--
+                Token CSRF manual: se usa el token de Flask-WTF sin un form completo.
+                Equivalente a form.hidden_tag() pero sin instanciar un FlaskForm.
+            -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="card-body p-3 p-md-4">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead>
+                            <tr class="table-light">
+                                <th class="text-muted small ps-3" style="width:110px">Nivel</th>
+                                <th class="small" style="min-width:130px">Grado</th>
+
+                                <!-- Columna por cada jornada activa del colegio -->
+                                {% for jornada in matriz_cupos.jornadas %}
+                                    {% if jornada.Nombre_Jornada == 'Mañana' %}
+                                        <th class="text-center small" style="min-width:90px">
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                                {{ jornada.Nombre_Jornada }}
+                                            </span>
+                                        </th>
+                                    {% elif jornada.Nombre_Jornada == 'Tarde' %}
+                                        <th class="text-center small" style="min-width:90px">
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                                {{ jornada.Nombre_Jornada }}
+                                            </span>
+                                        </th>
+                                    {% elif jornada.Nombre_Jornada == 'Nocturna' %}
+                                        <th class="text-center small" style="min-width:90px">
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                {{ jornada.Nombre_Jornada }}
+                                            </span>
+                                        </th>
+                                    {% elif jornada.Nombre_Jornada == 'Única' %}
+                                        <th class="text-center small" style="min-width:90px">
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                                {{ jornada.Nombre_Jornada }}
+                                            </span>
+                                        </th>
+                                    {% elif jornada.Nombre_Jornada == 'Completa' %}
+                                        <th class="text-center small" style="min-width:90px">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                {{ jornada.Nombre_Jornada }}
+                                            </span>
+                                        </th>
+                                    {% else %}
+                                        <th class="text-center small" style="min-width:90px">
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                {{ jornada.Nombre_Jornada }}
+                                            </span>
+                                        </th>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <th class="text-center small bg-light fw-bold" style="min-width:80px">
+                                    Total
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nivel in matriz_cupos.niveles_ordenados %}
+
+                                <!-- Fila separadora de nivel educativo -->
+                                <tr class="table-secondary">
+                                    <td colspan="{{ 2 + matriz_cupos.jornadas|length + 1 }}"
+                                        class="small fw-semibold text-muted py-1 ps-3">
+                                        {% if nivel == 'Preescolar' %}
+                                            <i class="fas fa-child me-1"></i>
+                                        {% elif nivel == 'Primaria' %}
+                                            <i class="fas fa-book-open me-1"></i>
+                                        {% elif nivel == 'Secundaria' %}
+                                            <i class="fas fa-graduation-cap me-1"></i>
+                                        {% else %}
+                                            <i class="fas fa-user-graduate me-1"></i>
+                                        {% endif %}
+                                        {{ nivel }}
+                                    </td>
+                                </tr>
+
+                                <!-- Filas de grados del nivel -->
+                                {% for grado in matriz_cupos.grados_por_nivel[nivel] %}
+                                <tr>
+                                    <td class="text-muted small ps-3">{{ nivel }}</td>
+                                    <td class="small">{{ grado.Nombre_Grado }}</td>
+
+                                    {% set fila_total = namespace(valor=0) %}
+
+                                    {% for jornada in matriz_cupos.jornadas %}
+                                        {% set cupos_celda = matriz_cupos.cupos.get(
+                                            (grado.ID_Grado, jornada.ID_Jornada), 0
+                                        ) %}
+                                        {% set fila_total.valor = fila_total.valor + cupos_celda %}
+
+                                    <td class="p-1">
+                                        <!--
+                                            Nombre del campo: cupo_g{id_grado}_j{id_jornada}
+                                            Parseado en guardar_cupos() via request.form
+                                        -->
+                                        <input type="number"
+                                               name="cupo_g{{ grado.ID_Grado }}_j{{ jornada.ID_Jornada }}"
+                                               class="form-control form-control-sm text-center"
+                                               min="0" max="999"
+                                               value="{{ cupos_celda }}"
+                                               style="width:72px;margin:auto">
+                                    </td>
+                                    {% endfor %}
+
+                                    <!-- Total de la fila (solo lectura, calculado en Jinja2) -->
+                                    <td class="text-center fw-bold small">
+                                        {{ fila_total.valor }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
+                            {% endfor %}
+                        </tbody>
+
+                        <!-- Totales por columna (calculados en Jinja2) -->
+                        <tfoot>
+                            <tr class="table-primary">
+                                <td colspan="2" class="small fw-semibold ps-3 text-muted">
+                                    <i class="fas fa-sigma me-1"></i>Total por Jornada
+                                </td>
+                                {% for jornada in matriz_cupos.jornadas %}
+                                    {% set col_total = namespace(valor=0) %}
+                                    {% for nivel in matriz_cupos.niveles_ordenados %}
+                                        {% for grado in matriz_cupos.grados_por_nivel[nivel] %}
+                                            {% set col_total.valor = col_total.valor +
+                                               matriz_cupos.cupos.get((grado.ID_Grado, jornada.ID_Jornada), 0) %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                <td class="text-center fw-bold small">{{ col_total.valor }}</td>
+                                {% endfor %}
+                                <td class="text-center fw-bold">{{ total_cupos }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1 text-primary"></i>
+                        Ingrese <strong>0</strong> si el grado no tiene cupos para esa jornada.
+                        Los totales son de referencia; se recalculan al guardar.
+                    </small>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-top py-3 px-4
+                        d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-success btn-sm px-4">
+                    <i class="fas fa-save me-1"></i>Guardar Cupos
+                </button>
+            </div>
+        </form>
+
+        {% else %}
+        <!-- Estado vacío: el colegio no tiene jornadas activas -->
+        <div class="card-body p-4 text-center text-muted">
+            <i class="fas fa-clock fa-2x mb-2 opacity-50"></i>
+            <p class="mb-1 fw-semibold">No hay jornadas activas</p>
+            <p class="small mb-0">
+                Active al menos una jornada en la <strong>Sección 2</strong>
+                para poder configurar los cupos.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+
+    <!-- ╔══════════════════════════════════════════════════════╗ -->
+    <!-- ║  SECCIÓN 4 — ESTADO DEL COLEGIO                     ║ -->
+    <!-- ╚══════════════════════════════════════════════════════╝ -->
+    <!--
+        FormCambiarEstadoColegio → POST admin.school_config_estado
+        Procesado por School_Config_Service.cambiar_estado()
+        Hace toggle sobre Estado_Colegio (sp_admin_colegio_estado_cambiar).
+    -->
+    <div class="card border-0 shadow-sm mb-4" id="seccion-estado">
+        <div class="card-header bg-white border-bottom py-3">
+            <h6 class="fw-bold mb-0">
+                <i class="fas fa-toggle-on me-2 text-primary"></i>Estado del Colegio
+            </h6>
+            <small class="text-muted">
+                Active o desactive este colegio en la plataforma de cupos.
+            </small>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4 align-items-center">
+
+                <!-- Estado actual -->
+                <div class="col-12 col-md-6">
+                    {% if colegio.Estado_Colegio %}
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3
+                                bg-success bg-opacity-10 border border-success border-opacity-25">
+                        <i class="fas fa-circle-check fa-2x text-success"></i>
+                        <div>
+                            <div class="fw-bold">Colegio Activo</div>
+                            <div class="small text-muted">
+                                Visible en la plataforma. Los usuarios pueden solicitar cupos.
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3
+                                bg-danger bg-opacity-10 border border-danger border-opacity-25">
+                        <i class="fas fa-circle-xmark fa-2x text-danger"></i>
+                        <div>
+                            <div class="fw-bold">Colegio Inactivo</div>
+                            <div class="small text-muted">
+                                No aparece en la plataforma. Los padres no pueden solicitar cupos.
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Acción de cambio -->
+                <div class="col-12 col-md-6">
+                    {% if colegio.Estado_Colegio %}
+                    <p class="small text-muted mb-3">
+                        Al <strong>desactivar</strong> el colegio:
+                    </p>
+                    <ul class="small text-muted mb-3 ps-3">
+                        <li>No aparecerá en las búsquedas de cupos de los padres.</li>
+                        <li>Las solicitudes pendientes continuarán su proceso.</li>
+                        <li>Los cupos y datos <strong>no se eliminarán</strong>.</li>
+                        <li>Podrá reactivarse en cualquier momento.</li>
+                    </ul>
+                    <button class="btn btn-outline-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalConfirmarEstado">
+                        <i class="fas fa-toggle-off me-1"></i>Desactivar Colegio
+                    </button>
+                    {% else %}
+                    <p class="small text-muted mb-3">
+                        Al <strong>activar</strong> el colegio:
+                    </p>
+                    <ul class="small text-muted mb-3 ps-3">
+                        <li>Volverá a aparecer en las búsquedas de cupos.</li>
+                        <li>Los cupos previamente configurados quedarán disponibles.</li>
+                    </ul>
+                    <button class="btn btn-outline-success btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalConfirmarEstado">
+                        <i class="fas fa-toggle-on me-1"></i>Activar Colegio
+                    </button>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<!-- =====================================================================
+     MODAL: CONFIRMAR CAMBIO DE ESTADO
+     El POST va a admin.school_config_estado con el token CSRF.
+     ===================================================================== -->
+<div class="modal fade" id="modalConfirmarEstado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold
+                    {% if colegio.Estado_Colegio %}text-danger{% else %}text-success{% endif %}">
+                    <i class="fas fa-triangle-exclamation me-2"></i>
+                    Confirmar {% if colegio.Estado_Colegio %}Desactivación{% else %}Activación{% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="POST"
+                  action="{{ url_for('admin.school_config_estado', id_colegio=colegio.ID_Colegio) }}">
+                {{ form_estado.hidden_tag() }}
+                {{ form_estado.confirmar() }}
+
+                <div class="modal-body pt-2">
+                    <p class="mb-2">
+                        ¿Está seguro de que desea
+                        <strong>{% if colegio.Estado_Colegio %}desactivar{% else %}activar{% endif %}</strong>
+                        el colegio <strong>{{ colegio.Nombre_Colegio }}</strong>?
+                    </p>
+                    {% if colegio.Estado_Colegio %}
+                    <div class="alert alert-warning border-0 small py-2 mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        El colegio dejará de mostrarse, pero sus datos y cupos se conservarán.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm"
+                            data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit"
+                            class="btn btn-sm px-4
+                                {% if colegio.Estado_Colegio %}btn-danger{% else %}btn-success{% endif %}">
+                        <i class="fas fa-toggle-{% if colegio.Estado_Colegio %}off{% else %}on{% endif %} me-1"></i>
+                        Sí, {% if colegio.Estado_Colegio %}desactivar{% else %}activar{% endif %}
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

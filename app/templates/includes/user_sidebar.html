@@ -1,0 +1,33 @@
+<nav class="dashboard-sidebar">
+    <div class="brand-section">
+        <i class="fas fa-graduation-cap fa-lg"></i>
+        <a href="{{ url_for('aplication.dashboard') }}" class="brand-text">FORTRESS EDUCA</a>
+    </div>
+
+    <div class="d-flex flex-column p-2">
+        <a href="{{ url_for('aplication.dashboard') }}" class="nav-link{% if active_page == 'home' %} active{% endif %}">
+            <i class="fas fa-home"></i> <span>Resumen</span>
+        </a>
+        <a href="{{ url_for('aplication.ticket_request') }}" class="nav-link{% if active_page == 'request' %} active{% endif %}">
+            <i class="fas fa-file-alt"></i> <span>Nueva Solicitud</span>
+        </a>
+        <a href="{{ url_for('aplication.ticket_status') }}" class="nav-link{% if active_page == 'status' %} active{% endif %}">
+            <i class="fas fa-search"></i> <span>Seguimiento</span>
+        </a>
+        <a href="{{ url_for('aplication.profile') }}" class="nav-link{% if active_page == 'profile' %} active{% endif %}">
+            <i class="fas fa-user"></i> <span>Mi Perfil</span>
+        </a>
+        <a href="{{ url_for('aplication.security') }}" class="nav-link{% if active_page == 'security' %} active{% endif %}">
+            <i class="fas fa-lock"></i> <span>Seguridad</span>
+        </a>
+        <a href="{{ url_for('aplication.settings') }}" class="nav-link{% if active_page == 'settings' %} active{% endif %}">
+            <i class="fas fa-cog"></i> <span>Ajustes</span>
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <a href="#" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
+            <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+        </a>
+    </div>
+</nav>

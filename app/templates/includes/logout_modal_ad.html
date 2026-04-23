@@ -1,0 +1,38 @@
+<head>
+    <!-- Custom Especific CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
+</head>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModalAdmin" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content logout-modal-content shadow-lg">
+            
+            <div class="modal-body text-center py-5 px-5">
+                <!-- Icono de Salida -->
+                <div class="mb-4">
+                    <div class="logout-icon-wrapper">
+                        <i class="fas fa-sign-out-alt fa-3x logout-icon-color"></i>
+                    </div>
+                </div>
+                
+                <h4 class="fw-bold mb-2 logout-title">¿Ya te vas?</h4>
+                <p class="text-muted mb-0">Estás a punto de cerrar tu sesión en Fortress Educa. ¿Deseas continuar?</p>
+            </div>
+            
+            <!-- Acciones -->
+            <div class="modal-footer border-0 d-flex justify-content-center pb-5 px-4">
+                <button type="button" class="btn btn-light logout-btn-cancel px-4 py-2 me-2" data-bs-dismiss="modal">
+                    Mantenerse conectado
+                </button>
+                
+                <form action="{{ url_for('auth.logout_ad') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn logout-btn-confirm px-4 py-2">
+                        Sí, cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

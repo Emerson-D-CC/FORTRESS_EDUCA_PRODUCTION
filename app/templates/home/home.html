@@ -1,0 +1,205 @@
+<!-- #Llamar a layout_public.html -->
+{% extends 'layout_public.html' %}
+
+{% block meta_description %}Plataforma institucional para la asignación de cupos educativos en Engativá.{% endblock %}
+
+{% block titulo %}Inicio - Fortress Educa{% endblock %}
+
+<!-- Invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Archivo: home.html
+        Función: Página principal (Landing Page)
+    -->
+
+    <!-- Sección navbar -->
+    <section id="navbar">
+        <!-- Llamar narvar.html -->
+        {% include 'includes/home_navbar_2.html' %}
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero-section fade-in">
+        <div class="container text-center">
+            <div class="mb-3">
+                <span class="badge bg-light text-primary px-3 py-2 fs-6 fw-normal rounded-pill">
+                    <i class="fas fa-map-marker-alt me-1"></i> Localidad de Engativá · Bogotá D.C.
+                </span>
+            </div>
+            <h1 class="hero-title display-4">Educación como Derecho,<br>No como Privilegio</h1>
+            <p class="hero-subtitle fs-5">
+                Plataforma institucional para la asignación de cupos educativos en colegios públicos de Engativá
+                a niños y niñas en condición de vulnerabilidad, desplazamiento forzado o víctimas del conflicto armado.
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg text-primary fw-bold px-5">
+                    <i class="fas fa-child me-2"></i>Solicitar Cupo Educativo
+                </a>
+                <a href="#about" class="btn btn-outline-light btn-lg px-5">Conocer Más</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ¿Qué es Fortress Educa? -->
+    <section id="about" class="section-padding">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <h2 class="section-title text-start ms-0">¿Qué es Fortress Educa?</h2>
+                    <p class="lead text-muted">La plataforma institucional para la reintegración educativa en Engativá.</p>
+                    <p>
+                        Fortress Educa es la solución tecnológica que centraliza y agiliza el proceso de asignación
+                        de cupos educativos en colegios públicos de la localidad de Engativá para niños y niñas
+                        afectados por el conflicto armado, el desplazamiento forzado u otras condiciones de vulnerabilidad.
+                        Nuestro objetivo es garantizar el acceso a la educación de manera transparente, segura y eficiente.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Proceso ágil y transparente de asignación.</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Atención prioritaria a poblaciones vulnerables.</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Seguimiento en línea del estado del cupo.</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Enfocado en la protección de la niñez colombiana.</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <div class="bg-light p-5 rounded-3 text-center" style="background: linear-gradient(135deg, #f0f9f4, #e8f4fd) !important;">
+                        <i class="fas fa-school fa-5x" style="color: var(--color-accent-green); opacity: 0.8;"></i>
+                        <h4 class="mt-4 fw-bold text-primary">Colegios Públicos de Engativá</h4>
+                        <p class="text-muted">Conectando familias vulnerables con oportunidades educativas</p>
+                        <div class="row g-3 mt-2 text-center">
+                            <div class="col-4">
+                                <div class="fw-bold fs-4 text-success">
+                                    <!-- AQUÍ SE MOSTRARÁ EL NÚMERO DE COLEGIOS DESDE LA BASE DE DATOS -->
+                                    28+
+                                </div>
+                                <small class="text-muted">Colegios</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold fs-4 text-primary">
+                                    <!-- DATO DINÁMICO: CUPOS DISPONIBLES DESDE BD -->
+                                    1.2k+
+                                </div>
+                                <small class="text-muted">Cupos</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold fs-4" style="color: var(--color-accent-green);">
+                                    <!-- DATO DINÁMICO: FAMILIAS ATENDIDAS -->
+                                    800+
+                                </div>
+                                <small class="text-muted">Familias</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios -->
+    <section id="servicios" class="section-padding bg-light">
+        <div class="container">
+            <h2 class="section-title">Nuestros Servicios</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card service-card p-4 text-center h-100">
+                        <div class="icon-box"><i class="fas fa-file-alt"></i></div>
+                        <h4>Solicitud de Cupo</h4>
+                        <p class="text-muted">Registro y gestión de solicitudes de cupo educativo para niños en condición de vulnerabilidad.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card service-card p-4 text-center h-100">
+                        <div class="icon-box"><i class="fas fa-school"></i></div>
+                        <h4>Asignación de Colegios</h4>
+                        <p class="text-muted">Asignación inteligente de cupos en colegios públicos de Engativá según necesidades y prioridad.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card service-card p-4 text-center h-100">
+                        <div class="icon-box"><i class="fas fa-chart-bar"></i></div>
+                        <h4>Seguimiento en Línea</h4>
+                        <p class="text-muted">Monitoreo en tiempo real del estado de la solicitud y confirmación de asignación de cupo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proceso -->
+    <section id="proceso" class="section-padding">
+        <div class="container">
+            <h2 class="section-title">Proceso de Asignación de Cupo</h2>
+            <div class="row mt-5 justify-content-center">
+                <div class="col-md-2 text-center mb-4">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 65px; height: 65px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(44,83,100,0.3);">1</div>
+                    <h5>Registro</h5>
+                    <p class="small text-muted">El acudiente crea su cuenta en la plataforma.</p>
+                </div>
+                <div class="col-md-2 text-center mb-4">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 65px; height: 65px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(44,83,100,0.3);">2</div>
+                    <h5>Solicitud</h5>
+                    <p class="small text-muted">Diligencia el formulario con datos del menor y su condición.</p>
+                </div>
+                <div class="col-md-2 text-center mb-4">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 65px; height: 65px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(44,83,100,0.3);">3</div>
+                    <h5>Validación</h5>
+                    <p class="small text-muted">Revisión y verificación de documentos por funcionarios.</p>
+                </div>
+                <div class="col-md-2 text-center mb-4">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 65px; height: 65px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(44,83,100,0.3);">4</div>
+                    <h5>Asignación</h5>
+                    <p class="small text-muted">Asignación del cupo en colegio público disponible en Engativá.</p>
+                </div>
+                <div class="col-md-2 text-center mb-4">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 65px; height: 65px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(17,153,142,0.3);">5</div>
+                    <h5>Confirmación</h5>
+                    <p class="small text-muted">Notificación y confirmación del cupo asignado al acudiente.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Poblaciones que atendemos -->
+    <section class="section-padding bg-light">
+        <div class="container">
+            <h2 class="section-title">Poblaciones que Atendemos</h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-3 col-6 text-center">
+                    <div class="card p-4 h-100 border-0 shadow-sm">
+                        <i class="fas fa-route fa-3x mb-3" style="color: var(--color-accent-green);"></i>
+                        <h6 class="fw-bold">Desplazamiento Forzado</h6>
+                        <p class="small text-muted">Familias desplazadas por la violencia que llegan a Engativá.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 text-center">
+                    <div class="card p-4 h-100 border-0 shadow-sm">
+                        <i class="fas fa-dove fa-3x mb-3" style="color: var(--color-primary-light);"></i>
+                        <h6 class="fw-bold">Víctimas del Conflicto</h6>
+                        <p class="small text-muted">Menores víctimas directas e indirectas del conflicto armado.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 text-center">
+                    <div class="card p-4 h-100 border-0 shadow-sm">
+                        <i class="fas fa-hand-holding-heart fa-3x mb-3" style="color: var(--color-warning);"></i>
+                        <h6 class="fw-bold">Vulnerabilidad Económica</h6>
+                        <p class="small text-muted">Niños en situación de pobreza con dificultades de acceso educativo.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 text-center">
+                    <div class="card p-4 h-100 border-0 shadow-sm">
+                        <i class="fas fa-user-graduate fa-3x mb-3" style="color: var(--color-danger);"></i>
+                        <h6 class="fw-bold">No Escolarizados</h6>
+                        <p class="small text-muted">Menores que se encuentran fuera del sistema educativo formal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

@@ -1,0 +1,65 @@
+<nav class="dashboard-sidebar">
+    <div class="brand-section">
+        <i class="fas fa-shield fa-lg"></i>
+        <a href="{{ url_for('admin.dashboard') }}" class="brand-text">ADMIN EDUCA</a>
+    </div>
+
+    <div class="d-flex flex-column p-2">
+
+        <!-- Sección de funciones de admin -->
+
+        <a href="{{ url_for('admin.dashboard') }}" class="nav-link{% if active_page == 'dashboard' %} active{% endif %}">
+            <i class="fas fa-chart-pie"></i> <span>Resumen General</span>
+        </a>
+
+        <a href="{{ url_for('admin.cases') }}" class="nav-link{% if active_page == 'cases' %} active{% endif %}">
+            <i class="fas fa-file-alt"></i> <span>Solicitudes de Cupos</span>
+        </a>
+
+        <!-- Contenedor del Botón Principal con Redirección -->
+        <div class="nav-link-group {% if active_page in ['users', 'staff', 'accounts'] %} active{% endif %}">
+            <!-- El enlace que redirige -->
+            <a href="{{ url_for('admin.accounts') }}" class="nav-link-main">
+                <i class="fas fa-users"></i> 
+                <span>Cuentas</span>
+            </a>
+            
+            <!-- El botón de la flecha que despliega (solo visible en hover) -->
+            <button class="submenu-toggle" data-bs-toggle="collapse" data-bs-target="#usersSubmenu" aria-expanded="false">
+                <i class="fas fa-chevron-down arrow-icon"></i>
+            </button>
+        </div>
+        
+        <!-- Sub-elementos (igual que antes) -->
+        <div class="collapse {% if active_page in ['users', 'staff'] %} show {% endif %}" id="usersSubmenu">
+            <div class="d-flex flex-column submenu-container">
+                <a href="{{ url_for('admin.accounts_user') }}" class="nav-link py-1 {% if active_page == 'users' %} active{% endif %}">
+                    <i class="fas fa-user-friends"></i> <span>Usuarios</span>
+                </a>
+                <a href="{{ url_for('admin.accounts_func') }}" class="nav-link py-1 {% if active_page == 'staff' %} active{% endif %}">
+                    <i class="fas fa-user-tie"></i> <span>Funcionarios</span>
+                </a>
+            </div>
+        </div>
+
+
+        <a href="{{ url_for('admin.history') }}" class="nav-link{% if active_page == 'history' %} active{% endif %}">
+            <i class="fas fa-history"></i> <span>Historial</span>
+        </a>
+
+        <a href="{{ url_for('admin.school_status') }}" class="nav-link{% if active_page == 'settings' %} active{% endif %}">
+            <i class="fas fa-school"></i> <span>Colegios</span>
+        </a>
+
+        <a href="{{ url_for('admin.settings') }}" class="nav-link{% if active_page == 'settings' %} active{% endif %}">
+            <i class="fas fa-cog"></i> <span>Configuración</span>
+        </a>
+
+    </div>
+
+    <div class="sidebar-footer">
+        <a href="#" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModalAdmin">
+            <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+        </a>
+    </div>
+</nav>
