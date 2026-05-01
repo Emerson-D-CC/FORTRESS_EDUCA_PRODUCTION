@@ -7,19 +7,31 @@ from flask import render_template, request, redirect, url_for, flash, session, s
 from app.utils.database_utils import db
 
 # CONFIGURACIONES LOCALES
-from app.forms.aplication_forms import *
-from app.repositories.aplication_repository import *
+from app.repositories.aplication_repository import (
+    sp_tipo_documento_consultar, 
+    sp_ticket_consultar_por_usuario,
+    sp_ticket_cerrado_consultar_por_usuario,
+    sp_ticket_consultar_detalle, 
+    sp_ticket_comentarios_consultar,
+    sp_ticket_documentos_consultar,
+    sp_documento_ticket_insertar,
+    sp_documento_comentario_insertar,
+    sp_documento_ticket_descargar,
+    sp_comentario_usuario_insertar,    
+)
+from app.forms.aplication_forms import FormSubirDocumento, FormAgregarComentarioUsuario
+
 
 # ====================================================================================================================================================
 #                                           SISTEMA DE TICKETS - SEGUIMIENTO DE SOLICITUDES DE CUPO
 # ====================================================================================================================================================
 
 _ALLOWED_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
-_MAX_FILE_BYTES     = 5 * 1024 * 1024  # 5 MB
+_MAX_FILE_BYTES = 5 * 1024 * 1024  # 5 MB
 
 
 def _form_opciones_subir_documento(form):
-    """Carga los tipos de documento en el SelectField."""
+    """Carga los tipos de documento en el SelectField"""
     tipos = sp_tipo_documento_consultar()
     form.tipo_documento.choices = [(0, "-- Seleccione --")] + [
         (t["ID_Tipo_Doc"], t["Nombre_Tipo_Doc"]) for t in tipos
@@ -30,28 +42,28 @@ def _form_opciones_subir_documento(form):
 
 _PASOS_TIMELINE = [
     {
-        "label":      "Solicitud Enviada",
-        "icono":      "fa-paper-plane",
+        "label": "Solicitud Enviada",
+        "icono": "fa-paper-plane",
         "estados_bd": ["Abierto"],
     },
     {
-        "label":      "En Revisión",
-        "icono":      "fa-eye",
+        "label": "En Revisión",
+        "icono": "fa-eye",
         "estados_bd": ["En Revisión"],
     },
     {
-        "label":      "Validación de Documentos",
-        "icono":      "fa-clipboard-check",
+        "label": "Validación de Documentos",
+        "icono": "fa-clipboard-check",
         "estados_bd": ["Validación de Documentos", "Pendiente Acción de Usuario"],
     },
     {
-        "label":      "Asignación de Cupo",
-        "icono":      "fa-school",
+        "label": "Asignación de Cupo",
+        "icono": "fa-school",
         "estados_bd": ["Asignación de Cupo"],
     },
     {
-        "label":      "Confirmación Final",
-        "icono":      "fa-flag-checkered",
+        "label": "Confirmación Final",
+        "icono": "fa-flag-checkered",
         "estados_bd": ["Solucionado"],
     },
 ]
@@ -108,8 +120,8 @@ def _construir_timeline(nombre_estado_actual: str) -> tuple[list[dict], str]:
             estado_paso = ""
 
         pasos.append({
-            "label":  paso["label"],
-            "icono":  paso["icono"],
+            "label": paso["label"],
+            "icono": paso["icono"],
             "estado": estado_paso,
         })
 
@@ -131,9 +143,9 @@ class Ticket_Detail_Service:
         
         return render_template(
             "aplication/ticket_status.html",
-            tickets_ab=tickets_ab,
-            tickets_cer=tickets_cer,
-            active_page="status",
+            tickets_ab = tickets_ab,
+            tickets_cer = tickets_cer,
+            active_page = "status",
         )
 
     def cargar_datos_ticket(self, id_ticket: str):
@@ -151,6 +163,7 @@ class Ticket_Detail_Service:
         timeline, timeline_tipo = _construir_timeline(ticket["Nombre_Estado"])
 
         form = FormSubirDocumento()
+        form_comentario = FormAgregarComentarioUsuario()      
         _form_opciones_subir_documento(form)
 
         ctx = dict(
@@ -160,6 +173,7 @@ class Ticket_Detail_Service:
             timeline = timeline,
             timeline_tipo = timeline_tipo,
             form = form,
+            form_comentario = form_comentario,     
             active_page="status",
         )
 
@@ -222,10 +236,45 @@ class Ticket_Detail_Service:
         doc = sp_documento_ticket_descargar(id_doc, user_id)
         if not doc:
             flash("Documento no encontrado o sin permisos.", "danger")
-            return redirect(url_for("aplication.ticket_detail", id_ticket=id_ticket, active_page="status"))
+            return redirect(url_for("aplication.ticket_detail", id_ticket = id_ticket, active_page="status"))
 
         return send_file(
             io.BytesIO(doc["Archivo"]),
-            download_name=doc["Nombre_Original"],
-            as_attachment=True,
+            download_name = doc["Nombre_Original"],
+            as_attachment = True,
         )
+
+
+    def agregar_comentario(self, id_ticket: str):
+        """Procesa el formulario de comentario del usuario"""
+        user_id = session["user_id"]
+
+        # Verificar que el ticket pertenece al usuario antes de continuar
+        ticket = sp_ticket_consultar_detalle(id_ticket, user_id)
+        if not ticket:
+            flash("Solicitud no encontrada o sin permisos.", "danger")
+            return redirect(url_for("aplication.ticket_status"))
+
+        if ticket["Estado_Final"] == 1:
+            flash("Esta solicitud está cerrada. No es posible agregar comentarios.", "warning")
+            return redirect(url_for("aplication.ticket_detail", id_ticket=id_ticket))
+
+        form_comentario = FormAgregarComentarioUsuario()
+        if not form_comentario.validate_on_submit():
+            flash("Por favor revise el comentario antes de enviarlo.", "danger")
+            return redirect(url_for("aplication.ticket_detail", id_ticket=id_ticket))
+
+        try:
+            sp_comentario_usuario_insertar(
+                id_ticket  = id_ticket,
+                id_usuario = user_id,
+                comentario = form_comentario.comentario.data.strip(),
+            )
+            db.commit()
+            flash("Comentario agregado correctamente.", "success")
+        except Exception as e:
+            db.rollback()
+            print(f"[ERROR - comentario usuario] {e}")
+            flash("Ocurrió un error al guardar el comentario. Intente nuevamente.", "danger")
+
+        return redirect(url_for("aplication.ticket_detail", id_ticket=id_ticket))        

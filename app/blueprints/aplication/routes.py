@@ -1,7 +1,8 @@
+# FUNCIONES DE FLASK
 from flask import Blueprint
 
 from app.utils.decorators.aplication_decorators import acudiente_required, login_required, student_required
-from app.controllers.aplication import AplicationController
+from app.controllers.aplication_controller import AplicationController
 
 
 # Declara el Blueprint para Aplication
@@ -41,6 +42,11 @@ def ticket_detail(id_ticket):
 @acudiente_required
 def ticket_download_doc(id_ticket, id_doc):
     return controller.ticket_detail_download_doc(id_ticket, id_doc)
+
+@aplication_bp.route("/mis-solicitudes/<string:id_ticket>/comentario", methods=["POST"])
+@login_required
+def ticket_add_coment(id_ticket):
+    return controller.ticket_detail_coment(id_ticket)
 
 # REGISTRO ESTUDIANTE 
 @aplication_bp.route("/aplication_registro_estudiante", methods=["GET", "POST"])

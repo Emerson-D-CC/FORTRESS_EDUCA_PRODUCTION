@@ -39,11 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const siguienteIndex = indexSeleccionado + 1;
 
         if (siguienteIndex < opciones.length) {
-            // Existe un grado siguiente → seleccionarlo
+            // Existe un grado siguiente = seleccionarlo
             gradoProximo.selectedIndex = siguienteIndex;
             hidden.value = gradoProximo.value;
         } else {
-            // Es el último grado → mostrar "No aplica"
+            // Es el último grado = mostrar "No aplica"
             gradoProximo.style.display = "none";
             msg.textContent = "No aplica";
             msg.style.display = "block";

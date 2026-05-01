@@ -1,6 +1,6 @@
 {% extends 'layout_admin.html' %}
 
-{% block titulo %}Fortress Educa - Historial Auditoría{% endblock %}
+{% block titulo %}Historial Auditoría - Admin Educa{% endblock %}
 
 <!-- Titulo del Header -->
 {% set admin_header_title = "Historial y Auditoría del Sistema" %}
@@ -13,7 +13,7 @@
         Función: Pagina de visualización de estadisticas global del sistema
     -->
 
-{# ── Macro: construye query-string conservando filtros activos ── #}
+<!--  Macro: construye query-string conservando filtros activos  -->
 {% macro qs(extra={}) %}
   {%- set params = [] -%}
   {%- if filtros.tipo_evento -%}  {%- set _ = params.append("tipo_evento=" ~ filtros.tipo_evento) -%}  {%- endif -%}
@@ -25,176 +25,183 @@
 
     <main class="page-content">
 
-    <!-- Aviso de módulo -->
-    <div class="alert alert-light border small py-2 mb-4">
-        <i class="fas fa-shield-alt text-primary me-1"></i>
-        <strong>Módulo de Auditoría:</strong> Este registro captura todas las acciones sensibles del sistema
-        para garantizar transparencia y trazabilidad. No puede ser modificado por los administradores.
-    </div>
-
-    <!-- ── Filtros ── -->
+    <!--  Filtros  -->
     <div class="card border-0 shadow-sm p-3 mb-4">
         <form method="GET" action="{{ url_for('admin.history') }}" id="filtrosForm">
-        <div class="row g-3 align-items-end">
+            <div class="row g-3 align-items-end">
 
-            <!-- Tipo de Evento -->
-            <div class="col-md-3">
-            <label class="form-label small fw-bold" for="tipo_evento">Tipo de Evento</label>
-            <select class="form-select form-select-sm" id="tipo_evento" name="tipo_evento">
-                <option value="">Todos los eventos</option>
-                {% for valor, etiqueta in tipos_evento %}
-                <option value="{{ valor }}" {% if filtros.tipo_evento == valor %}selected{% endif %}>
-                    {{ etiqueta }}
-                </option>
-                {% endfor %}
-            </select>
+                <!-- Tipo de Evento -->
+                <div class="col-md-3">
+                <label class="form-label small fw-bold" for="tipo_evento">Tipo de Evento</label>
+                <select class="form-select form-select-sm" id="tipo_evento" name="tipo_evento">
+                    <option value="">Todos los eventos</option>
+                    {% for valor, etiqueta in tipos_evento %}
+                    <option value="{{ valor }}" {% if filtros.tipo_evento == valor %}selected{% endif %}>
+                        {{ etiqueta }}
+                    </option>
+                    {% endfor %}
+                </select>
+                </div>
+
+                <!-- Fecha Desde -->
+                <div class="col-md-3">
+                <label class="form-label small fw-bold" for="fecha_desde">Fecha Desde</label>
+                <input type="date" class="form-control form-control-sm" id="fecha_desde"
+                        name="fecha_desde" value="{{ filtros.fecha_desde or '' }}">
+                </div>
+
+                <!-- Fecha Hasta -->
+                <div class="col-md-3">
+                <label class="form-label small fw-bold" for="fecha_hasta">Fecha Hasta</label>
+                <input type="date" class="form-control form-control-sm" id="fecha_hasta"
+                        name="fecha_hasta" value="{{ filtros.fecha_hasta or '' }}">
+                </div>
+
+                <!-- Botones -->
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-filter me-1"></i>Filtrar
+                    </button>
+                    <a href="{{ url_for('admin.history') }}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-times me-1"></i>Limpiar
+                    </a>
+                </div>
+
             </div>
-
-            <!-- Fecha Desde -->
-            <div class="col-md-3">
-            <label class="form-label small fw-bold" for="fecha_desde">Fecha Desde</label>
-            <input type="date" class="form-control form-control-sm" id="fecha_desde"
-                    name="fecha_desde" value="{{ filtros.fecha_desde or '' }}">
-            </div>
-
-            <!-- Fecha Hasta -->
-            <div class="col-md-3">
-            <label class="form-label small fw-bold" for="fecha_hasta">Fecha Hasta</label>
-            <input type="date" class="form-control form-control-sm" id="fecha_hasta"
-                    name="fecha_hasta" value="{{ filtros.fecha_hasta or '' }}">
-            </div>
-
-            <!-- Botones -->
-            <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn btn-outline-secondary btn-sm flex-grow-1">
-                <i class="fas fa-filter me-1"></i>Filtrar
-            </button>
-            <a href="{{ url_for('admin.history') }}" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-times me-1"></i>Limpiar
-            </a>
-            <a href="{{ url_for('admin.history_export') }}{{ qs() }}"
-                class="btn btn-outline-success btn-sm" title="Exportar CSV">
-                <i class="fas fa-download me-1"></i>CSV
-            </a>
-            </div>
-
-        </div>
         </form>
     </div><!-- /filtros -->
 
-    <!-- ── Tabla de auditoría ── -->
+    <!--  Tabla de auditoría  -->
     <div class="card border-0 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-4">
+                <i class="fas fa-scroll me-2 text-primary"></i>Registro de Auditoría
+                <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
+                    {{ total_registros }}
+                </span>
+            </h5>
 
-        <h5 class="fw-bold mb-4">
-        <i class="fas fa-scroll me-2 text-primary"></i>Registro de Auditoría
-        <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
-            {{ total_registros }}
-        </span>
-        </h5>
+            {% if total_registros %}
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('admin.history_export') }}{{ qs({'formato': 'csv'}) }}"
+                class="btn btn-outline-success btn-sm" title="Exportar CSV">
+                    <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                </a>
+                <a href="{{ url_for('admin.history_export') }}{{ qs({'formato': 'pdf'}) }}"
+                class="btn btn-outline-danger btn-sm" title="Exportar PDF">
+                    <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                </a>
+            </div>
+            {% endif %}
+        </div>
 
         <div class="table-responsive">
-        <table class="table table-hover align-middle small">
-            <thead class="table-dark">
-            <tr>
-                <th>Fecha y Hora</th>
-                <th>Tipo de Evento</th>
-                <th>Usuario</th>
-                <th>Detalle</th>
-                <th>Ticket</th>
-                <th>Visibilidad</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for r in registros %}
-            <tr>
+            <table class="table table-hover align-middle small">
+                <thead class="table-dark">
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Tipo de Evento</th>
+                    <th>Usuario</th>
+                    <th>Detalle</th>
+                    <th>Ticket</th>
+                    <th>Visibilidad</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for r in registros %}
+                <tr>
 
-                <!-- Fecha -->
-                <td class="text-nowrap">
-                {{ r.Fecha_Comentario.strftime("%d %b %Y, %I:%M %p") if r.Fecha_Comentario else "—" }}
-                </td>
+                    <!-- Fecha -->
+                    <td class="text-nowrap">
+                    {{ r.Fecha_Comentario.strftime("%d %b %Y, %I:%M %p") if r.Fecha_Comentario else "—" }}
+                    </td>
 
-                <!-- Tipo de Evento (badge) -->
-                <td>
-                {% if r.Tipo_Evento == "Cupo Asignado" %}
-                    <span class="badge bg-success">
-                    <i class="fas fa-school me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
-                {% elif r.Tipo_Evento == "Nueva Solicitud" %}
-                    <span class="badge bg-primary">
-                    <i class="fas fa-file-alt me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
-                {% elif r.Tipo_Evento == "Cambio de Estado" %}
-                    <span class="badge bg-warning text-dark">
-                    <i class="fas fa-exchange-alt me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
-                {% elif r.Tipo_Evento == "Cambio Tecnico" %}
-                    <span class="badge bg-info text-dark">
-                    <i class="fas fa-user-cog me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
-                {% elif r.Tipo_Evento == "Documento Subido" %}
-                    <span class="badge bg-secondary">
-                    <i class="fas fa-paperclip me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
-                {% elif r.Tipo_Evento == "Cierre Solicitud" %}
-                    <span class="badge bg-danger">
-                    <i class="fas fa-lock me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
+                    <!-- Tipo de Evento (badge) -->
+                    <td>
+                    {% if r.Tipo_Evento == "Cupo Asignado" %}
+                        <span class="badge bg-success">
+                        <i class="fas fa-school me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% elif r.Tipo_Evento == "Nueva Solicitud" %}
+                        <span class="badge bg-primary">
+                        <i class="fas fa-file-alt me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% elif r.Tipo_Evento == "Cambio de Estado" %}
+                        <span class="badge bg-warning text-dark">
+                        <i class="fas fa-exchange-alt me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% elif r.Tipo_Evento == "Cambio Tecnico" %}
+                        <span class="badge bg-info text-dark">
+                        <i class="fas fa-user-cog me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% elif r.Tipo_Evento == "Documento Subido" %}
+                        <span class="badge bg-secondary">
+                        <i class="fas fa-paperclip me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% elif r.Tipo_Evento == "Cierre Solicitud" %}
+                        <span class="badge bg-danger">
+                        <i class="fas fa-lock me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% elif r.Tipo_Evento == "Cupo Cancelado" %}
+                        <span class="badge bg-danger">
+                        <i class="fas fa-school me-1"></i>{{ r.Tipo_Evento }}
+                        </span>                    
+                    {% else %}
+                        <span class="badge bg-secondary">
+                        <i class="fas fa-comment me-1"></i>{{ r.Tipo_Evento }}
+                        </span>
+                    {% endif %}
+                    </td>
+
+                    <!-- Usuario -->
+                    <td>
+                    {{ r.Nombre_Completo_Usuario }}
+                    <br>
+                    <small class="text-muted">{{ r.Nombre_Rol }}</small>
+                    </td>
+
+                    <!-- Detalle -->
+                    <td style="max-width:320px;">{{ r.Comentario }}</td>
+
+                    <!-- Ticket -->
+                    <td>
+                        {% if r.FK_ID_Ticket %}
+                        <a href="{{ url_for('ticket_ad.ticket_panel_detail', id_ticket=r.FK_ID_Ticket) }}"
+                            class="fw-bold text-primary text-decoration-none" target="_blank">
+                            #{{ r.FK_ID_Ticket }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    
+                    <!-- Visibilidad -->
+                    <td>
+                        {% if r.Es_Interno %}
+                        <span class="badge bg-warning text-dark" style="font-size: 0.875em;">Interno</span>
+                        {% else %}
+                        <span class="badge bg-primary" style="font-size: 0.875em;">Público</span>
+                        {% endif %}
+                    </td>
+
+                </tr>
                 {% else %}
-                    <span class="badge bg-secondary">
-                    <i class="fas fa-comment me-1"></i>{{ r.Tipo_Evento }}
-                    </span>
-                {% endif %}
-                </td>
-
-                <!-- Usuario -->
-                <td>
-                {{ r.Nombre_Completo_Usuario }}
-                <br>
-                <small class="text-muted">{{ r.Nombre_Rol }}</small>
-                </td>
-
-                <!-- Detalle -->
-                <td style="max-width:320px;">{{ r.Comentario }}</td>
-
-                <!-- Ticket -->
-                <td>
-                    {% if r.FK_ID_Ticket %}
-                    <a href="{{ url_for('admin.ticket_panel_detail', id_ticket=r.FK_ID_Ticket) }}"
-                        class="fw-bold text-primary text-decoration-none" target="_blank">
-                        #{{ r.FK_ID_Ticket }}
-                    </a>
-                    {% else %}
-                    <span class="text-muted">—</span>
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50 mx-auto"></i>
+                    No se encontraron registros de auditoría
+                    {% if filtros.tipo_evento or filtros.fecha_desde or filtros.fecha_hasta %}
+                        con los filtros seleccionados.
+                        <a href="{{ url_for('admin.history') }}" class="ms-1">Limpiar filtros</a>
                     {% endif %}
-                </td>
-                
-                <!-- Visibilidad -->
-                <td>
-                    {% if r.Es_Interno %}
-                    <span class="badge bg-warning text-dark" style="font-size: 0.875em;">Interno</span>
-                    {% else %}
-                    <span class="badge bg-primary" style="font-size: 0.875em;">Público</span>
-                    {% endif %}
-                </td>
-
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="6" class="text-center text-muted py-5">
-                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50 mx-auto"></i>
-                No se encontraron registros de auditoría
-                {% if filtros.tipo_evento or filtros.fecha_desde or filtros.fecha_hasta %}
-                    con los filtros seleccionados.
-                    <a href="{{ url_for('admin.history') }}" class="ms-1">Limpiar filtros</a>
-                {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div><!-- /table-responsive -->
 
-        <!-- ── Pie: contador + paginación ── -->
+        <!--  Pie: contador + paginación  -->
         <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
 
         <small class="text-muted">
@@ -211,7 +218,7 @@
         <nav>
             <ul class="pagination pagination-sm mb-0">
 
-            {# Anterior #}
+            <!-- Anterior -->
             <li class="page-item {% if pagina_actual <= 1 %}disabled{% endif %}">
                 <a class="page-link"
                 href="{{ url_for('admin.history') }}{{ qs({'pagina': pagina_actual - 1}) }}">
@@ -219,7 +226,7 @@
                 </a>
             </li>
 
-            {# Páginas visibles: primera, ventana centrada, última #}
+            <!-- Páginas visibles: primera, ventana centrada, última -->
             {% set rango_ini = [pagina_actual - 2, 1] | max %}
             {% set rango_fin = [pagina_actual + 2, total_paginas] | min %}
 
@@ -253,7 +260,7 @@
                 </li>
             {% endif %}
 
-            {# Siguiente #}
+            <!-- Siguiente -->
             <li class="page-item {% if pagina_actual >= total_paginas %}disabled{% endif %}">
                 <a class="page-link"
                 href="{{ url_for('admin.history') }}{{ qs({'pagina': pagina_actual + 1}) }}">

@@ -1,0 +1,206 @@
+<div class="tab-pane fade tab-content-inner" id="pane-cupo" role="tabpanel">
+
+    {% if cupo_asignado %}
+    <div class="row g-4">
+
+        <!--  Panel lateral: estado del cupo  -->
+        <div class="col-lg-3">
+            <div class="inner-card text-center p-3">
+                <div class="user-avatar" style="background: linear-gradient(135deg,#0ea5e9,#38bdf8);">
+                    <i class="fas fa-school" style="font-size:1.4rem;"></i>
+                </div>
+                <h6 class="fw-bold mb-1 mt-2">{{ cupo_asignado.Nombre_Colegio }}</h6>
+                <p class="text-muted small mb-2">{{ cupo_asignado.Nombre_Jornada }}</p>
+                <span class="badge bg-primary mb-3">{{ cupo_asignado.Nombre_Grado }}</span>
+
+                <hr class="my-2">
+
+                <div class="d-flex justify-content-around text-center mt-2">
+                    <div>
+                        <div class="fw-bold text-success fs-5">{{ cupo_asignado.Cupos_Disponibles }}</div>
+                        <div class="text-muted" style="font-size:.7rem;">Disponibles</div>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-warning fs-5">{{ cupo_asignado.Cupos_Reservados }}</div>
+                        <div class="text-muted" style="font-size:.7rem;">Reservados</div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /col lateral -->
+
+        <!--  Columna principal  -->
+        <div class="col-lg-9">
+
+            <!-- Info del cupo -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-chair"></i> Detalle del Cupo
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Grado</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Nombre_Grado }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Nivel Educativo</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Nivel_Educativo }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Jornada</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Nombre_Jornada }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Cupos Disponibles</label>
+                            <input type="text" class="form-control form-control-sm text-success fw-bold"
+                                value="{{ cupo_asignado.Cupos_Disponibles }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Cupos Reservados</label>
+                            <input type="text" class="form-control form-control-sm text-warning fw-bold"
+                                value="{{ cupo_asignado.Cupos_Reservados }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info del colegio -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-school"></i> Institución Educativa
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label text-muted small fw-bold">Nombre del Colegio / IED</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Nombre_Colegio }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Código DANE</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Codigo_DANE }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Dirección</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Direccion_Colegio }}" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Barrio</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Nombre_Barrio }}" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Localidad</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Nombre_Localidad }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Teléfono</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Telefono }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Correo Electrónico</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ cupo_asignado.Email }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones: solo si el ticket está abierto -->
+            {% if ticket.Estado_Final == 0 %}
+            <div class="inner-card">
+                <div class="inner-card-head">
+                    <i class="fas fa-sliders"></i> Gestión de la Asignación
+                </div>
+                <div class="inner-card-body">
+
+                    <div class="alert alert-info small mb-4">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Use los botones de abajo para registrar la respuesta del usuario sobre
+                        el cupo propuesto. <strong>Autorizar</strong> cierra el ticket como
+                        Solucionado. <strong>Cancelar</strong> libera el cupo y reactiva
+                        la búsqueda.
+                    </div>
+
+                    <div class="row g-3">
+
+                        <!-- Autorizar -->
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-success mb-2">
+                                        <i class="fas fa-check-circle me-1"></i> Autorizar Asignación
+                                    </h6>
+                                    <p class="small text-muted mb-3">
+                                        El usuario ha confirmado el cupo. El ticket se marcará como
+                                        <strong>Solucionado</strong> y el cupo quedará asignado definitivamente
+                                        al estudiante.
+                                    </p>
+                                    <form method="POST"
+                                        action="{{ url_for('ticket_ad.ticket_autorizar_cupo', id_ticket=ticket.ID_Ticket) }}">
+                                        {{ form_confirmar.csrf_token }}
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Confirmar y Solucionar Ticket
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cancelar -->
+                        <div class="col-md-6">
+                            <div class="card border-danger h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-danger mb-2">
+                                        <i class="fas fa-times-circle me-1"></i> Cancelar Asignación
+                                    </h6>
+                                    <p class="small text-muted mb-3">
+                                        El usuario rechazó el cupo. El cupo quedará liberado y el
+                                        ticket volverá a <strong>Asignación de Cupo</strong> para
+                                        buscar otra opción.
+                                    </p>
+                                    <form method="POST"
+                                        action="{{ url_for('ticket_ad.ticket_cancelar_cupo', id_ticket=ticket.ID_Ticket) }}">
+                                        {{ form_confirmar.csrf_token }}
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times-circle me-1"></i>
+                                                Cancelar y Liberar Cupo
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /row botones -->
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-secondary py-2 small">
+                <i class="fas fa-lock me-1"></i>
+                El ticket está cerrado. No se pueden realizar más acciones sobre el cupo.
+            </div>
+            {% endif %}
+
+        </div><!-- /col principal -->
+    </div><!-- /row -->
+
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <i class="fas fa-search fa-2x mb-3 d-block opacity-50"></i>
+        <p class="mb-0">No hay ningún cupo asignado a este ticket todavía.</p>
+    </div>
+    {% endif %}
+
+</div><!-- /tab cupo -->

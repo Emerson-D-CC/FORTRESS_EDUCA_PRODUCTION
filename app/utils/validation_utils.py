@@ -14,6 +14,7 @@ class regex:
     def formato_email(valor: str) -> bool:
         return bool(re.fullmatch(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,6}){1,2}$", valor.strip()))
 
+
     # NÚMEROS TELEFÓNICOS
     @staticmethod
     def formato_telefono_sin_prefijo_celular(valor: str) -> bool:
@@ -31,7 +32,6 @@ class regex:
     def formato_direccion(valor: str) -> bool:
         # Función que valida las direcciones de Bogotá D.C. con varios regex
         return bool(re.fullmatch(
-            # Expresión regular para validar direcciones en Bogotá D.C.
             r"^(?:(Cl|Cll|Calle|Cra|Kr|Kra|Carrera|Av|Avenida|Tv|Transv|Transversal|Dg|Diag|Diagonal))\.?\s*" \
             r"\d{1,3}[A-Za-z]?(?:\s*Bis)?(?:\s*(Norte|Sur|Este|Oeste|N|S|E|O))?" \
             r"\s*#\s*\d{1,3}[A-Za-z]?(?:\s*[A-Za-z0-9]+)?(?:\s*-\s*\d{1,3}[A-Za-z0-9]*)?" \
@@ -55,9 +55,11 @@ class regex:
             errores.append("\nNo debe contener espacios en blanco.")
         return errores
     
+    
     @staticmethod
     def formato_contraseña_all(contraseña: str) -> bool:
         return bool(re.fullmatch(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\s])[^\s]{10,}$", contraseña.strip()))
+
 
     # CODIGO MFA
     @staticmethod

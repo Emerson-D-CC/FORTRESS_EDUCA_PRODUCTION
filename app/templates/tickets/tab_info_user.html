@@ -1,0 +1,144 @@
+<div class="tab-pane fade tab-content-inner"
+    id="pane-acudiente" role="tabpanel">
+
+    <div class="row g-4">
+
+        <!-- Panel lateral -->
+        <div class="col-lg-3">
+            <div class="inner-card text-center p-3">
+                <div class="user-avatar" style="background: linear-gradient(135deg,#16a34a,#4ade80);">
+                    <i class="fas fa-user" style="font-size:1.4rem;"></i>
+                </div>
+                <h6 class="fw-bold mb-1">
+                    {{ acudiente.Primer_Nombre }} {{ acudiente.Primer_Apellido }}
+                </h6>
+                <p class="text-muted small mb-2">Acudiente Registrado</p>
+                <span class="badge bg-success">Cuenta Activa</span>
+            </div>
+        </div>
+
+        <!-- Datos -->
+        <div class="col-lg-9">
+
+            <!-- Identidad -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-id-card"></i> Identidad
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Primer Nombre</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Primer_Nombre }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Segundo Nombre</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Segundo_Nombre or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Primer Apellido</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Primer_Apellido }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Segundo Apellido</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Segundo_Apellido or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Tipo de Documento</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Tipo_Iden }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Número de Documento</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Numero_Documento }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Parentesco con el Menor</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Parentesco }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Fecha de Creación</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Fecha_Creacion }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacto -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-phone"></i> Contacto
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Teléfono / Celular</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Telefono or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Correo Electrónico</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Email }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-map-marker-alt"></i> Ubicación
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Barrio</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Barrio or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Localidad</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Localidad or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Estrato</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Estrato or '—' }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos demográficos -->
+            <div class="inner-card">
+                <div class="inner-card-head">
+                    <i class="fas fa-users"></i> Datos Demográficos
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Género</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Genero or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Grupo Preferencial</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ acudiente.Nombre_Grupo_Preferencial or '—' }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /col datos -->
+    </div><!-- /row -->
+</div><!-- /tab acudiente -->

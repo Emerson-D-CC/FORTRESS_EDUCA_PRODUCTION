@@ -1,0 +1,34 @@
+<nav class="dashboard-sidebar">
+    <div class="brand-section">
+        <i class="fas fa-gear fa-lg"></i>
+        <a href="{{ url_for('technical.dashboard') }}" class="brand-text">TECHNICAL EDUCA</a>
+    </div>
+
+    <div class="d-flex flex-column p-2">
+
+        <!-- Sección de funciones de admin -->
+
+        <a href="{{ url_for('technical.dashboard') }}" class="nav-link{% if active_page == 'dashboard' %} active{% endif %}">
+            <i class="fas fa-chart-pie"></i> <span>Resumen General</span>
+        </a>
+
+        <a href="{{ url_for('technical.cases') }}" class="nav-link{% if active_page == 'cases' %} active{% endif %}">
+            <i class="fas fa-file-alt"></i> <span>Casos Asignados</span>
+        </a>
+
+        <a href="{{ url_for('technical.history') }}" class="nav-link{% if active_page == 'history' %} active{% endif %}">
+            <i class="fas fa-history"></i> <span>Historial</span>
+        </a>
+
+        <a href="{{ url_for('technical.security') }}" class="nav-link{% if active_page == 'security' %} active{% endif %}">
+            <i class="fas fa-lock"></i> <span>Seguridad</span>
+        </a>
+
+    </div>
+
+    <div class="sidebar-footer">
+        <a href="#" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModalTechnical">
+            <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+        </a>
+    </div>
+</nav>

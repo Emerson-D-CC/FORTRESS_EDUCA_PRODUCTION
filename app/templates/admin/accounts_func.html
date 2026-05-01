@@ -1,6 +1,6 @@
 {% extends 'layout_admin.html' %}
 
-{% block titulo %}Funcionarios del Sistema - Fortress Educa{% endblock %}
+{% block titulo %}Funcionarios del Sistema - Admin Educa{% endblock %}
 
 <!-- Titulo del Header -->
 {% set admin_header_title = "Cuentas de Funcionarios Fortress" %}
@@ -13,235 +13,398 @@
         Función: Pagina de visualización especifica de funcionarios (tecnicos y admin)
     -->
 
-    <main class="page-content">
+<!-- ── Macro tab técnicos: preserva estado + pagina_tec ── -->
+{% macro qs_tec(extra={}) %}
+  {%- set params = ["tab=funcionarios"] -%}
+  {%- if filtros.estado is not none -%}{%- set _ = params.append("estado=" ~ filtros.estado) -%}{%- endif -%}
+  {%- for k, v in extra.items() -%}{%- set _ = params.append(k ~ "=" ~ v) -%}{%- endfor -%}
+  ?{{ params | join("&") }}
+{%- endmacro %}
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+<!-- ── Macro tab admins: preserva pagina_adm ── -->
+{% macro qs_adm(extra={}) %}
+  {%- set params = ["tab=admins"] -%}
+  {%- for k, v in extra.items() -%}{%- set _ = params.append(k ~ "=" ~ v) -%}{%- endfor -%}
+  ?{{ params | join("&") }}
+{%- endmacro %}
 
-        <!-- MÉTRICAS -->
-        <div class="row g-4 mb-4">
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-tec);">
-                    <div class="fs-3 fw-bold">{{ metricas.tecnicos | default(0) }}</div>
-                    <div class="stat-label">TÉCNICOS</div>
+<main class="page-content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            </div>
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-danger);">
-                    <div class="fs-3 fw-bold">{{ metricas.tecnicos_desactivados | default(0) }}</div>
-                    <div class="stat-label">TÉCNICOS DESACTIVADOS</div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-admin);">
-                    <div class="fs-3 fw-bold">{{ metricas.administradores | default(0) }}</div>
-                    <div class="stat-label">ADMINISTRADORES</div>
-                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- MÉTRICAS -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-4 col-xl">
+            <div class="stat-card mini" style="border-left: 4px solid var(--color-tec);">
+                <div class="fs-3 fw-bold">{{ metricas.tecnicos | default(0) }}</div>
+                <div class="stat-label">TÉCNICOS</div>
             </div>
         </div>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="stat-card mini" style="border-left: 4px solid var(--color-danger);">
+                <div class="fs-3 fw-bold">{{ metricas.tecnicos_desactivados | default(0) }}</div>
+                <div class="stat-label">TÉCNICOS DESACTIVADOS</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="stat-card mini" style="border-left: 4px solid var(--color-admin);">
+                <div class="fs-3 fw-bold">{{ metricas.administradores | default(0) }}</div>
+                <div class="stat-label">ADMINISTRADORES</div>
+            </div>
+        </div>
+    </div>
 
-        <!-- PESTAÑAS -->
-        <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold {% if tab_activo != 'admins' %}active{% endif %}"
-                        data-bs-toggle="tab" data-bs-target="#funcionarios" type="button">
-                    <i class="fas fa-chalkboard-teacher me-1"></i> Funcionarios Técnicos
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold {% if tab_activo == 'admins' %}active{% endif %}"
-                        data-bs-toggle="tab" data-bs-target="#admins" type="button">
-                    <i class="fas fa-user-shield me-1"></i> Administradores
-                </button>
-            </li>
-        </ul>
+    <!-- PESTAÑAS -->
+    <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold {% if tab_activo != 'admins' %}active{% endif %}"
+                    data-bs-toggle="tab" data-bs-target="#funcionarios" type="button">
+                <i class="fas fa-chalkboard-teacher me-1"></i> Funcionarios Técnicos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold {% if tab_activo == 'admins' %}active{% endif %}"
+                    data-bs-toggle="tab" data-bs-target="#admins" type="button">
+                <i class="fas fa-user-shield me-1"></i> Administradores
+            </button>
+        </li>
+    </ul>
 
-        <div class="tab-content">
+    <div class="tab-content">
 
-            <!-- ── TAB: Técnicos ── -->
-            <div class="tab-pane fade {% if tab_activo != 'admins' %}show active{% endif %}" id="funcionarios">
+        <!-- ══ TAB: Técnicos ══ -->
+        <div class="tab-pane fade {% if tab_activo != 'admins' %}show active{% endif %}" id="funcionarios">
 
-                <!-- Filtros -->
-                <div class="card border-0 shadow-sm p-3 mb-4">
-                    <form method="GET" action="{{ url_for('admin.accounts_func') }}">
-                        <input type="hidden" name="tab" value="funcionarios">
-                        <div class="row g-3 align-items-end">
-
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold">Estado del Técnico</label>
-                                <select class="form-select form-select-sm" name="estado">
-                                    <option value="">Todos los Estados</option>
-                                    <option value="1" {% if filtros.estado == 1 %}selected{% endif %}>Activo</option>
-                                    <option value="0" {% if filtros.estado == 0 %}selected{% endif %}>Desactivado</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4 d-flex gap-2">
-                                <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-filter me-1"></i>Filtrar
-                                </button>
-                                <a href="{{ url_for('admin.accounts_func') }}" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-times me-1"></i>Limpiar
-                                </a>
-                            </div>
-
+            <!-- Filtros -->
+            <div class="card border-0 shadow-sm p-3 mb-4">
+                <form method="GET" action="{{ url_for('admin.accounts_func') }}">
+                    <input type="hidden" name="tab" value="funcionarios">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Estado del Técnico</label>
+                            <select class="form-select form-select-sm" name="estado">
+                                <option value="">Todos los Estados</option>
+                                <option value="1" {% if filtros.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if filtros.estado == 0 %}selected{% endif %}>Desactivado</option>
+                            </select>
                         </div>
-                    </form>
-                </div>
+                        <div class="col-md-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-filter me-1"></i>Filtrar
+                            </button>
+                            <a href="{{ url_for('admin.accounts_func') }}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                <!-- Tabla -->
-                <div class="card border-0 shadow-sm p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0">
-                            <i class="fas fa-table me-2 text-primary"></i>
-                            Funcionarios Técnicos
-                            <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
-                                {{ tecnicos | length }}
-                            </span>
-                        </h5>
+            <!-- Tabla técnicos -->
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-table me-2 text-primary"></i>
+                        Funcionarios Técnicos
+                        <span class="badge bg-secondary ms-2" style="font-size:.75rem;">{{ total_tec }}</span>
+                    </h5>
+
+                    {% if total_tec %}
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('admin.accounts_func_exportar_tecnicos') }}{{ qs_tec({'formato': 'csv'}) }}"
+                           class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                        </a>
+                        <a href="{{ url_for('admin.accounts_func_exportar_tecnicos') }}{{ qs_tec({'formato': 'pdf'}) }}"
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                        </a>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
-                                    <th>Casos Asignados</th>
-                                    <th>Casos Cerrados</th>
-                                    <th>Estado</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for tec in tecnicos %}
-                                <tr>
-                                    <td><strong>{{ tec.ID_Formateado }}</strong></td>
-                                    <td>{{ tec.Nombre_Completo }}</td>
-                                    <td class="small">{{ tec.Email or '—' }}</td>
-                                    <td><span class="badge bg-primary">{{ tec.Casos_Asignados }}</span></td>
-                                    <td><span class="badge bg-success">{{ tec.Casos_Cerrados }}</span></td>
-                                    <td>
-                                        {% if tec.Estado_Usuario == 1 %}
-                                            <span class="badge bg-success">Activo</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Desactivado</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-center">
-                                        {% if tec.Estado_Usuario == 1 %}
-                                            <form method="POST"
-                                                action="{{ url_for('admin.accounts_func_toggle_estado', id_usuario=tec.ID_Usuario) }}"
-                                                style="display:inline;">
-                                                {{ form_toggle.hidden_tag() }}
-                                                <input type="hidden" name="nuevo_estado" value="0">
-                                                <button class="btn btn-outline-danger btn-sm" title="Deshabilitar">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                            </form>
-                                        {% else %}
-                                            <form method="POST"
-                                                action="{{ url_for('admin.accounts_func_toggle_estado', id_usuario=tec.ID_Usuario) }}"
-                                                style="display:inline;">
-                                                {{ form_toggle.hidden_tag() }}
-                                                <input type="hidden" name="nuevo_estado" value="1">
-                                                <button class="btn btn-outline-success btn-sm" title="Habilitar">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted py-5">
-                                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
-                                        
-                                        <p class="mb-0">
-                                            No se encontraron técnicos
-                                            {% if filtros.estado is not none %} 
-                                                con ese estado.
-                                                <a href="{{ url_for('admin.accounts_func') }}" class="ms-1">Limpiar</a>
-                                            {% else %} 
-                                                en el sistema.
-                                            {% endif %}
-                                        </p>
-                                    </td>
-                                </tr>
-                                {% endfor %}                                     
-                            </tbody>
-                        </table>
-                    </div>
-                    {% if tecnicos %}
-                    <small class="text-muted mt-3 d-block">
-                        Mostrando <strong>{{ tecnicos | length }}</strong> técnico{{ 's' if tecnicos | length != 1 else '' }}
-                        {% if filtros.estado is not none %}(con filtros activos){% endif %}
-                    </small>
                     {% endif %}
                 </div>
-            </div>
 
-            <!-- ── TAB: Administradores ── -->
-            <div class="tab-pane fade {% if tab_activo == 'admins' %}show active{% endif %}" id="admins">
-                <div class="card border-0 shadow-sm p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0">
-                            <i class="fas fa-table me-2 text-primary"></i>
-                            Administradores del Sistema
-                            <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
-                                {{ admins | length }}
-                            </span>
-                        </h5>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Credencial</th>
-                                    <th>Nombre</th>
-                                    <th>Último Acceso</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for adm in admins %}
-                                <tr>
-                                    <td><strong>{{ adm.ID_Formateado }}</strong></td>
-                                    <td>{{ adm.Nombre_Completo }}</td>
-                                    <td class="small">
-                                        {{ adm.Ultimo_Login.strftime('%d %b %Y, %I:%M %p') if adm.Ultimo_Login else '—' }}
-                                    </td>
-                                    <td>
-                                        {% if adm.Estado_Usuario == 1 %}
-                                            <span class="badge bg-success">Activo</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Desactivado</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-5">
-                                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
-                                        No hay administradores registrados.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Casos Asignados</th>
+                                <th>Casos Cerrados</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tec in tecnicos %}
+                            <tr>
+                                <td><strong>{{ tec.ID_Formateado }}</strong></td>
+                                <td>{{ tec.Nombre_Completo }}</td>
+                                <td class="small">{{ tec.Email or '—' }}</td>
+                                <td><span class="badge bg-primary">{{ tec.Casos_Asignados }}</span></td>
+                                <td><span class="badge bg-success">{{ tec.Casos_Cerrados }}</span></td>
+                                <td>
+                                    {% if tec.Estado_Usuario == 1 %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Desactivado</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if tec.Estado_Usuario == 1 %}
+                                        <form method="POST"
+                                              action="{{ url_for('admin.accounts_func_toggle_estado', id_usuario=tec.ID_Usuario) }}"
+                                              style="display:inline;">
+                                            {{ form_toggle.hidden_tag() }}
+                                            <input type="hidden" name="nuevo_estado" value="0">
+                                            <button class="btn btn-outline-danger btn-sm" title="Deshabilitar">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="POST"
+                                              action="{{ url_for('admin.accounts_func_toggle_estado', id_usuario=tec.ID_Usuario) }}"
+                                              style="display:inline;">
+                                            {{ form_toggle.hidden_tag() }}
+                                            <input type="hidden" name="nuevo_estado" value="1">
+                                            <button class="btn btn-outline-success btn-sm" title="Habilitar">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                    No se encontraron técnicos
+                                    {% if filtros.estado is not none %}
+                                        con ese estado.
+                                        <a href="{{ url_for('admin.accounts_func') }}" class="ms-1">Limpiar</a>
+                                    {% else %}
+                                        en el sistema.
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
 
-        </div>
-    </main>
+                <!-- Pie: contador + paginador técnicos -->
+                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                    <small class="text-muted">
+                        Mostrando <strong>{{ tecnicos | length }}</strong>
+                        de <strong>{{ total_tec }}</strong>
+                        técnico{{ 's' if total_tec != 1 else '' }}
+                        {% if filtros.estado is not none %}
+                            <span class="badge bg-warning text-dark ms-1">Filtro activo</span>
+                        {% endif %}
+                    </small>
+
+                    {% if total_paginas_tec > 1 %}
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+
+                            <li class="page-item {% if pagina_tec <= 1 %}disabled{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('admin.accounts_func') }}{{ qs_tec({'pagina_tec': pagina_tec - 1}) }}">
+                                    Anterior
+                                </a>
+                            </li>
+
+                            {% set rango_ini = [pagina_tec - 2, 1] | max %}
+                            {% set rango_fin = [pagina_tec + 2, total_paginas_tec] | min %}
+
+                            {% if rango_ini > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="{{ url_for('admin.accounts_func') }}{{ qs_tec({'pagina_tec': 1}) }}">1</a>
+                                </li>
+                                {% if rango_ini > 2 %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                            {% endif %}
+
+                            {% for p in range(rango_ini, rango_fin + 1) %}
+                                <li class="page-item {% if p == pagina_tec %}active{% endif %}">
+                                    <a class="page-link"
+                                       href="{{ url_for('admin.accounts_func') }}{{ qs_tec({'pagina_tec': p}) }}">
+                                        {{ p }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+
+                            {% if rango_fin < total_paginas_tec %}
+                                {% if rango_fin < total_paginas_tec - 1 %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="{{ url_for('admin.accounts_func') }}{{ qs_tec({'pagina_tec': total_paginas_tec}) }}">
+                                        {{ total_paginas_tec }}
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item {% if pagina_tec >= total_paginas_tec %}disabled{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('admin.accounts_func') }}{{ qs_tec({'pagina_tec': pagina_tec + 1}) }}">
+                                    Siguiente
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div><!-- /funcionarios -->
+
+
+        <!-- ══ TAB: Administradores ══ -->
+        <div class="tab-pane fade {% if tab_activo == 'admins' %}show active{% endif %}" id="admins">
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-table me-2 text-primary"></i>
+                        Administradores del Sistema
+                        <span class="badge bg-secondary ms-2" style="font-size:.75rem;">{{ total_adm }}</span>
+                    </h5>
+
+                    {% if total_adm %}
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('admin.accounts_func_exportar_admins') }}{{ qs_adm({'formato': 'csv'}) }}"
+                           class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                        </a>
+                        <a href="{{ url_for('admin.accounts_func_exportar_admins') }}{{ qs_adm({'formato': 'pdf'}) }}"
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Credencial</th>
+                                <th>Nombre</th>
+                                <th>Último Acceso</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for adm in admins %}
+                            <tr>
+                                <td><strong>{{ adm.ID_Formateado }}</strong></td>
+                                <td>{{ adm.Nombre_Completo }}</td>
+                                <td class="small">
+                                    {{ adm.Ultimo_Login.strftime('%d %b %Y, %I:%M %p') if adm.Ultimo_Login else '—' }}
+                                </td>
+                                <td>
+                                    {% if adm.Estado_Usuario == 1 %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Desactivado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                    No hay administradores registrados.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pie: contador + paginador admins -->
+                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                    <small class="text-muted">
+                        Mostrando <strong>{{ admins | length }}</strong>
+                        de <strong>{{ total_adm }}</strong>
+                        administrador{{ 'es' if total_adm != 1 else '' }}
+                    </small>
+
+                    {% if total_paginas_adm > 1 %}
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+
+                            <li class="page-item {% if pagina_adm <= 1 %}disabled{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('admin.accounts_func') }}{{ qs_adm({'pagina_adm': pagina_adm - 1}) }}">
+                                    Anterior
+                                </a>
+                            </li>
+
+                            {% set rango_ini = [pagina_adm - 2, 1] | max %}
+                            {% set rango_fin = [pagina_adm + 2, total_paginas_adm] | min %}
+
+                            {% if rango_ini > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="{{ url_for('admin.accounts_func') }}{{ qs_adm({'pagina_adm': 1}) }}">1</a>
+                                </li>
+                                {% if rango_ini > 2 %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                            {% endif %}
+
+                            {% for p in range(rango_ini, rango_fin + 1) %}
+                                <li class="page-item {% if p == pagina_adm %}active{% endif %}">
+                                    <a class="page-link"
+                                       href="{{ url_for('admin.accounts_func') }}{{ qs_adm({'pagina_adm': p}) }}">
+                                        {{ p }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+
+                            {% if rango_fin < total_paginas_adm %}
+                                {% if rango_fin < total_paginas_adm - 1 %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="{{ url_for('admin.accounts_func') }}{{ qs_adm({'pagina_adm': total_paginas_adm}) }}">
+                                        {{ total_paginas_adm }}
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item {% if pagina_adm >= total_paginas_adm %}disabled{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('admin.accounts_func') }}{{ qs_adm({'pagina_adm': pagina_adm + 1}) }}">
+                                    Siguiente
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div><!-- /admins -->
+
+    </div><!-- /tab-content -->
+</main>
 
 {% endblock %}

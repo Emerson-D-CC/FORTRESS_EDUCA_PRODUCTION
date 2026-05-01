@@ -1,19 +1,22 @@
 from functools import wraps, lru_cache
+# FUNCIONES DE FLASK
 from flask import session, abort, redirect, url_for, flash, make_response
 
 # Conexión con BD
-from app.repositories.utils_repository import sp_obtener_roles, sp_verificar_jti
+from app.repositories.utils_repository import sp_obtener_roles, sp_verificar_jti, sp_verificar_mfa
 
+# FUNCIONES DE FLASK
 from flask_jwt_extended import verify_jwt_in_request, get_jwt, unset_jwt_cookies
 
 
 @lru_cache(maxsize=None)
 def _get_role_id(nombre_rol):
-    """Obtiene y cachea el ID de un rol por su nombre."""
+    """Obtiene y cachea el ID de un rol por su nombre"""
     return sp_obtener_roles(nombre_rol)
 
 
 def login_required(f):
+    """Varifica que allá una sesión activa"""    
     @wraps(f)
     def decorated(*args, **kwargs):
         # Valida firma y expiración del JWT (igual que antes) 
@@ -38,7 +41,7 @@ def login_required(f):
 
 
 def admin_required(f):
-    """Verifica que el usuario sea ADMIN."""
+    """Verifica que el usuario sea ADMIN"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -52,6 +55,26 @@ def admin_required(f):
 
         if session.get('role_id') != admin_id:
             abort(403)
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def mfa_required(f):
+    """Verifica que el usuario tenga el MFA activo y configurado"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("Debe iniciar sesión para continuar", "warning")
+            return redirect(url_for("auth.login_admin"))
+
+        resultado = sp_verificar_mfa(session['user_id'])
+
+        # Si no tiene MFA activo o no tiene secret configurado, redirige
+        if not resultado or \
+           resultado.get("Doble_Factor_Activo") != "ACTIVE" or \
+           not resultado.get("MFA_Secret"):
+            return make_response(redirect(url_for("auth.config_mfa"), 303))
 
         return f(*args, **kwargs)
     return decorated_function

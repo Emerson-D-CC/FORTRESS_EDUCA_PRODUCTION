@@ -1,6 +1,6 @@
 {% extends 'layout_admin.html' %}
 
-{% block titulo %}Cuentas del Sistema - Fortress Educa{% endblock %}
+{% block titulo %}Cuentas del Sistema - Admin Educa{% endblock %}
 
 <!-- Titulo del Header -->
 {% set admin_header_title = "Cuentas del Sistema" %}
@@ -28,30 +28,62 @@
 
         <!-- MÉTRICAS -->
         <div class="row g-4 mb-4">
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary-dark);">
-                    <div class="fs-3 fw-bold">{{ metricas.total_usuarios | default(0) }}</div>
-                    <div class="stat-label">TOTAL USUARIOS</div>
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary-dark);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-secondary bg-opacity-10">
+                            <i class="fas fa-users fa-lg text-dark"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">TOTAL USUARIOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.total_usuarios | default(0) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary);">
-                    <div class="fs-3 fw-bold">{{ metricas.acudientes_con | default(0) }}</div>
-                    <div class="stat-label">ACUDIENTES ACTIVOS</div>
+
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+                            <i class="fas fa-user-pen fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">ACUDIENTES ACTIVOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.acudientes_con | default(0) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-tec);">
-                    <div class="fs-3 fw-bold">{{ metricas.tecnicos_con | default(0) }}</div>
-                    <div class="stat-label">TÉCNICOS ACTIVOS</div>
+
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-text-muted);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-secondary bg-opacity-10">
+                            <i class="fas fa-user-gear fa-lg text-secondary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">TÉCNICOS ACTIVOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.tecnicos_con | default(0) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-admin);">
-                    <div class="fs-3 fw-bold">{{ metricas.administradores_con | default(0) }}</div>
-                    <div class="stat-label">ADMINISTRADORES ACTIVOS</div>
+
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-admin);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-secondary bg-opacity-10">
+                            <i class="fas fa-user-shield fa-lg text-dark"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">ADMINISTRADORES ACTIVOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.administradores_con | default(0) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
 
         <!-- PESTAÑAS -->
@@ -72,7 +104,7 @@
 
         <div class="tab-content">
 
-            <!-- ── TAB 1: Historial de Acceso ── -->
+            <!--  TAB 1: Historial de Acceso  -->
             <div class="tab-pane fade {% if tab_activo != 'acciones' %}show active{% endif %}" id="access_history">
 
                 <!-- Filtros -->
@@ -143,7 +175,30 @@
                                 {{ historial_acceso | length }}
                             </span>
                         </h5>
+
+                        {% if historial_acceso %}
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('admin.accounts_exportar_acceso',
+                                        formato='csv',
+                                        rol=filtros_acceso.rol or '',
+                                        evento=filtros_acceso.evento or '',
+                                        navegador=filtros_acceso.navegador or '') }}"
+                            class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-file-csv me-1"></i> Exportar CSV
+                            </a>
+                            <a href="{{ url_for('admin.accounts_exportar_acceso',
+                                        formato='pdf',
+                                        rol=filtros_acceso.rol or '',
+                                        evento=filtros_acceso.evento or '',
+                                        navegador=filtros_acceso.navegador or '') }}"
+                            class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+                            </a>
+                        </div>
+                        {% endif %}
+
                     </div>
+
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-dark">
@@ -166,9 +221,11 @@
                                         {% if h.Nombre_Rol == 'Admin' %}
                                             <span class="badge bg-dark">{{ h.Nombre_Rol | upper }}</span>
                                         {% elif h.Nombre_Rol == 'Tecnico' %}
-                                            <span class="badge bg-secondary">{{ h.Nombre_Rol | upper }}</span>                                   
+                                            <span class="badge bg-secondary">{{ h.Nombre_Rol | upper }}</span>
+                                        {% elif h.Nombre_Rol == 'Acudiente' %}
+                                            <span class="badge bg-primary">{{ h.Nombre_Rol | upper }}</span>                                                                    
                                         {% else %}
-                                            <span class="badge bg-primary">{{ h.Nombre_Rol | upper }}</span>
+                                            <span class="badge bg-warning">{{ h.Nombre_Rol | upper }}</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -217,7 +274,7 @@
             </div><!-- /access_history -->
 
 
-            <!-- ── TAB 2: Historial de Acciones ── -->
+            <!--  TAB 2: Historial de Acciones  -->
             <div class="tab-pane fade {% if tab_activo == 'acciones' %}show active{% endif %}" id="actions_history">
 
                 <!-- Filtros -->
@@ -275,7 +332,28 @@
                                 {{ historial_acciones | length }}
                             </span>
                         </h5>
+
+                        {% if historial_acciones %}
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('admin.accounts_exportar_acciones',
+                                        formato='csv',
+                                        rol_ac=filtros_acciones.rol or '',
+                                        evento_ac=filtros_acciones.evento or '') }}"
+                            class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-file-csv me-1"></i> Exportar CSV
+                            </a>
+                            <a href="{{ url_for('admin.accounts_exportar_acciones',
+                                        formato='pdf',
+                                        rol_ac=filtros_acciones.rol or '',
+                                        evento_ac=filtros_acciones.evento or '') }}"
+                            class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+                            </a>
+                        </div>
+                        {% endif %}
+
                     </div>
+                    
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-dark">

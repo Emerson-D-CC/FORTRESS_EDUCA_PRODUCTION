@@ -1,0 +1,101 @@
+<!-- #Llamar a layout_public.html -->
+{% extends 'layout_public.html' %}
+
+{% block meta_description %} Acceda a su cuenta en la plataforma de gestión de Fortress Educa. {% endblock %}
+
+{% block titulo %}Iniciar Sesión Tecnicos - Fortress Educa{% endblock %}
+
+<!-- Invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Portal de autenticación para tecnicos
+    -->
+
+    <!-- Sección navbar -->
+    <section id="navbar">
+        <!-- Llamar narvar.html -->
+        {% include 'includes/home_navbar_1.html' %}
+    </section>
+
+    <div class="auth-container fade-in">
+        <div class="text-center mb-4">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style="width:70px; height:70px; background: linear-gradient(135deg, var(--color-primary-dark), var(--color-accent-green));">
+                <i class="fas fa-gear fa-2x text-white"></i>
+            </div>
+            <h3 class="fw-bold" style="color: var(--color-primary-dark);">Bienvenido/a</h3>
+            <p class="text-muted small">Plataforma de Cupos Educativos · Engativá</p>
+        </div>
+
+        <ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab">
+            <li class="nav-item" role="presentation">
+                <span class="nav-link disabled border-0" 
+                    style="color: #2563EB; font-weight: 500; cursor: default; background: transparent;">
+                    <i class="fas fa-user-gear me-1"></i> Tecnico
+                </span>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Login Tecnico / Funcionario -->
+            <div class="tab-pane fade show active" id="pills-technical" role="tabpanel">
+
+                <div class="alert alert-warning text-center small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Acceso restringido a <strong>tecnicos educativos autorizados</strong>.
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.login_technical') }}"> 
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Credencial Institucional</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                            <input type="text" class="form-control" id="username_technical" name="username_technical"
+                                placeholder="ID Tecnico / Credencial" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contraseña Institucional</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Clave de acceso"  autocomplete="new-password">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <a href="{{ url_for('auth.recover_password_code', next='auth.login_technical') }}" class="small text-decoration-none" style="color: var(--color-primary-light);">¿Olvidó
+                            su contraseña?</a>
+                    </div>
+
+                    <!-- Implementación de recaptcha -->
+                    {% if mostrar_recaptcha %}
+                    <div class="mb-3">
+                        <div class="alert alert-warning small py-2">
+                            <i class="fas fa-shield-alt me-1 mx-auto"></i>
+                            Por seguridad, confirme que no es un robot.
+                        </div>
+                        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-dark w-100 btn-lg mt-3" id="btnLoginTechnical">
+                            <i class="fas fa-sign-in-alt me-2"></i>Ingresar
+                        </button>                        
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+
+{% endblock %}

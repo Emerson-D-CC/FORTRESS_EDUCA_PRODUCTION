@@ -1,8 +1,9 @@
+# FUNCIONES DE FLASK
 from flask import session, render_template
 from app.repositories.admin_repository import (
-    sp_dashboard_metricas,
-    sp_cases_listar_todos,
-    sp_dashboard_chart_actividad
+    sp_dashboard_metricas, 
+    sp_cases_listar_todos, 
+    sp_dashboard_chart_actividad,
 )
 
 # Mapa de días en español para el gráfico
@@ -12,10 +13,10 @@ DIAS_ES = {
 }
 
 class Dashboard_Service:
-    """Servicio para la vista de dashboard del admin."""
+    """Servicio para la vista de dashboard del admin"""
 
     def cargar_dashboard(self):
-        """Obtiene las métricas y datos necesarios para el dashboard."""
+        """Obtiene las métricas y datos necesarios para el dashboard"""
 
         # --- Métricas principales ---
         resultado_metricas = sp_dashboard_metricas()

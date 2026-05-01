@@ -1,5 +1,5 @@
-<!-- #Llamar a layout_dashboard.html -->
-{% extends 'layout_dashboard.html' %}
+<!-- #Llamar a layout_aplication.html -->
+{% extends 'layout_aplication.html' %}
 
 {% block titulo %}Solicitud {{ ticket.ID_Ticket }} - Fortress Educa{% endblock %}
 
@@ -11,7 +11,6 @@
 
     <!--
         FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
-        Archivo: ticket_detail.html
         Función: Visualización de la información y seguimiento del ticket creado para la solicitud del cupo.
     -->
 
@@ -282,86 +281,55 @@
 
         <!-- Fila 2: Comentarios + Documentos -->
         <div class="row g-4">
-
+            
             <!-- Comentarios -->
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm p-4 h-100">
-                    <h5 class="fw-bold mb-4">
-                        <i class="fas fa-comments me-2 text-primary"></i>
-                        Comentarios del Proceso
-                    </h5>
+                    <!-- Formulario de nuevo comentario -->
+                    {% if ticket.Estado_Final == 0 %}
+                        <h6 class="fw-semibold text-muted text-uppercase small mb-3">
+                            <i class="fas fa-plus-circle me-1"></i>Agregar Comentario
+                        </h6>
+                        <form method="POST"
+                            action="{{ url_for('aplication.ticket_add_coment', id_ticket=ticket.ID_Ticket) }}"
+                            novalidate>
+                            {{ form_comentario.hidden_tag() }}
 
-                    {% if comentarios %}
-                        <div class="d-flex flex-column gap-3">
-                            {% for com in comentarios %}
-                            <div class="p-3 rounded border bg-light">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <div>
-                                        <span class="fw-semibold">{{ com.Nombre_Usuario }}</span>
-                                        <span class="badge bg-secondary ms-2 small">{{ com.Nombre_Rol }}</span>
-                                    </div>
-                                    <small class="text-muted">
-                                        {{ com.Fecha_Comentario.strftime('%d/%m/%Y %I:%M %p') if com.Fecha_Comentario else '' }}
-                                    </small>
+                            <div class="mb-3">
+                                {{ form_comentario.comentario.label(class="form-label fw-semibold small") }}
+                                {{ form_comentario.comentario(
+                                    class="form-control form-control-sm" + (" is-invalid" if form_comentario.comentario.errors else ""),
+                                    rows="4",
+                                    placeholder="Escribe tu comentario aquí…"
+                                ) }}
+                                {% for error in form_comentario.comentario.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                                <div class="form-text">
+                                    Máx. 3 000 caracteres. Los comentarios son visibles para los funcionarios asignados.
                                 </div>
-                                <p class="mb-0 small">{{ com.Comentario }}</p>
                             </div>
-                            {% endfor %}
-                        </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-paper-plane me-1"></i>Enviar Comentario
+                                </button>
+                            </div>
+                        </form>
                     {% else %}
-                        <div class="text-center text-muted py-5">
-                            <i class="fas fa-comment-slash fa-2x mb-2 d-block mx-auto"></i>
-                            <p class="mb-0">Aún no hay comentarios en esta solicitud.</p>
-                        </div>                     
+                        <h6 class="fw-semibold text-muted text-uppercase small mb-3">
+                            <i class="fas fa-plus-circle me-1"></i>Agregar Comentario
+                        </h6>                    
+                        <div class="alert alert-secondary py-2 small mb-0">
+                            <i class="fas fa-lock me-1"></i>
+                            Esta solicitud está cerrada. No es posible agregar comentarios.
+                        </div>
                     {% endif %}
                 </div>
-            </div>
+            </div>                
 
             <!-- Documentos -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm p-4 h-100">
-                    <h5 class="fw-bold mb-4">
-                        <i class="fas fa-paperclip me-2 text-primary"></i>
-                        Documentos
-                    </h5>
-
-                    <!-- Lista de documentos existentes -->
-                    <h6 class="fw-semibold text-muted text-uppercase small mb-3">Documentos Adjuntos</h6>
-                    {% if documentos %}
-                        <div class="list-group list-group-flush mb-4">
-                            {% for doc in documentos %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    {% set ext = doc.Nombre_Original.rsplit('.', 1)[-1].lower() %}
-                                    {% if ext == 'pdf' %}
-                                        <i class="fas fa-file-pdf text-danger fa-lg"></i>
-                                    {% elif ext in ['jpg', 'jpeg', 'png'] %}
-                                        <i class="fas fa-file-image text-info fa-lg"></i>
-                                    {% else %}
-                                        <i class="fas fa-file text-secondary fa-lg"></i>
-                                    {% endif %}
-                                    <div>
-                                        <span class="fw-semibold small d-block">{{ doc.Nombre_Original }}</span>
-                                        <span class="text-muted" style="font-size: 0.75rem;">
-                                            {{ doc.Nombre_Tipo_Doc }} ·
-                                            {{ doc.Fecha_Subida.strftime('%d/%m/%Y') if doc.Fecha_Subida else '' }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <a href="{{ url_for('aplication.ticket_download_doc', id_ticket=ticket.ID_Ticket, id_doc=doc.ID_Doc_Ticket) }}"
-                                   class="btn btn-outline-primary btn-sm"
-                                   title="Descargar {{ doc.Nombre_Original }}">
-                                    <i class="fas fa-download"></i>
-                                </a>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted small mb-4">No hay documentos adjuntos en esta solicitud.</p>
-                    {% endif %}
-
-                    <hr>
-
+                <div class="card border-0 shadow-sm p-4 h-100">            
                     <!-- Formulario para subir nuevo documento -->
                     <h6 class="fw-semibold text-muted text-uppercase small mb-3">
                         <i class="fas fa-upload me-1"></i>Subir Nuevo Documento
@@ -407,6 +375,104 @@
                     {% endif %}
                 </div>
             </div>
+
+        </div>
+
+
+
+        <div class="row g-4">
+
+            <!-- Comentarios -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-comments me-2 text-primary"></i>
+                        Comentarios del Proceso
+                    </h5>
+
+                    <!-- Lista de comentarios existentes -->
+                    {% if comentarios %}
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            {% for com in comentarios %}
+                            <div class="p-3 rounded border bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <span class="fw-semibold">{{ com.Nombre_Usuario }}</span>
+                                        <span class="badge
+                                            {% if com.Nombre_Rol == 'Acudiente' %}
+                                                bg-primary
+                                            {% elif com.Nombre_Rol == 'Tecnico' %}
+                                                bg-success
+                                            {% else %}
+                                                bg-secondary
+                                            {% endif %}
+                                            ms-2 small">
+                                            {{ com.Nombre_Rol }}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ com.Fecha_Comentario.strftime('%d/%m/%Y %I:%M %p') if com.Fecha_Comentario else '' }}
+                                    </small>
+                                </div>
+                                <p class="mb-0 small">{{ com.Comentario }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4 mb-3">
+                            <i class="fas fa-comment-slash fa-2x mb-2 d-block mx-auto"></i>
+                            <p class="mb-0">Aún no hay comentarios en esta solicitud.</p>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Documentos -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-paperclip me-2 text-primary"></i>
+                        Documentos
+                    </h5>
+
+                    <!-- Lista de documentos existentes -->
+                    <h6 class="fw-semibold text-muted text-uppercase small mb-3">Documentos Adjuntos</h6>
+                    {% if documentos %}
+                        <div class="list-group list-group-flush mb-4">
+                            {% for doc in documentos %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% set ext = doc.Nombre_Original.rsplit('.', 1)[-1].lower() %}
+                                    {% if ext == 'pdf' %}
+                                        <i class="fas fa-file-pdf text-danger fa-lg"></i>
+                                    {% elif ext in ['jpg', 'jpeg', 'png'] %}
+                                        <i class="fas fa-file-image text-info fa-lg"></i>
+                                    {% else %}
+                                        <i class="fas fa-file text-secondary fa-lg"></i>
+                                    {% endif %}
+                                    <div>
+                                        <span class="fw-semibold small d-block">{{ doc.Nombre_Original }}</span>
+                                        <span class="text-muted" style="font-size: 0.75rem;">
+                                            {{ doc.Nombre_Tipo_Doc }} ·
+                                            {{ doc.Fecha_Subida.strftime('%d/%m/%Y') if doc.Fecha_Subida else '' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('aplication.ticket_download_doc', id_ticket=ticket.ID_Ticket, id_doc=doc.ID_Doc_Ticket) }}"
+                                   class="btn btn-outline-primary btn-sm"
+                                   title="Descargar {{ doc.Nombre_Original }}">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small mb-4">No hay documentos adjuntos en esta solicitud.</p>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
 
     </main>

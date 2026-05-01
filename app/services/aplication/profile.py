@@ -5,16 +5,30 @@ from flask import render_template, request, redirect, url_for, flash, session
 from app.utils.database_utils import db
 
 # CONFIGURACIONES LOCALES
-from app.forms.aplication_forms import *
-from app.repositories.aplication_repository import *
+from app.repositories.aplication_repository import (
+    sp_obtener_perfil_acudiente,
+    sp_obtener_estudiantes_por_acudiente,
+    sp_obtener_estratos,
+    sp_obtener_generos,
+    sp_obtener_grupos_preferenciales,
+    sp_obtener_barrios,
+    sp_obtener_grados,
+    sp_obtener_colegios,
+    sp_actualizar_datos_adicionales,
+    sp_actualizar_persona,
+    sp_actualizar_estudiante,
+    sp_verificar_estudiante_acudiente,
+    sp_obtener_estudiante_por_id,
+)
         
+from app.forms.aplication_forms import FormAcudienteDatosEditables, FormEstudianteDatosEditables
 
 # ====================================================================================================================================================
 #                                           PAGINA PROFILE.HTML
 # ====================================================================================================================================================
 
 def _form_opciones_acudiente(form):
-    """Asigna choices a los SelectFields del formulario del acudiente."""
+    """Asigna choices a los SelectFields del formulario del acudiente"""
     form.estrato.choices = (
         [(0, "— Seleccione un Estrato —")] +
         [(e["ID_Estrato"], e["Nombre_Estrato"]) for e in sp_obtener_estratos()]
@@ -34,7 +48,7 @@ def _form_opciones_acudiente(form):
 
 
 def _form_opciones_estudiante(form):
-    """Asigna choices a todos los SelectFields del formulario del estudiante."""
+    """Asigna choices a todos los SelectFields del formulario del estudiante"""
     form.genero.choices = (
         [(0, "— Seleccione un Género —")] +
         [(g["ID_Genero"], g["Nombre_Genero"]) for g in sp_obtener_generos()]
@@ -76,7 +90,7 @@ class Profile_Data_Service:
         _form_opciones_estudiante(form_est)
 
         # Determinar tab activo
-        # Por defecto: acudiente. Si viene ?tab=menor o hay ?estudiante=X → menor.
+        # Por defecto: acudiente. Si viene ?tab=menor o hay ?estudiante=X = menor.
         id_param  = request.args.get("estudiante", type=int)
         tab_param = request.args.get("tab", "")
         active_tab = "menor" if (tab_param == "menor" or id_param) else "acudiente"

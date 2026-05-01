@@ -49,7 +49,7 @@ def sp_auditoria_sesion(id_usuario, ip, evento, navegador):
     )
 
 def sp_registrar_sesion(id_usuario, jti, dispositivo, ip):
-    """Registra o actualiza una sesión activa."""
+    """Registra o actualiza una sesión activa"""
     return db.call_procedure(
         "sp_tbl_sesion_activa_registrar_sesion",
         (id_usuario, jti, dispositivo, ip),
@@ -58,7 +58,7 @@ def sp_registrar_sesion(id_usuario, jti, dispositivo, ip):
 
 # Cerrar sesión
 def sp_cerrar_sesion(jti):
-    """Marca como inactiva una sesión por su JTI."""
+    """Marca como inactiva una sesión por su JTI"""
     return db.call_procedure(
         "sp_tbl_sesion_activa_cerrar_sesion",
         (jti,),
@@ -73,7 +73,7 @@ def sp_cerrar_sesion(jti):
 
 
 def sp_obtener_mfa_secret(id_usuario):
-    """Devuelve el estado y secrets MFA del usuario."""
+    """Devuelve el estado y secrets MFA del usuario"""
     return db.call_procedure(
         "sp_tbl_usuario_obtener_mfa_secret",
         (id_usuario,),
@@ -153,7 +153,7 @@ def sp_registrar_usuario(data):
 # ====================================================================================================================================================
 
 def sp_obtener_email_por_username(username):
-    """Obtiene el email asociado a un usuario (username = correo en este sistema)."""
+    """Obtiene el email asociado a un usuario (username = correo en este sistema)"""
     result = db.call_procedure(
         "sp_usuario_obtener_email",
         (username,),
@@ -163,9 +163,16 @@ def sp_obtener_email_por_username(username):
 
 
 def sp_actualizar_contraseña(username, nuevo_hash, ip, user_agent):
-    """Actualiza el hash y salt de la contraseña del usuario."""
+    """Actualiza el hash y salt de la contraseña del usuario"""
     return db.call_procedure(
         "sp_usuario_recuperar_contraseña",
         (username, nuevo_hash, ip, user_agent),
         commit=False
     )
+    
+
+
+# ====================================================================================================================================================
+#                                           LOGICA DE CHANGE_PASSWORD | PAGINA SECURITY.HTML (USER, TECHNICAL, ADMIN)
+# ====================================================================================================================================================
+

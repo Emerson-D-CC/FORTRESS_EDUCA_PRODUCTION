@@ -1,6 +1,6 @@
 {% extends 'layout_admin.html' %}
 
-{% block titulo %}Fortress Educa - Configuración Admin{% endblock %}
+{% block titulo %}Estatus de Colegios - Admin Educa{% endblock %}
 
 {% set admin_header_title = "Configuración de Colegios" %}
 
@@ -24,7 +24,7 @@
         {% endwith %}
 
         <!-- ===== RESUMEN ESTADÍSTICO ===== -->
-        <!-- DATA: stats → sp_admin_colegios_estadisticas() -->
+        <!-- DATA: stats = sp_admin_colegios_estadisticas() -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-xl-3">
                 <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary);">
@@ -243,7 +243,7 @@
 
     <!-- =====================================================================
         MODAL: AGREGAR COLEGIO
-        Action → POST admin.school_agregar
+        Action = POST admin.school_agregar
         Procesado por School_Status_Service.agregar_colegio()
         ===================================================================== -->
     <div class="modal fade" id="modalAgregarColegio" tabindex="-1" aria-hidden="true">

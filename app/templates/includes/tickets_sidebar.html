@@ -1,0 +1,128 @@
+<!-- SIDEBAR — INFORMACIÓN DEL TICKET -->
+<aside class="col-12 col-lg-4 col-xl-3 sticky-lg-top" style="top: 20px;">
+    <div class="sidebar-card">
+
+        <!-- Cabecera oscura -->
+        <div class="sidebar-head">
+            <p class="ticket-id mb-0">
+                <i class="fas fa-hashtag me-1"></i>{{ ticket.ID_Ticket }}
+            </p>
+            <p class="ticket-title">{{ ticket.Titulo_Ticket }}</p>
+        </div>
+
+        <!-- Información básica -->
+        <div class="sidebar-body">
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="info-label mb-0">Puntaje de Prioridad</span>
+                <div class="puntaje-pill">{{ ticket.Puntaje_Prioridad }}</div>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Fecha de Apertura</span>
+                <span class="info-value">
+                    <i class="fas fa-calendar-plus fa-xs text-muted me-1"></i>
+                    {{ ticket.Fecha_Creacion.strftime('%d/%m/%Y %I:%M %p') if ticket.Fecha_Creacion else '—' }}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Fecha de Cierre</span>
+                <span class="info-value">
+                    <i class="fas fa-calendar-check fa-xs text-muted me-1"></i>
+                    {{ ticket.Fecha_Cierre.strftime('%d/%m/%Y %I:%M %p') if ticket.Fecha_Cierre else 'En proceso' }}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Estado Actual</span>
+                <span>
+                    {% if ticket.Nombre_Estado == 'En Revisión' %}
+                        <span class="badge bg-warning text-dark badge-estado">{{ ticket.Nombre_Estado }}</span>
+                    {% elif ticket.Nombre_Estado in ['Cerrado', 'Archivado'] %}
+                        <span class="badge bg-secondary badge-estado">{{ ticket.Nombre_Estado }}</span>
+                    {% elif ticket.Nombre_Estado == 'Asignación de Cupo' %}
+                        <span class="badge bg-info text-dark badge-estado">{{ ticket.Nombre_Estado }}</span>
+                    {% elif ticket.Nombre_Estado == 'Confirmación Final' %}
+                        <span class="badge bg-success badge-estado">{{ ticket.Nombre_Estado }}</span>
+                    {% else %}
+                        <span class="badge bg-primary badge-estado">{{ ticket.Nombre_Estado }}</span>
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Descripción</span>
+                <div class="desc-box">{{ ticket.Descripcion_Ticket }}</div>
+            </div>
+
+        </div><!-- /sidebar-body -->
+
+        <!-- Técnico asignado -->
+        <div class="divider-label">
+            <i class="fas fa-user-tie me-1"></i> Técnico Asignado
+        </div>
+        <div class="sidebar-body">
+            <div class="info-row">
+                <span class="info-label">ID</span>
+                <span class="info-value">
+                    {{ ticket.ID_Tecnico if ticket.ID_Tecnico else '—' }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Nombre</span>
+                <span class="info-value">
+                    <i class="fas fa-user-circle fa-xs text-muted me-1"></i>
+                    {{ ticket.Nombre_Tecnico if ticket.Nombre_Tecnico else 'Sin asignar' }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Acciones del Técnico (estado + cierre) -->
+        <div class="divider-label">
+            <i class="fas fa-sliders me-1"></i> Acciones del Ticket
+        </div>
+        <div class="sidebar-body">
+            {% if ticket.Estado_Final == 0 %}
+            <form method="POST"
+                action="{{ url_for('ticket_ad.ticket_update_estado', id_ticket=ticket.ID_Ticket) }}">
+                {{ form_estado.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">
+                        Cambiar Estado <span class="text-danger">*</span>
+                    </label>
+                    {{ form_estado.estado(class="form-select form-select-sm") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">Fecha de Cierre</label>
+                    {{ form_estado.fecha_cierre(class="form-control form-control-sm",
+                    placeholder="Se establece al cerrar") }}
+                    <div class="form-text">Déjela vacía si el ticket continúa abierto.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">
+                        Resolución / Cambio de Estado <span class="text-danger">*</span>
+                    </label>
+                    {{ form_estado.resolucion(class="form-control form-control-sm",
+                    rows="3", placeholder="Describe la resolución o el motivo del cierre…") }}
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-secondary py-2 small mb-0">
+                <i class="fas fa-lock me-1"></i>
+                Este ticket está cerrado y no puede modificarse.
+            </div>
+            {% endif %}
+        </div>
+
+    </div><!-- /sidebar-card -->
+</aside><!-- /sidebar -->

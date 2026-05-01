@@ -1,3 +1,4 @@
+# FUNCIONES DE FLASK
 from flask import flash, redirect, render_template, url_for
 
 from app.forms.admin_forms import FormPrioridadAfectacion,FormPrioridadGrupo,FormPrioridadEstrato
@@ -20,20 +21,20 @@ from app.repositories.admin_repository import (
 class Settings_Service:
     """Servicio para la gestión de las tablas de configuración de prioridades"""
 
-    # ── Carga principal ──────────────────────────────────────────────────────
+    #  Carga principal 
 
     def cargar_settings(self):
         return render_template(
             "admin/settings.html",
-            afectaciones   = sp_admin_prioridad_afectaciones_listar(),
-            grupos         = sp_admin_prioridad_grupos_listar(),
-            estratos       = sp_admin_prioridad_estratos_listar(),
+            afectaciones = sp_admin_prioridad_afectaciones_listar(),
+            grupos = sp_admin_prioridad_grupos_listar(),
+            estratos = sp_admin_prioridad_estratos_listar(),
             form_afectacion = FormPrioridadAfectacion(),
-            form_grupo      = FormPrioridadGrupo(),
-            form_estrato    = FormPrioridadEstrato(),
+            form_grupo = FormPrioridadGrupo(),
+            form_estrato = FormPrioridadEstrato(),
         )
 
-    # ── Tipo Afectación ──────────────────────────────────────────────────────
+    #  Tipo Afectación 
 
     def crear_afectacion(self):
         form = FormPrioridadAfectacion()
@@ -67,7 +68,7 @@ class Settings_Service:
         flash("Estado de afectación actualizado.", "info")
         return redirect(url_for("admin.settings"))
 
-    # ── Grupo Preferencial ───────────────────────────────────────────────────
+    #  Grupo Preferencial 
 
     def crear_grupo(self):
         form = FormPrioridadGrupo()
@@ -101,7 +102,7 @@ class Settings_Service:
         flash("Estado de grupo preferencial actualizado.", "info")
         return redirect(url_for("admin.settings"))
 
-    # ── Estrato ──────────────────────────────────────────────────────────────
+    #  Estrato 
 
     def crear_estrato(self):
         form = FormPrioridadEstrato()

@@ -6,7 +6,14 @@ from flask_jwt_extended import set_access_cookies, set_refresh_cookies, unset_jw
 
 # CONFIGURACIONES LOCALES
 from app.forms.auth_forms import LoginAdminForm
-from app.repositories.auth_repository import sp_validar_data_user, sp_registrar_sesion, sp_validar_data_autenticacion, sp_exito_login, sp_obtener_roles, sp_cerrar_sesion
+from app.repositories.auth_repository import (
+    sp_validar_data_user, 
+    sp_registrar_sesion, 
+    sp_validar_data_autenticacion, 
+    sp_exito_login, 
+    sp_obtener_roles, 
+    sp_cerrar_sesion,
+)
 
 # SEGURIDAD
 from app.security.recaptcha_controller import validar_recaptcha

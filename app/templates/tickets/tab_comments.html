@@ -1,0 +1,110 @@
+<!--  TAB 1 — COMENTARIOS -->
+<div class="tab-pane fade show active tab-content-inner"
+    id="pane-comentarios" role="tabpanel">
+
+    <!-- Tabla de comentarios -->
+    <div class="inner-card mb-3">
+        <div class="inner-card-head">
+            <i class="fas fa-list-ul"></i> Historial de Comentarios
+        </div>
+        <div class="inner-card-body p-0">
+            {% if comentarios %}
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-hover mb-0 comments-table">
+                    <thead>
+                        <tr>
+                            <th style="width:140px;">Fecha</th>
+                            <th>Comentario</th>
+                            <th style="width:90px;" class="text-center">Interno</th>
+                            <th style="width:140px;">Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for com in comentarios %}
+                        <tr>
+                            <td class="text-muted" style="font-size:.75rem; white-space:nowrap;">
+                                {{ com.Fecha_Comentario.strftime('%d/%m/%Y') if com.Fecha_Comentario else '—' }}<br>
+                                <span style="font-size:.7rem;">
+                                    {{ com.Fecha_Comentario.strftime('%I:%M %p') if com.Fecha_Comentario else '' }}
+                                </span>
+                            </td>
+                            <td>{{ com.Comentario }}</td>
+                            <td class="text-center">
+                                {% if com.Es_Interno %}
+                                    <span class="badge-interno">
+                                        <i class="fas fa-lock fa-xs me-1"></i>Interno
+                                    </span>
+                                {% else %}
+                                    <span class="badge-publico">
+                                        <i class="fas fa-globe fa-xs me-1"></i>Público
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="fw-semibold" style="font-size:.82rem;">
+                                    {{ com.Nombre_Usuario }}
+                                </span><br>
+                                <span class="badge bg-secondary" style="font-size:.65rem;">
+                                    {{ com.Nombre_Rol }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-comment-slash fa-2x mb-2 d-block opacity-50 mx-auto"></i>
+                <p class="mb-0 small">Aún no hay comentarios en esta solicitud.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div><!-- /tabla comentarios -->
+
+    <!-- Formulario nuevo comentario -->
+    {% if ticket.Estado_Final == 0 %}
+    <div class="inner-card">
+        <div class="inner-card-head">
+            <i class="fas fa-plus-circle"></i> Agregar Comentario
+        </div>
+        <div class="inner-card-body">
+            <form method="POST"
+                action="{{ url_for('ticket_ad.ticket_add_comentario', id_ticket=ticket.ID_Ticket) }}">
+                {{ form_comentario.hidden_tag() }}
+                <div class="row g-3 align-items-end">
+                    <div class="col-12">
+                        <label class="form-label text-muted small fw-bold">
+                            Comentario <span class="text-danger">*</span>
+                        </label>
+                        {{ form_comentario.comentario(
+                            class="form-control",
+                            rows="3",
+                            placeholder="Escribe tu comentario aquí…") }}
+                    </div>
+                    <div class="col-auto d-flex align-items-center gap-2">
+                        <div class="form-check form-switch mb-0">
+                            {{ form_comentario.es_interno(class="form-check-input") }}
+                            <label class="form-check-label small fw-bold" for="{{ form_comentario.es_interno.id }}">
+                                <i class="fas fa-lock fa-xs me-1 text-warning"></i>Interno
+                            </label>
+                        </div>
+                        <div class="form-text m-0">Solo visible para técnicos y administradores</div>
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i> Agregar Comentario
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-secondary py-2 small">
+        <i class="fas fa-lock me-1"></i>
+        Este ticket está cerrado. No es posible agregar comentarios.
+    </div>
+    {% endif %}
+
+</div><!-- /tab comentarios -->

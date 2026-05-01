@@ -1,7 +1,9 @@
+# FUNCIONES DE FLASK
 from flask import Blueprint, render_template, redirect, url_for
+# FUNCIONES DE FLASK
 from flask_wtf.csrf import CSRFError
 
-from app.controllers.auth import AuthController
+from app.controllers.auth_controller import AuthController
 
 # Declarar el Blueprint
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -16,14 +18,22 @@ def login_user():
 def login_admin():
     return controller.login_ad()
 
+@auth_bp.route("/login-tecnios", methods=["GET", "POST"])
+def login_technical():
+    return controller.login_tec()
+
 # LOGOUT
 @auth_bp.route("/logout", methods=["GET", "POST"])
 def logout():
     return controller.logout()
 
-@auth_bp.route("/logout-admin", methods=["GET", "POST"])
+@auth_bp.route("/logout-administrador", methods=["GET", "POST"])
 def logout_ad():
     return controller.logout_ad()
+
+@auth_bp.route("/logout-tecnico", methods=["GET", "POST"])
+def logout_tec():
+    return controller.logout_tec()
 
 # MFA
     # VERIFICAR MFA

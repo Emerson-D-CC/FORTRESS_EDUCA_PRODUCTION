@@ -1,0 +1,266 @@
+{% extends 'layout_technical.html' %}
+
+{% block titulo %}Solicitudes Asignadas - Technical Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set technical_header_title = "Solicitudes de Cupo Asignadas" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina de visualización de tickets asignados al tecnico
+    -->
+
+    <main class="page-content">
+
+        <!-- ===== TARJETAS DE MÉTRICAS ===== -->
+        <div class="row g-3 mb-4">
+
+            <!-- Solicitudes asignadas al técnico -->
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+                            <i class="fas fa-ticket-alt fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">MIS SOLICITUDES</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.solicitudes_asignadas | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- En revisión (scoped al técnico) -->
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-warning);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-warning bg-opacity-10">
+                            <i class="fas fa-hourglass-half fa-lg text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">EN REVISIÓN</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.en_revision | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solucionados (scoped al técnico) -->
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-success);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-success bg-opacity-10">
+                            <i class="fas fa-check-double fa-lg text-success"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">SOLUCIONADOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.solucionados | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cupos disponibles (global, no scoped al técnico) -->
+            <div class="col-6 col-xl-3">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-info);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-info bg-opacity-10">
+                            <i class="fas fa-door-open fa-lg text-info"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">CUPOS DISPONIBLES</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.cupos_disponibles | default(0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== BARRA DE FILTROS ===== -->
+        <!--
+            Filtro por GET: FormFiltroTicketsTecnico(request.args)
+            El servicio aplica _filtrar_tickets_tecnico() + insertion/selection sort.
+        -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-3">
+                <form method="GET" action="{{ url_for('technical.cases') }}" id="formFiltro">
+                    <div class="row g-2 align-items-end">
+
+                        <!-- Estado -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-bold">Estado</label>
+                            {{ form_filtro.estado(class="form-select form-select-sm") }}
+                        </div>
+
+                        <!-- Grado -->
+                        <div class="col-6 col-md-4">
+                            <label class="form-label small fw-bold">Grado</label>
+                            {{ form_filtro.grado(class="form-select form-select-sm") }}
+                        </div>
+
+                        <!-- Tipo de Afectación -->
+                        <div class="col-6 col-md-4">
+                            <label class="form-label small fw-bold">Tipo de Afectación</label>
+                            {{ form_filtro.afectacion(class="form-select form-select-sm") }}
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex gap-2 justify-content-end">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-filter me-1"></i>Filtrar
+                            </button>
+                            <a href="{{ url_for('technical.cases') }}"
+                               class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== TABLA DE TICKETS ===== -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3
+                        d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-table me-2 text-primary"></i>
+                    Mis Solicitudes Asignadas
+                </h6>
+                <small class="text-muted">
+                    Mostrando
+                    <span class="fw-semibold">{{ total_tickets }}</span>
+                    solicitud{{ 'es' if total_tickets != 1 else '' }}
+                    {% if filtros.estado or filtros.grado or filtros.afectacion %}
+                        <span class="badge bg-warning text-dark ms-1">Filtros activos</span>
+                    {% endif %}
+                </small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3" style="width:70px">ID</th>
+                            <th style="width:180px">Nombre del Menor</th>
+                            <th class="d-none d-md-table-cell" style="width:150px">Acudiente</th>
+                            <th class="d-none d-md-table-cell" style="width:100px">Grado</th>
+                            <th class="d-none d-lg-table-cell" style="width:120px">Afectación</th>
+                            <th style="width:150px">Estado</th>
+                            <th style="width:130px">Prioridad</th>
+                            <th class="d-none d-xl-table-cell">Colegio Asignado</th>
+                            <th class="text-center pe-3" style="width:100px">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tickets %}
+                        <tr>
+
+                            <!-- ID con enlace al panel del ticket -->
+                            <td class="ps-3">
+                                <a href="{{ url_for('ticket_ad.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
+                                   class="fw-bold text-primary text-decoration-none"
+                                   target="_blank">
+                                    #{{ t.ID_Ticket }}
+                                </a>
+                            </td>
+
+                            <td class="fw-semibold">{{ t.Nombre_Estudiante }}</td>
+
+                            <td class="d-none d-md-table-cell">{{ t.Nombre_Acudiente }}</td>
+
+                            <td class="d-none d-md-table-cell">{{ t.Nombre_Grado }}</td>
+
+                            <td class="d-none d-lg-table-cell">{{ t.Nombre_Afectacion }}</td>
+
+                            <!-- Badge de estado -->
+                            <td>
+                                {% if t.Nombre_Estado == 'En Revisión' %}
+                                    <span class="badge bg-warning text-dark">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado in ['Rechazado', 'Cancelado a Petición'] %}
+                                    <span class="badge bg-danger">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Solucionado' %}
+                                    <span class="badge bg-success">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Asignación de Cupo' %}
+                                    <span class="badge bg-info text-dark">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Validación de Documentos' %}
+                                    <span class="badge bg-secondary">{{ t.Nombre_Estado }}</span>
+                                {% elif t.Nombre_Estado == 'Pendiente Acción de Usuario' %}
+                                    <span class="badge bg-warning text-dark">{{ t.Nombre_Estado }}</span>
+                                {% else %}
+                                    <span class="badge bg-primary">{{ t.Nombre_Estado }}</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Badge de prioridad según puntaje -->
+                            <td>
+                                {% if t.Puntaje_Prioridad >= 80 %}
+                                    <span class="badge bg-danger">Alta ({{ t.Puntaje_Prioridad }})</span>
+                                {% elif t.Puntaje_Prioridad >= 50 %}
+                                    <span class="badge bg-warning text-dark">Media ({{ t.Puntaje_Prioridad }})</span>
+                                {% else %}
+                                    <span class="badge bg-success">Baja ({{ t.Puntaje_Prioridad }})</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Colegio asignado -->
+                            <td class="d-none d-xl-table-cell">
+                                {% if t.Colegio_Asignado != 'Sin asignar' %}
+                                    <span class="text-success fw-bold">{{ t.Colegio_Asignado }}</span>
+                                {% else %}
+                                    <span class="text-muted">Sin asignar</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Columna "Técnico" omitida: el técnico ya sabe que son sus casos -->
+
+                            <td class="text-center pe-3">
+                                <a href="{{ url_for('ticket_ad.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
+                                   class="btn btn-outline-primary btn-sm"
+                                   target="_blank">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
+                                No se encontraron solicitudes
+                                {% if filtros.estado or filtros.grado or filtros.afectacion %}
+                                    con los filtros seleccionados.
+                                    <a href="{{ url_for('technical.cases') }}" class="ms-1">Limpiar filtros</a>
+                                {% else %}
+                                    asignadas a tu usuario.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white border-top py-2 px-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        {{ total_tickets }} registro{{ 's' if total_tickets != 1 }} mostrado{{ 's' if total_tickets != 1 }}
+                        {% if filtros.estado or filtros.grado or filtros.afectacion %}
+                            · ordenados por fecha de creación (Insertion Sort)
+                        {% else %}
+                            · ordenados por prioridad descendente (Selection Sort)
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock %}

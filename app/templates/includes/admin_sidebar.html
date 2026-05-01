@@ -33,12 +33,15 @@
         <!-- Sub-elementos (igual que antes) -->
         <div class="collapse {% if active_page in ['users', 'staff'] %} show {% endif %}" id="usersSubmenu">
             <div class="d-flex flex-column submenu-container">
+                <a href="{{ url_for('admin.accounts_new') }}" class="nav-link py-1 {% if active_page == 'new_user' %} active{% endif %}">
+                    <i class="fas fa-user-plus"></i> <span>Nuevo Usuario</span>
+                </a>                   
                 <a href="{{ url_for('admin.accounts_user') }}" class="nav-link py-1 {% if active_page == 'users' %} active{% endif %}">
-                    <i class="fas fa-user-friends"></i> <span>Usuarios</span>
+                    <i class="fas fa-user-graduate"></i> <span>Usuarios</span>
                 </a>
                 <a href="{{ url_for('admin.accounts_func') }}" class="nav-link py-1 {% if active_page == 'staff' %} active{% endif %}">
                     <i class="fas fa-user-tie"></i> <span>Funcionarios</span>
-                </a>
+                </a>             
             </div>
         </div>
 
@@ -53,6 +56,10 @@
 
         <a href="{{ url_for('admin.settings') }}" class="nav-link{% if active_page == 'settings' %} active{% endif %}">
             <i class="fas fa-cog"></i> <span>Configuración</span>
+        </a>
+
+        <a href="{{ url_for('admin.security') }}" class="nav-link{% if active_page == 'security' %} active{% endif %}">
+            <i class="fas fa-lock"></i> <span>Seguridad</span>
         </a>
 
     </div>

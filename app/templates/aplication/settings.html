@@ -1,5 +1,5 @@
-<!-- #Llamar a layout_dashboard.html -->
-{% extends 'layout_dashboard.html' %}
+<!-- #Llamar a layout_aplication.html -->
+{% extends 'layout_aplication.html' %}
 
 {% block titulo %}Configuración Usuario - Fortress Educa{% endblock %}
 
@@ -11,7 +11,6 @@
 
     <!--
         FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
-        Archivo: ticket_detail.html
         Función: Visualización de la información y seguimiento del ticket creado para la solicitud del cupo.
     -->
 
@@ -189,7 +188,7 @@
                             <div class="mx-auto" style="max-width: 340px;">
                                 <label class="form-label fw-semibold small text-muted d-block text-start">Contraseña de acceso</label>
                                 <div class="input-group">
-                                    {# Renderizamos el campo con un ID específico para tu función JS #}
+                                    <!-- Renderizamos el campo con un ID específico para tu función JS -->
                                     {{ form_eliminar.contraseña(class="form-control logout-input", id="password_delete", placeholder="Ingresa tu clave") }}
                                     
                                     <button class="btn btn-outline-light border-2 logout-btn-eye" type="button" 

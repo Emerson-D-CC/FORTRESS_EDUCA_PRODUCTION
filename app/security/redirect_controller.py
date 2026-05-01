@@ -1,4 +1,5 @@
-from flask import session, url_for
+# FUNCIONES DE FLASK
+from flask import session, request, url_for
 from app.repositories.utils_repository import sp_obtener_roles
 
 # Cache en memoria para evitar consultas repetidas a BD
@@ -11,15 +12,33 @@ def _get_role_id_cached(nombre_rol: str):
     return _role_id_cache[nombre_rol]
 
 
+def _get_login_url_by_path():
+    if request.path.startswith("/fortress_administrativo"):
+        return url_for("auth.login_admin")
+    if request.path.startswith("/fortress_tecnicos"):
+        return url_for("auth.login_technical")
+    if request.path.startswith("/sistema_cupos"):
+        return url_for("auth.login_user")
+    return None
+
+
 def get_login_url_por_rol(role_id=None) -> str:
-    """Retorna la URL de login correcta según el role_id"""
+    """Retorna la URL de login correcta según el role_id o la ruta actual."""
     
     if role_id is None:
         role_id = session.get("role_id")
 
-    admin_id = _get_role_id_cached("Admin")
+    login_url = _get_login_url_by_path()
+    if login_url:
+        return login_url
 
-    if role_id is not None and admin_id is not None and role_id == admin_id:
-        return url_for("auth.login_admin")
+    admin_id = _get_role_id_cached("Admin")
+    technical_id = _get_role_id_cached("Tecnico")
+
+    if role_id is not None:
+        if technical_id is not None and role_id == technical_id:
+            return url_for("auth.login_technical")
+        if admin_id is not None and role_id == admin_id:
+            return url_for("auth.login_admin")
 
     return url_for("auth.login_user")

@@ -10,7 +10,6 @@
 
     <!--
         FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
-        Archivo: login_admin.html
         Función: Portal de autenticación para administradores
     -->
 
@@ -24,7 +23,7 @@
         <div class="text-center mb-4">
             <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
                 style="width:70px; height:70px; background: linear-gradient(135deg, var(--color-primary-dark), var(--color-accent-green));">
-                <i class="fas fa-graduation-cap fa-2x text-white"></i>
+                <i class="fas fa-shield-alt fa-2x text-white"></i>
             </div>
             <h3 class="fw-bold" style="color: var(--color-primary-dark);">Bienvenido/a</h3>
             <p class="text-muted small">Plataforma de Cupos Educativos · Engativá</p>
@@ -70,7 +69,11 @@
                             </button>
                         </div>
                     </div>
-
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <a href="{{ url_for('auth.recover_password_code', next='auth.login_admin') }}" class="small text-decoration-none" style="color: var(--color-primary-light);">¿Olvidó
+                            su contraseña?</a>
+                    </div>
+                    
                     <!-- Implementación de recaptcha -->
                     {% if mostrar_recaptcha %}
                     <div class="mb-3">
@@ -84,12 +87,8 @@
 
                     <div class="mb-3">
                         <button type="submit" class="btn btn-dark w-100 btn-lg mt-3" id="btnLoginAdmin">
-                            <i class="fas fa-shield-alt me-2"></i>Acceder al Panel Administrativo
+                            <i class="fas fa-sign-in-alt me-2"></i>Ingresar
                         </button>                        
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <a href="{{ url_for('auth.recover_password_code', next='auth.login_admin') }}" class="small text-decoration-none" style="color: var(--color-primary-light);">¿Olvidó
-                            su contraseña?</a>
                     </div>
 
                 </form>

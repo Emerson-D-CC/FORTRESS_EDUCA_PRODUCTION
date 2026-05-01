@@ -31,7 +31,7 @@ class Config_Security:
 class Config_JWT:
     """Variables de Jason Web Token"""
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-dev-secret")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=55)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=24)
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = False
@@ -52,7 +52,7 @@ class Config_Email:
 
 class Config_Session:
     """Variables de configuración del tiempo de una sesión"""
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=55)
     MAX_SESSION_DURATION = timedelta(hours=24)
     SESSION_MAX_ACTIVAS = int(os.getenv("SESSION_MAX_ACTIVAS", 3))
     SESSION_COOKIE_SECURE = False

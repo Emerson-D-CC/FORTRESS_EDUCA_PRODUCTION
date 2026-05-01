@@ -1,16 +1,20 @@
+# FUNCIONES DE FLASK
 from flask_wtf import FlaskForm
 from datetime import date, datetime
 
-from wtforms import StringField, PasswordField, SelectField, BooleanField, DateField
+from wtforms import StringField, PasswordField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
+# UTILIDADES
 from app.utils.validation_utils import regex
+# SECURIDAD
+from app.security.forms_controller import SanitizedForm
 
 # ====================================================================================================================================================
 #                                           PAGINA LOGIN_USER.HTML
 # ====================================================================================================================================================
 
-class LoginUserForm(FlaskForm):
+class LoginUserForm(SanitizedForm):
 
     username = StringField(
         "Usuario",
@@ -28,9 +32,27 @@ class LoginUserForm(FlaskForm):
 #                                           PAGINA LOGIN_ADMIN.HTML
 # ====================================================================================================================================================
 
-class LoginAdminForm(FlaskForm):
+class LoginAdminForm(SanitizedForm):
 
     username_admin = StringField(
+        "Usuario",
+        validators = [DataRequired(), Length(min=3, max=100), Email()]
+    )
+    
+    password = PasswordField(
+        "Contraseña",
+        validators = [DataRequired(), Length(min=6, max=255)]
+    )
+    
+
+
+# ====================================================================================================================================================
+#                                           PAGINA LOGIN_TECHNICAL.HTML
+# ====================================================================================================================================================
+
+class LoginTecForm(SanitizedForm):
+
+    username_technical = StringField(
         "Usuario",
         validators = [DataRequired(), Length(min=3, max=100), Email()]
     )
@@ -47,7 +69,7 @@ class LoginAdminForm(FlaskForm):
 # ====================================================================================================================================================
 
 class FormVerificarMFA(FlaskForm):
-    """Formulario para confirmar un código TOTP al activar o autenticar 2FA."""
+    """Formulario para confirmar un código TOTP al activar o autenticar 2FA"""
 
     codigo_mfa = StringField(
         "Código de verificación",
@@ -96,7 +118,7 @@ def seleccion_valida(form, field):
     if not field.data or field.data == 0 or field.data == "0":
         raise ValidationError("Debe seleccionar una opción válida.")
     
-class RegisterForm(FlaskForm):
+class RegisterForm(SanitizedForm):
     
     # SECCIÓN 1: DATOS DEL ACUDIENTE
         
@@ -371,7 +393,7 @@ class RegisterForm(FlaskForm):
 #                                           PAGINA RECOVER_PASSWORD.HTML
 # ====================================================================================================================================================
 
-class RecuperarcontraseñaForm(FlaskForm):
+class RecuperarcontraseñaForm(SanitizedForm):
     username = StringField(
         "Correo Electrónico",
         validators = [DataRequired(), Length(min=3, max=100), Email()]
@@ -384,7 +406,7 @@ class VerificarCodigoForm(FlaskForm):
     )
 
 
-class NuevacontraseñaForm(FlaskForm):
+class NuevacontraseñaForm(SanitizedForm):
     password = PasswordField(
         "Nueva Contraseña",
         validators = [DataRequired(), Length(min=6, max=255)]
@@ -393,16 +415,6 @@ class NuevacontraseñaForm(FlaskForm):
         "Confirmar Contraseña",
         validators = [DataRequired(), EqualTo("password", message = "Las contraseñas no coinciden.")]
     )
-
-    # def validate_username(self, field):
-    #     """Validadro personalizado para email"""
-    #     valor = field.data.strip() if field.data else ""
-        
-    #     if not valor:
-    #         raise ValidationError("El teléfono no puede estar vacío.")
-        
-    #     if not regex.formato_email(valor):
-    #         raise ValidationError
 
     def validate_password(self, field):
         """Validador personalizado para contraseña"""

@@ -7,7 +7,7 @@
    DESIGN TOKENS — Fuente única de verdad para colores
    ============================================================ */
 :root {
-    /* ── Primarios ── */
+    /*  Primarios  */
     --color-primary: #2563EB;
     /* Azul profesional principal */
     --color-primary-dark: #0F172A;
@@ -17,19 +17,19 @@
     --color-primary-light: #3B82F6;
     /* Hover / estados activos */
 
-    /* ── Secundario (Turquesa) ── */
+    /*  Secundario (Turquesa)  */
     --color-accent-green: #14B8A6;
     /* Turquesa — éxito / acción secundaria */
     --color-accent-teal: #2DD4BF;
     /* Turquesa claro — hover/glow */
 
-    /* ── Acento (Ámbar) ── */
+    /*  Acento (Ámbar)  */
     --color-accent-amber: #F59E0B;
     /* Naranja suave — CTAs / advertencias */
     --color-accent-amber-light: #FCD34D;
     /* Ámbar luminoso */
 
-    /* ── Estados funcionales ── */
+    /*  Estados funcionales  */
     --color-success: #14B8A6;
     --color-success-end: #0D9488;
     --color-warning: #e67e22;
@@ -42,7 +42,7 @@
     --color-admin: #212529;
     --color-tec: #3a5b77;
 
-    /* ── Fondos ── */
+    /*  Fondos  */
     --color-bg-body: #F8FAFC;
     /* Fondo principal — casi blanco azulado */
     --color-bg-card: #FFFFFF;
@@ -51,7 +51,7 @@
     /* Filas alternas / secciones */
 
 
-    /* ── Texto ── */
+    /*  Texto  */
     --color-text-main: #0F172A;
     /* Texto principal — navy oscuro */
     --color-text-muted: #64748B;
@@ -59,11 +59,11 @@
     --color-text-light: #94A3B8;
     /* Texto deshabilitado / placeholders */
 
-    /* ── Bordes ── */
+    /*  Bordes  */
     --color-border: #E2E8F0;
     --color-border-focus: #2563EB;
 
-    /* ── Sombras ── */
+    /*  Sombras  */
     --shadow-soft: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
     --shadow-hover: 0 8px 24px rgba(37, 99, 235, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
     --shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.30);

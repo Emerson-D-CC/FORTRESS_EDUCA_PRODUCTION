@@ -1,3 +1,4 @@
+# FUNCIONES DE FLASK
 from flask import render_template, redirect, url_for, flash, request
 
 from app.forms.admin_forms import FormFiltroColegios, FormAgregarColegio
@@ -9,7 +10,6 @@ from app.repositories.admin_repository import (
     sp_catalogo_barrios_activos,
     sp_catalogo_jornadas_activas,
 )
-
 
     # ------------------------------------------------------------------
     # Helpers de ordenamiento
@@ -31,10 +31,7 @@ def _insertion_sort_por_nombre(colegios: list[dict]) -> list[dict]:
 
 
 def _selection_sort_por_cupos_desc(colegios: list[dict]) -> list[dict]:
-    """
-        Selection Sort descendente sobre la clave 'Total_Cupos'. 
-        Se usa cuando el usuario no aplica ningún filtro, mostrando primero los colegios con más cupos configurados.
-    """
+    """Selection Sort descendente sobre la clave 'Total_Cupos'"""
     lista = list(colegios)
     n = len(lista)
     for i in range(n):
@@ -47,19 +44,7 @@ def _selection_sort_por_cupos_desc(colegios: list[dict]) -> list[dict]:
 
 
 def _filtrar_colegios(colegios: list[dict], nombre: str, estado: str, id_barrio: int, id_jornada: int, jornadas_catalogo: list[dict]) -> list[dict]:
-    """
-    Aplica los filtros de la barra de búsqueda sobre la lista completa.
-    Toda la lógica vive aquí, sin cláusulas WHERE en SQL.
-
-    Parámetros
-    ----------
-    colegios : lista completa devuelta por sp_admin_colegios_listar
-    nombre : texto libre (busca en Nombre_Colegio y Codigo_DANE)
-    estado : "1", "0" o "" (todos)
-    id_barrio : ID del barrio o 0 (todos)
-    id_jornada : ID de la jornada o 0 (todos)
-    jornadas_catalogo : lista [{ID_Jornada, Nombre_Jornada}] para resolver nombre
-    """
+    """Aplica los filtros de la barra de búsqueda sobre la lista completa"""
     resultado = colegios
 
     # Filtro por nombre / DANE (búsqueda parcial, insensible a mayúsculas)
@@ -104,14 +89,7 @@ class School_Status_Service:
 
     # Cargar listado con filtros
     def listar_colegios(self):
-        """
-        Carga la página school_status.html con filtros y estadísticas.
-        Flujo:
-          1. Cargar catálogos para poblar los SelectField del formulario.
-          2. Obtener TODOS los colegios desde la BD (sin filtros SQL).
-          3. Aplicar filtros y ordenamiento en Python.
-          4. Renderizar template con los datos ya filtrados.
-        """
+        """Carga la página school_status.html con filtros y estadísticas """
         # --- Catálogos ---
         barrios = sp_catalogo_barrios_activos()
         jornadas = sp_catalogo_jornadas_activas()
@@ -145,8 +123,6 @@ class School_Status_Service:
         )
 
         # --- Ordenar:
-        #     · Con filtro activo = insertion sort por nombre (A-Z)
-        #     · Sin filtro        = selection sort por cupos (mayor primero)
         hay_filtro = any([nombre, estado, id_barrio, id_jornada])
         if hay_filtro:
             colegios_ordenados = _insertion_sort_por_nombre(colegios_filtrados)
@@ -164,7 +140,7 @@ class School_Status_Service:
 
     # Agregar nuevo colegio
     def agregar_colegio(self):
-        """Procesa el POST del modal de agregar colegio."""
+        """Procesa el POST del modal de agregar colegio"""
         barrios = sp_catalogo_barrios_activos()
         jornadas = sp_catalogo_jornadas_activas()
 

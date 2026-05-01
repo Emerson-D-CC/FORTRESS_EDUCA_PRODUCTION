@@ -6,8 +6,16 @@ from app.utils.database_utils import db
 from app.utils.password_utils import hashear_contraseña
 
 # CONFIGURACIONES LOCALES
-from app.forms.aplication_forms import *
-from app.repositories.aplication_repository import *
+from app.repositories.aplication_repository import (
+    sp_configuracion_obtener_notificaciones,
+    sp_configuracion_actualizar_notif_email,
+    sp_configuracion_actualizar_notif_navegador,
+    sp_validar_data_user,
+    sp_validar_login,
+    sp_eliminar_cuenta_completa,
+)
+
+from app.forms.aplication_forms import FormNotificacionesEmail, FormNotificacionesNavegador, FormEliminarCuenta
             
 # ====================================================================================================================================================
 #                                           PAGINA SETTINGS.HTML
@@ -51,7 +59,7 @@ class General_Settings_Service:
 # ACTUALIZAR NOTIFICACIONES AL CORREO
 
     def Email_Notif(self):
-        """Procesa el formulario de notificaciones por correo electrónico."""
+        """Procesa el formulario de notificaciones por correo electrónico"""
         
         form_email = FormNotificacionesEmail()
  

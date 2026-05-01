@@ -10,12 +10,12 @@ class MFA_Controller:
 
     @staticmethod
     def generar_secret() -> str:
-        """Genera un nuevo secret TOTP aleatorio (base32)."""
+        """Genera un nuevo secret TOTP aleatorio (base32)"""
         return pyotp.random_base32()
 
     @staticmethod
     def generar_uri(secret: str, username: str) -> str:
-        """Genera el URI otpauth para el QR."""
+        """Genera el URI otpauth para el QR"""
         totp = pyotp.TOTP(secret)
         return totp.provisioning_uri(
             name=username,
@@ -24,7 +24,7 @@ class MFA_Controller:
 
     @staticmethod
     def generar_qr_base64(uri: str) -> str:
-        """Genera imagen QR en base64 para embeber en HTML."""
+        """Genera imagen QR en base64 para embeber en HTML"""
         qr = qrcode.QRCode(box_size=6, border=2)
         qr.add_data(uri)
         qr.make(fit=True)
@@ -45,6 +45,7 @@ class MFA_Controller:
                 codigo = codigo.decode("utf-8")
 
             totp = pyotp.TOTP(secret.strip())
+            
             return totp.verify(codigo.strip(), valid_window=6)
         except Exception as e:
             print(f"[ERROR] verificar_codigo: {e}")

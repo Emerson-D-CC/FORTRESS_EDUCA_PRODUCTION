@@ -1,0 +1,258 @@
+{% extends 'layout_technical.html' %}
+
+{% block titulo %}Panel Administrativo - Technical Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set technical_header_title = "Panel Administrativo" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Pagina de visualización de estadisticas propias del tecnico
+    -->
+
+    <main class="page-content">
+
+        <!-- BANNER DE BIENVENIDA  -->
+        <div class="alert border-0 shadow-sm mb-4 dh-banner" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-gear fa-2x me-3 dh-banner__icon"></i>
+                <div>
+                    <h5 class="alert-heading mb-1 dh-banner__title">
+                        ¡Bienvenido/a, {{ resumen.Nombre_Technical if resumen else 'al Sistema' }}!
+                    </h5>
+                    <p class="mb-0 text-muted small">
+                        Desde este panel puede gestionar las solicitudes asignadas a su usuario
+                        en la localidad de Engativá.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÉTRICAS  -->
+        <div class="row g-4 mb-4">
+
+            <!-- Solicitudes asignadas (Estado_Final = 0) -->
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+                            <i class="fas fa-file-alt fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted fw-bold">SOLICITUDES ASIGNADAS</div>
+                            <div class="h3 fw-bold mb-0">
+                                {{ metricas.solicitudes_asignadas | default(0) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solicitudes solucionadas (Estado_Final = 1) -->
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-accent-green);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-success bg-opacity-10">
+                            <i class="fas fa-school fa-lg text-success"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted fw-bold">SOLICITUDES SOLUCIONADAS</div>
+                            <div class="h3 fw-bold mb-0">
+                                {{ metricas.solicitudes_solucionadas | default(0) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total solicitudes propias -->
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary-dark);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-secondary bg-opacity-10">
+                            <i class="fas fa-users fa-lg text-dark"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted fw-bold">TOTAL SOLICITUDES</div>
+                            <div class="h3 fw-bold mb-0">
+                                {{ metricas.total_solicitudes | default(0) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cupos disponibles Engativá (dato global) -->
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-info);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-info bg-opacity-10">
+                            <i class="fas fa-door-open fa-lg text-info"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted fw-bold">CUPOS DISPONIBLES</div>
+                            <div class="h3 fw-bold mb-0">
+                                {{ metricas.cupos_disponibles_engativa | default(0) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GRÁFICO + SOLICITUDES RECIENTES  -->
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-chart-bar me-2 text-primary"></i>Actividad de Solicitudes
+                        </h5>
+                        <select class="form-select form-select-sm" style="width: auto;" disabled>
+                            <option>Últimos 7 días</option>
+                        </select>
+                    </div>
+                    <canvas id="activityChart" height="250"></canvas>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-clock me-2 text-warning"></i>Últimas Solicitudes
+                    </h5>
+                    <div class="list-group list-group-flush">
+                        {% for s in ultimas_solicitudes %}
+                        <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold small">#{{ s.ID_Ticket }}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">
+                                        {{ s.Nombre_Estudiante }} · {{ s.Nombre_Grado }}
+                                    </div>
+                                </div>
+                                <span class="badge
+                                    {% if s.Nombre_Estado == 'Revisión' %}bg-warning
+                                    {% elif s.Nombre_Estado == 'Asignado' %}bg-success
+                                    {% elif s.Nombre_Estado == 'Lista espera' %}bg-secondary
+                                    {% elif s.Nombre_Estado == 'Pendiente' %}bg-danger
+                                    {% else %}bg-primary{% endif %}">
+                                    {{ s.Nombre_Estado }}
+                                </span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="list-group-item px-0 py-2 border-0">
+                            <div class="text-muted small">No hay solicitudes asignadas</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3 text-center">
+                        <!-- Corregido: apunta a technical.cases, no a admin.cases -->
+                        <a href="{{ url_for('technical.cases') }}" class="btn btn-outline-primary btn-sm">
+                            Ver Todas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ACCIONES RÁPIDAS  -->
+        <h6 class="fw-bold text-muted mt-4 mb-3">Acciones Rápidas del Técnico</h6>
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <a href="{{ url_for('technical.cases') }}"
+                class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark));">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Gestionar Solicitudes</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="#"
+                class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, #f6d365, #e67e22);">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Historial de Casos</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="#"
+                class="card border-0 shadow-sm p-3 text-decoration-none h-100 hover-elevate">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 text-white"
+                            style="background: linear-gradient(135deg, #cb2d3e, #ef473a);">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <span class="text-dark fw-bold small">Configuración</span>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const ctx = document.getElementById('activityChart');
+            if (!ctx) return;
+
+            const labels            = {{ chart_data.labels            | default([]) | tojson }};
+            const nuevasSolicitudes = {{ chart_data.nuevas_solicitudes | default([]) | tojson }};
+            const cuposAsignados    = {{ chart_data.cupos_asignados    | default([]) | tojson }};
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Nuevas Solicitudes',
+                            data: nuevasSolicitudes,
+                            backgroundColor: 'rgba(27, 35, 54)',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Cupos Asignados',
+                            data: cuposAsignados,
+                            backgroundColor: 'rgba(17, 153, 142, 0.7)',
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, precision: 0 },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,18 +1,24 @@
-from datetime import timedelta
+from datetime import timedelta, date
 
 # FUNCIONES DE FLASK
 from flask import render_template, request, redirect, url_for, flash, session, current_app, make_response
 
 # CONFIGURACIONES LOCALES
-from app.forms.auth_forms import *
-from app.repositories.auth_repository import *
-from app.utils.database_utils import db
+from app.forms.auth_forms import RegisterForm
+from app.repositories.auth_repository import (
+    sp_obtener_barrios,
+    sp_obtener_parentesco_acu,
+    sp_obtener_tipos_documento,
+    sp_usuario_existe,
+    sp_registrar_usuario,
+)
 
 # SEGURIDAD
 from app.security.recaptcha_controller import validar_recaptcha
 
 # UTILIDADES
 from app.utils.password_utils import hashear_contraseña
+from app.utils.database_utils import db
 
 # ====================================================================================================================================================
 #                                           PAGINA REGISTER.HTML

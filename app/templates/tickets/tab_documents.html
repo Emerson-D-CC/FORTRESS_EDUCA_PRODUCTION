@@ -1,0 +1,100 @@
+<div class="tab-pane fade tab-content-inner"
+    id="pane-documentos" role="tabpanel">
+
+    <!-- Lista documentos -->
+    <div class="inner-card mb-3">
+        <div class="inner-card-head">
+            <i class="fas fa-folder-open"></i> Documentos Adjuntos
+        </div>
+        <div class="inner-card-body">
+            {% if documentos %}
+                {% for doc in documentos %}
+                {% set ext = doc.Nombre_Original.rsplit('.', 1)[-1].lower() %}
+                <div class="doc-item">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if ext == 'pdf' %}
+                            <i class="fas fa-file-pdf text-danger fa-lg"></i>
+                        {% elif ext in ['jpg', 'jpeg', 'png'] %}
+                            <i class="fas fa-file-image text-info fa-lg"></i>
+                        {% else %}
+                            <i class="fas fa-file text-secondary fa-lg"></i>
+                        {% endif %}
+                        <div>
+                            <span class="fw-semibold" style="font-size:.85rem;">
+                                {{ doc.Nombre_Original }}
+                            </span>
+                            <div class="doc-meta">
+                                {{ doc.Nombre_Tipo_Doc }} ·
+                                {{ doc.Fecha_Subida.strftime('%d/%m/%Y') if doc.Fecha_Subida else '' }}
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('ticket_ad.ticket_download_doc', id_ticket=ticket.ID_Ticket, id_doc=doc.ID_Doc_Ticket) }}"
+                    class="btn btn-outline-primary btn-sm"
+                    title="Descargar {{ doc.Nombre_Original }}">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50 mx-auto"></i>
+                    <p class="mb-0 small">No hay documentos adjuntos en esta solicitud.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Subir documento -->
+    <div class="inner-card">
+        <div class="inner-card-head">
+            <i class="fas fa-upload"></i> Subir Nuevo Documento
+        </div>
+        <div class="inner-card-body">
+            {% if ticket.Estado_Final == 0 %}
+            <form method="POST"
+                action="{{ url_for('ticket_ad.ticket_upload_doc', id_ticket=ticket.ID_Ticket) }}"
+                enctype="multipart/form-data"
+                novalidate>
+                {{ form_doc.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">
+                        Tipo de Documento <span class="text-danger">*</span>
+                    </label>
+                    {{ form_doc.tipo_documento(
+                        class="form-select form-select-sm" +
+                        (" is-invalid" if form_doc.tipo_documento.errors else "")) }}
+                    {% for error in form_doc.tipo_documento.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">
+                        Seleccionar Archivo <span class="text-danger">*</span>
+                    </label>
+                    {{ form_doc.archivo(
+                        class="form-control form-control-sm" +
+                        (" is-invalid" if form_doc.archivo.errors else ""),
+                        accept=".pdf,.jpg,.jpeg,.png") }}
+                    <div class="form-text">PDF, JPG, PNG · Máx. 5 MB</div>
+                    {% for error in form_doc.archivo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-upload me-1"></i> Subir
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-secondary py-2 small mb-0">
+                <i class="fas fa-lock me-1"></i>
+                Esta solicitud está cerrada. No es posible adjuntar nuevos documentos.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div><!-- /tab documentos -->

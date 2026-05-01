@@ -1,0 +1,140 @@
+<div class="tab-pane fade tab-content-inner"
+    id="pane-estudiante" role="tabpanel">
+
+    <div class="row g-4">
+
+        <!-- Panel lateral -->
+        <div class="col-lg-3">
+            <div class="inner-card text-center p-3">
+                <div class="user-avatar" style="background: linear-gradient(135deg,#16a34a,#4ade80);">
+                    <i class="fas fa-child" style="font-size:1.4rem;"></i>
+                </div>
+                <h6 class="fw-bold mb-1">
+                    {{ estudiante.Primer_Nombre }} {{ estudiante.Primer_Apellido }}
+                </h6>
+                <p class="text-muted small mb-2">Estudiante</p>
+                <span class="badge bg-primary small">
+                    {{ estudiante.Nombre_Grado_Proximo or estudiante.Nombre_Grado_Actual }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Datos estudiante -->
+        <div class="col-lg-9">
+
+            <!-- Identificación -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-id-card"></i> Identificación del Menor
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Tipo de Identificación</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Nombre_Tipo_Iden }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Número de Documento</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Numero_Documento }}" readonly>
+                        </div>
+                    </div>
+                    <p class="info-notice mb-0">
+                        <i class="fas fa-lock fa-xs"></i>
+                        El tipo de identificación no puede modificarse una vez registrado.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Nombre completo -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-user"></i> Nombre Completo del Menor
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Primer Nombre</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Primer_Nombre }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Segundo Nombre</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Segundo_Nombre or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Primer Apellido</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Primer_Apellido }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Segundo Apellido</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Segundo_Apellido or '—' }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos demográficos -->
+            <div class="inner-card mb-3">
+                <div class="inner-card-head">
+                    <i class="fas fa-calendar-alt"></i> Datos Demográficos
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Fecha de Nacimiento</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Fecha_Nacimiento }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Edad</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Edad }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Género</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Nombre_Genero or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Grupo Preferencial</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Nombre_Grupo_Preferencial or '—' }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos académicos -->
+            <div class="inner-card">
+                <div class="inner-card-head">
+                    <i class="fas fa-graduation-cap"></i> Datos Académicos
+                </div>
+                <div class="inner-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Último Grado Aprobado</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Nombre_Grado_Actual }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Grado a Cursar</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Nombre_Grado_Proximo or '—' }}" readonly>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold">Última Institución Educativa</label>
+                            <input type="text" class="form-control form-control-sm"
+                                value="{{ estudiante.Nombre_Colegio_Anterior or '—' }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /col datos estudiante -->
+    </div><!-- /row -->
+</div><!-- /tab estudiante -->

@@ -1,15 +1,17 @@
-from flask import session, redirect, url_for, flash, render_template, request
+# FUNCIONES DE FLASK
+from flask import session, redirect, url_for, flash, request
 from app.utils.database_utils import db
 
 from app.repositories.auth_repository import sp_obtener_mfa_secret, sp_guardar_mfa_secret_temp, sp_activar_mfa
+from app.forms.auth_forms  import FormVerificarMFA
 
 # UTILIDADES
 from app.utils.audit_utils import Auditoria_Session
 from app.utils.database_utils import db
-
-from app.security.mfa_controller import MFA_Controller
-from app.forms.auth_forms  import FormVerificarMFA
 from app.utils.response_utils import render_no_cache
+
+# SEGURIDAD
+from app.security.mfa_controller import MFA_Controller
 
 
 class Config_MFA_Service:
@@ -20,9 +22,12 @@ class Config_MFA_Service:
         # =====================================================
         # SOLICITUD GET — accesible tras un login admin exitoso sin MFA activo.
         
+        # Obtener URL de login desde sesión
+        login_url = session.get("mfa_login_url", url_for("auth.login_admin"))
+        
         # Guardia: solo accesible si viene del login con setup pendiente
         if not session.get("mfa_setup_pendiente") or not session.get("user_id"):
-            return redirect(url_for("auth.login_admin"))
+            return redirect(login_url)
 
         id_usuario = session.get("user_id")
         username = session.get("username", "")
@@ -56,7 +61,7 @@ class Config_MFA_Service:
             db.rollback()
             print(f"[ERROR] Setup_MFA (GET): {e}")
             flash("No se pudo generar el QR. Intente nuevamente.", "danger")
-            return redirect(url_for("auth.login_admin"))
+            return redirect(login_url)
 
         form = FormVerificarMFA()
         return render_no_cache("auth/config_mfa.html", form=form)
@@ -68,8 +73,12 @@ class Config_MFA_Service:
         # =====================================================
         # SOLICITUD POST -  Si el código es correcto, activa MFA y redirige al dashboard admin
         
+        # Obtener URL de login desde sesión
+        login_url = session.get("mfa_login_url", url_for("auth.login_admin"))
+
+        
         if not session.get("mfa_setup_pendiente") or not session.get("user_id"):
-            return redirect(url_for("auth.login_admin"))
+            return redirect(login_url)
 
         form = FormVerificarMFA()
         id_usuario = session.get("user_id")
@@ -84,9 +93,9 @@ class Config_MFA_Service:
             data = sp_obtener_mfa_secret(id_usuario)
             if not data:
                 flash("Sesión expirada. Inicie sesión nuevamente.", "danger")
-                return redirect(url_for("auth.login_admin"))
+                return redirect(login_url)
 
-            row        = data[0]
+            row = data[0]
             secret_temp = row.get("MFA_Secret_Temp") or row.get("mfa_secret_temp")
             if isinstance(secret_temp, (bytes, bytearray)):
                 secret_temp = secret_temp.decode("utf-8")
@@ -97,7 +106,7 @@ class Config_MFA_Service:
 
             if not secret_temp:
                 flash("No hay configuración pendiente. Inicie sesión nuevamente.", "danger")
-                return redirect(url_for("auth.login_admin"))
+                return redirect(login_url)
 
             if not MFA_Controller.verificar_codigo(secret_temp, form.codigo_mfa.data.strip()):
                 Auditoria_Session(id_usuario, ip, "MFA_SETUP_FAILED", user_agent)

@@ -6,13 +6,14 @@ from flask import render_template, request, redirect, url_for, flash, session, c
 from flask_mail import Message
 
 # CONFIGURACIONES LOCALES
-from app.forms.auth_forms import *
-from app.repositories.auth_repository import *
-
-# CONFIGURAICONES GLOBALES
-from app.utils.extensions_utils import mail
+from app.forms.auth_forms import RecuperarcontraseñaForm, VerificarCodigoForm, NuevacontraseñaForm
+from app.repositories.auth_repository import (
+    sp_obtener_email_por_username, 
+    sp_actualizar_contraseña,
+)
 
 # UTILIDADES
+from app.utils.extensions_utils import mail
 from app.utils.password_utils import hashear_contraseña
 
 # Permitir solo endpoints válidos para la redirección final de recuperación
@@ -43,7 +44,7 @@ class Password_Recovery_Service:
     #  Solicitar código
     def Password_Recovery(self):
         
-        """GET / POST — el usuario ingresa su correo y recibe el código."""
+        """GET / POST — el usuario ingresa su correo y recibe el código"""
         _set_password_recovery_login_endpoint_from_request()
         login_url = _obtener_url_login_recovery()
         form = RecuperarcontraseñaForm()
@@ -95,7 +96,7 @@ class Password_Recovery_Service:
 
     #  Verificar código
     def Verify_Code(self):
-        """GET / POST — el usuario ingresa el código recibido."""
+        """GET / POST — el usuario ingresa el código recibido"""
         _set_password_recovery_login_endpoint_from_request()
         login_url = _obtener_url_login_recovery()
         form = VerificarCodigoForm()
@@ -178,7 +179,7 @@ class Password_Recovery_Service:
 
     #  Envio Correo
     def _enviar_correo_codigo(self, destinatario: str, codigo: str):
-        """Envía el correo con el código de verificación."""
+        """Envía el correo con el código de verificación"""
         msg = Message(
             subject="Recuperación de contraseña - Fortress Educa",
             recipients=[destinatario]

@@ -1,0 +1,130 @@
+{% extends 'layout_tickets.html' %}
+
+{% block titulo %}Panel Tickets - Fortress Educa{% endblock %}
+
+<!-- Titulo del Header -->
+{% set admin_header_title = "Todas las Solicitudes de Cupo" %}
+
+<!-- invocar el bloque -->
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA - PLATAFORMA DE CUPOS EDUCATIVOS
+        Función: Panel de visualización de toda la información de un ticket. Además, de permitir ver su seguimiento y cerrarlo
+    -->
+
+    <!-- PANEL PRINCIPAL — TABS -->
+    <section class="col-12 col-lg-8 col-xl-9">
+
+        <!-- TABS NAV -->
+        <ul class="nav nav-tabs" id="ticketAdminTabs" role="tablist">
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-comentarios"
+                        data-bs-toggle="tab" data-bs-target="#pane-comentarios"
+                        type="button" role="tab">
+                    <i class="fas fa-comments me-1"></i> Comentarios
+                </button>
+            </li>
+
+            <!-- Asignación: deshabilitado si ya hay cupo asignado -->
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if ticket.FK_ID_Cupo_Asignado %}disabled{% endif %}"
+                        id="tab-asignacion"
+                        {% if not ticket.FK_ID_Cupo_Asignado %}
+                            data-bs-toggle="tab" data-bs-target="#pane-asignacion"
+                        {% endif %}
+                        type="button" role="tab"
+                        {% if ticket.FK_ID_Cupo_Asignado %}
+                            title="Ya existe un cupo asignado a este ticket"
+                            aria-disabled="true"
+                        {% endif %}>
+                    <i class="fas fa-school me-1"></i> Asignación Cupo
+                </button>
+            </li>
+
+            <!-- Info Cupo: solo habilitado si hay cupo asignado -->
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if not ticket.FK_ID_Cupo_Asignado %}disabled{% endif %}"
+                        id="tab-cupo"
+                        {% if ticket.FK_ID_Cupo_Asignado %}
+                            data-bs-toggle="tab" data-bs-target="#pane-cupo"
+                        {% endif %}
+                        type="button" role="tab"
+                        {% if not ticket.FK_ID_Cupo_Asignado %}
+                            title="Se habilitará cuando se asigne un cupo"
+                            aria-disabled="true"
+                        {% endif %}>
+                    <i class="fas fa-graduation-cap me-1"></i> Información Cupo
+                    {% if ticket.FK_ID_Cupo_Asignado %}
+                        <span class="badge bg-primary text-dark ms-1" style="font-size:.7rem;">Asignado</span>
+                    {% endif %}
+                </button>
+            </li>                    
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-acudiente"
+                        data-bs-toggle="tab" data-bs-target="#pane-acudiente"
+                        type="button" role="tab">
+                    <i class="fas fa-user me-1"></i> Info Acudiente
+                </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-estudiante"
+                        data-bs-toggle="tab" data-bs-target="#pane-estudiante"
+                        type="button" role="tab">
+                    <i class="fas fa-child me-1"></i> Info Estudiante
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-documentos"
+                        data-bs-toggle="tab" data-bs-target="#pane-documentos"
+                        type="button" role="tab">
+                    <i class="fas fa-paperclip me-1"></i> Documentos
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <!--  TAB 1 — COMENTARIOS -->
+            {% include 'tickets/tab_comments.html' %}
+
+            <!-- TAB 2 — ASIGNACIÓN DE CUPO -->
+            {% include 'tickets/tab_assignment.html' %}
+
+            <!-- TAB 3 — INFO ACUDIENTE (solo lectura) -->
+            {% include 'tickets/tab_info_user.html' %}
+
+            <!-- TAB 4 — INFO ESTUDIANTE (solo lectura) -->
+            {% include 'tickets/tab_info_student.html' %}
+
+            <!-- TAB 5 — DOCUMENTOS -->
+            {% include 'tickets/tab_documents.html' %}
+
+            <!-- TAB 6 — INFORMACIÓN DEL CUPO ASIGNADO -->
+            {% include 'tickets/tab_assignment_info.html' %}
+
+        </div><!-- /tab-content -->
+        
+    </section><!-- /main-panel -->
+
+    <script>
+        // Activa el tab indicado en ?tab= al cargar la página
+        (function () {
+            const params  = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            // Si viene cupo asignado y no hay ?tab=, abrir tab-cupo automáticamente
+            const tieneCupo = {{ 'true' if ticket.FK_ID_Cupo_Asignado else 'false' }};
+            const tabId = tabParam ? 'tab-' + tabParam : (tieneCupo ? 'tab-cupo' : null);
+            if (tabId) {
+                const tabEl = document.getElementById(tabId);
+                if (tabEl && !tabEl.classList.contains('disabled')) {
+                    new bootstrap.Tab(tabEl).show();
+                }
+            }
+        })();
+    </script>
+
+{% endblock %}

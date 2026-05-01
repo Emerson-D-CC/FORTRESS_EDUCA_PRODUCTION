@@ -1,6 +1,6 @@
 {% extends 'layout_admin.html' %}
 
-{% block titulo %}Todas las Solicitudes - Fortress Educa{% endblock %}
+{% block titulo %}Todas las Solicitudes - Admin Educa{% endblock %}
 
 <!-- Titulo del Header -->
 {% set admin_header_title = "Todas las Solicitudes de Cupo" %}
@@ -13,194 +13,184 @@
         Función: Pagina de visualización global de tickets
     -->
 
+    <!--  Macro: conserva filtros activos en cada URL de paginación/exportar  -->
+    {% macro qs(extra={}) %}
+    {%- set params = [] -%}
+    {%- if filtros.estado     -%}{%- set _ = params.append("estado="     ~ filtros.estado)     -%}{%- endif -%}
+    {%- if filtros.grado      -%}{%- set _ = params.append("grado="      ~ filtros.grado)      -%}{%- endif -%}
+    {%- if filtros.afectacion -%}{%- set _ = params.append("afectacion=" ~ filtros.afectacion) -%}{%- endif -%}
+    {%- for k, v in extra.items() -%}{%- set _ = params.append(k ~ "=" ~ v) -%}{%- endfor -%}
+    {%- if params %}?{{ params | join("&") }}{%- endif -%}
+    {% endmacro %}
+
     <main class="page-content">
 
         <!-- Mensajes flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show small py-2" role="alert">
+                <i class="fas fa-info-circle me-1"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
         {% endwith %}
 
         <!-- TARJETAS DE MÉTRICAS -->
-        <div class="row g-4 mb-4">
-
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini">
-                    <div class="fs-3 fw-bold">
-                        {{ metricas.total_solicitudes | default(0) }}
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-primary);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+                            <i class="fas fa-ticket-alt fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">TOTAL SOLICITUDES</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.total_solicitudes | default(0) }}</div>
+                        </div>
                     </div>
-                    <div class="stat-label">Total Solicitudes</div>
                 </div>
             </div>
-
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini status-pending">
-                    <div class="fs-3 fw-bold">
-                        {{ metricas.en_revision | default(0) }}
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-warning);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-warning bg-opacity-10">
+                            <i class="fas fa-hourglass-half fa-lg text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">EN REVISIÓN</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.en_revision | default(0) }}</div>
+                        </div>
                     </div>
-                    <div class="stat-label">En Revisión</div>
                 </div>
             </div>
-
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-accent-green);">
-                    <div class="fs-3 fw-bold">
-                        {{ metricas.solucionados | default(0) }}
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-success);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-success bg-opacity-10">
+                            <i class="fas fa-check-double fa-lg text-success"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">SOLUCIONADOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.solucionados | default(0) }}</div>
+                        </div>
                     </div>
-                    <div class="stat-label">Solucionados</div>
                 </div>
             </div>
-
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-primary);">
-                    <div class="fs-3 fw-bold">
-                        {{ metricas.cupos_disponibles | default(0) }}
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-info);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-info bg-opacity-10">
+                            <i class="fas fa-door-open fa-lg text-info"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">CUPOS DISPONIBLES</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.cupos_disponibles | default(0) }}</div>
+                        </div>
                     </div>
-                    <div class="stat-label">Cupos Disponibles</div>
                 </div>
             </div>
-
-            <div class="col-6 col-md-4 col-xl">
-                <div class="stat-card mini" style="border-left: 4px solid var(--color-accent-green);">
-                    <div class="fs-3 fw-bold">
-                        {{ metricas.cupos_asignados | default(0) }}
+            <div class="col-6 col-xl">
+                <div class="card shadow-sm h-100" style="border-left: 4px solid var(--color-text-muted);">
+                    <div class="card-body p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-3 p-2 bg-secondary bg-opacity-10">
+                            <i class="fas fa-user-check fa-lg text-secondary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-bold">CUPOS ASIGNADOS</div>
+                            <div class="h3 fw-bold mb-0">{{ metricas.cupos_asignados | default(0) }}</div>
+                        </div>
                     </div>
-                    <div class="stat-label">Cupos Asignados</div>
                 </div>
             </div>
+        </div>
 
-        </div><!-- /metricas -->
+        <!-- BARRA DE FILTROS -->
+        <div class="card border-0 shadow-sm mb-3">
+
+            <div class="card border-0 shadow-sm p-3 mb-4">
+                <form method="GET" action="{{ url_for('admin.cases') }}" id="formFiltro">
+                    
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Estado</label>
+                            {{ form_filtro.estado(class="form-select form-select-sm") }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Grado</label>
+                            {{ form_filtro.grado(class="form-select form-select-sm") }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Tipo de Afectación</label>
+                            {{ form_filtro.afectacion(class="form-select form-select-sm") }}
+                        </div>
 
 
-        <!-- FILTROS -->
-        <div class="card border-0 shadow-sm p-3 mb-4">
-            <form method="GET" action="{{ url_for('admin.cases') }}" id="filtrosForm">
-                <div class="row g-3 align-items-end">
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-filter me-1"></i>Filtrar
+                            </button>
+                            <a href="{{ url_for('admin.cases') }}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
 
-                    {# Filtro: Estado #}
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold" for="filtroEstado">
-                            Filtrar por Estado
-                        </label>
-                        <select class="form-select form-select-sm" id="filtroEstado" name="estado">
-                            <option value="">Todos los estados</option>
-                            {% for est in estados %}
-                            <option value="{{ est.ID_Estado_Ticket }}"
-                                {% if filtros.estado == est.ID_Estado_Ticket %}selected{% endif %}>
-                                {{ est.Nombre_Estado }}
-                            </option>
-                            {% endfor %}
-                        </select>
                     </div>
 
-                    {# Filtro: Grado #}
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold" for="filtroGrado">
-                            Filtrar por Grado
-                        </label>
-                        <select class="form-select form-select-sm" id="filtroGrado" name="grado">
-                            <option value="">Todos los grados</option>
-                            {% for gr in grados %}
-                            <option value="{{ gr.ID_Grado }}"
-                                {% if filtros.grado == gr.ID_Grado %}selected{% endif %}>
-                                {{ gr.Nombre_Grado }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    {# Filtro: Tipo de Afectación #}
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold" for="filtroAfectacion">
-                            Tipo de Afectación
-                        </label>
-                        <select class="form-select form-select-sm" id="filtroAfectacion" name="afectacion">
-                            <option value="">Todas</option>
-                            {% for af in afectaciones %}
-                            <option value="{{ af.ID_Tipo_Afectacion }}"
-                                {% if filtros.afectacion == af.ID_Tipo_Afectacion %}selected{% endif %}>
-                                {{ af.Nombre_Afectacion }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    {# Botones #}
-                    <div class="col-md-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-filter me-1"></i>Filtrar
-                        </button>
-                        {# Limpiar filtros: redirige a la ruta sin params #}
-                        <a href="{{ url_for('admin.cases') }}" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-times me-1"></i>Limpiar
-                        </a>
-                    </div>
-
-                </div>
-            </form>
-        </div> <!-- \filtros -->
-
+                </form>
+            </div>
+        </div>
 
         <!-- TABLA DE TICKETS -->
-        <div class="card border-0 shadow-sm p-4">
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold mb-0">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">
                     <i class="fas fa-table me-2 text-primary"></i>
                     Tabla de Solicitudes de Cupos
-                    {# Contador de resultados #}
-                    <span class="badge bg-secondary ms-2" style="font-size:.75rem;">
-                        {{ tickets | length }}
-                    </span>
-                </h5>
+                    <span class="badge bg-secondary ms-2" style="font-size:.75rem;">{{ total_tickets }}</span>
+                </h6>
+
+                <!-- Botones de exportar (solo si hay registros) -->
+                {% if total_tickets %}
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin.cases_export') }}{{ qs({'formato': 'csv'}) }}"
+                    class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                    </a>
+                    <a href="{{ url_for('admin.cases_export') }}{{ qs({'formato': 'pdf'}) }}"
+                    class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                    </a>
+                </div>
+                {% endif %}
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
-                            <th>Nombre del Menor</th>
-                            <th>Acudiente</th>
-                            <th>Edad</th>
-                            <th>Grado</th>
-                            <th>Afectación</th>
-                            <th>Estado</th>
-                            <th>Prioridad</th>
-                            <th>Colegio Asignado</th>
-                            <th>Técnico</th>
-                            <th class="text-center">Acción</th>
+                            <th class="ps-3" style="width:130px">TICKET</th>
+                            <th style="width:180px">Nombre del Menor</th>
+                            <th class="d-none d-md-table-cell" style="width:100px">Grado</th>
+                            <th class="d-none d-lg-table-cell" style="width:120px">Afectación</th>
+                            <th style="width:150px">Estado</th>
+                            <th style="width:150px">Prioridad</th>
+                            <th class="d-none d-xl-table-cell">Colegio Asignado</th>
+                            <th class="d-none d-xl-table-cell" style="width:130px">Técnico</th>
+                            <th class="text-center pe-3" style="width:100px">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for t in tickets %}
                         <tr>
-
-                            {# ID → enlace al panel del ticket #}
-                            <td>
-                                <a href="{{ url_for('admin.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
+                            <td class="ps-3">
+                                <a href="{{ url_for('ticket_ad.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
                                 class="fw-bold text-primary text-decoration-none" target="_blank">
                                     #{{ t.ID_Ticket }}
                                 </a>
                             </td>
-
-                            <td><strong>{{ t.Nombre_Estudiante }}</strong></td>
-
-                            <td class="small">{{ t.Nombre_Acudiente }}</td>
-
-                            <td class="small">{{ t.Edad_Estudiante }} años</td>
-
-                            <td class="small">{{ t.Nombre_Grado }}</td>
-
-                            <td class="small">{{ t.Nombre_Afectacion }}</td>
-
-                            {# Badge de estado #}
+                            <td class="fw-semibold">{{ t.Nombre_Estudiante }}</td>
+                            <td class="d-none d-md-table-cell">{{ t.Nombre_Grado }}</td>
+                            <td class="d-none d-lg-table-cell">{{ t.Nombre_Afectacion }}</td>
                             <td>
                                 {% if t.Nombre_Estado == 'En Revisión' %}
                                     <span class="badge bg-warning text-dark">{{ t.Nombre_Estado }}</span>
@@ -218,8 +208,6 @@
                                     <span class="badge bg-primary">{{ t.Nombre_Estado }}</span>
                                 {% endif %}
                             </td>
-
-                            {# Badge de prioridad según puntaje #}
                             <td>
                                 {% if t.Puntaje_Prioridad >= 80 %}
                                     <span class="badge bg-danger">Alta ({{ t.Puntaje_Prioridad }})</span>
@@ -229,34 +217,25 @@
                                     <span class="badge bg-success">Baja ({{ t.Puntaje_Prioridad }})</span>
                                 {% endif %}
                             </td>
-
-                            {# Colegio asignado #}
-                            <td>
+                            <td class="d-none d-xl-table-cell">
                                 {% if t.Colegio_Asignado != 'Sin asignar' %}
-                                    <span class="text-success small fw-bold">{{ t.Colegio_Asignado }}</span>
+                                    <span class="text-success fw-bold">{{ t.Colegio_Asignado }}</span>
                                 {% else %}
-                                    <span class="text-muted small">Sin asignar</span>
+                                    <span class="text-muted">Sin asignar</span>
                                 {% endif %}
                             </td>
-
-                            {# Técnico asignado #}
-                            <td class="text-muted small">
-                                {{ t.Nombre_Tecnico }}
-                            </td>
-
-                            {# Botón de acción → ticket_panel.html #}
-                            <td class="text-center">
-                                <a href="{{ url_for('admin.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
+                            <td class="d-none d-xl-table-cell text-muted">{{ t.Nombre_Tecnico }}</td>
+                            <td class="text-center pe-3">
+                                <a href="{{ url_for('ticket_ad.ticket_panel_detail', id_ticket=t.ID_Ticket) }}"
                                 class="btn btn-outline-primary btn-sm" target="_blank">
                                     <i class="fas fa-eye me-1"></i>Ver
                                 </a>
                             </td>
-
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="11" class="text-center text-muted py-5">
-                                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50 mx-auto"></i>
+                            <td colspan="9" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50 mx-auto"></i>
                                 No se encontraron solicitudes
                                 {% if filtros.estado or filtros.grado or filtros.afectacion %}
                                     con los filtros seleccionados.
@@ -266,25 +245,90 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% endfor %}                     
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <!-- Contador de resultados al pie de la tabla -->
-            {% if tickets %}
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <small class="text-muted">
-                    Mostrando <strong>{{ tickets | length }}</strong>
-                    solicitud{{ 'es' if tickets | length != 1 else '' }}
-                    {% if filtros.estado or filtros.grado or filtros.afectacion %}
-                        (con filtros activos)
-                    {% endif %}
-                </small>
-            </div>
-            {% endif %}
+            <!-- PIE: contador + paginador -->
+            <div class="card-footer bg-white border-top py-3 px-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-        </div><!--\tabla -->
+                    <small class="text-muted">
+                        Mostrando <strong>{{ tickets | length }}</strong>
+                        de <strong>{{ total_tickets }}</strong>
+                        solicitud{{ 'es' if total_tickets != 1 else '' }}
+                        {% if filtros.estado or filtros.grado or filtros.afectacion %}
+                            <span class="badge bg-warning text-dark ms-1">Filtros activos</span>
+                            · ordenadas por fecha de creación.
+                        {% else %}
+                            · ordenadas por prioridad descendente.
+                        {% endif %}
+                    </small>
+
+                    <!-- Paginador -->
+                    {% if total_paginas > 1 %}
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+
+                            <!-- Anterior -->
+                            <li class="page-item {% if pagina_actual <= 1 %}disabled{% endif %}">
+                                <a class="page-link"
+                                href="{{ url_for('admin.cases') }}{{ qs({'pagina': pagina_actual - 1}) }}">
+                                    Anterior
+                                </a>
+                            </li>
+
+                            {% set rango_ini = [pagina_actual - 2, 1] | max %}
+                            {% set rango_fin = [pagina_actual + 2, total_paginas] | min %}
+
+                            {% if rango_ini > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                    href="{{ url_for('admin.cases') }}{{ qs({'pagina': 1}) }}">1</a>
+                                </li>
+                                {% if rango_ini > 2 %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                            {% endif %}
+
+                            {% for p in range(rango_ini, rango_fin + 1) %}
+                                <li class="page-item {% if p == pagina_actual %}active{% endif %}">
+                                    <a class="page-link"
+                                    href="{{ url_for('admin.cases') }}{{ qs({'pagina': p}) }}">
+                                        {{ p }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+
+                            {% if rango_fin < total_paginas %}
+                                {% if rango_fin < total_paginas - 1 %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                    href="{{ url_for('admin.cases') }}{{ qs({'pagina': total_paginas}) }}">
+                                        {{ total_paginas }}
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <!-- Siguiente -->
+                            <li class="page-item {% if pagina_actual >= total_paginas %}disabled{% endif %}">
+                                <a class="page-link"
+                                href="{{ url_for('admin.cases') }}{{ qs({'pagina': pagina_actual + 1}) }}">
+                                    Siguiente
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div><!-- /card tabla -->
 
     </main>
 

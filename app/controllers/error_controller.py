@@ -1,3 +1,4 @@
+# FUNCIONES DE FLASK
 from flask import render_template, request
 from werkzeug.exceptions import HTTPException
 
@@ -78,7 +79,7 @@ def get_layout_for_request():
     if path.startswith("/admin"):
         return "layout_admin.html"
     elif path.startswith("/dashboard"):
-        return "layout_dashboard.html"
+        return "layout_aplication.html"
     return "layout_public.html"
 
 

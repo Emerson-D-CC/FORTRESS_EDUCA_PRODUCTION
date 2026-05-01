@@ -1,6 +1,6 @@
 {% extends 'layout_admin.html' %}
 
-{% block titulo %}Fortress Educa - Gestión de Colegio{% endblock %}
+{% block titulo %}Configuración de Colegio - Admin Educa{% endblock %}
 
 <!-- Titulo del Header -->
 {% set admin_header_title = colegio.Nombre_Colegio %}
@@ -35,7 +35,7 @@
     </div>
 
     <!-- CABECERA DEL COLEGIO -->
-    <!-- DATA: colegio → sp_admin_colegio_detalle(id_colegio) -->
+    <!-- DATA: colegio = sp_admin_colegio_detalle(id_colegio) -->
     <div class="card border-0 shadow-sm mb-4"
          style="border-left: 4px solid var(--color-primary) !important;">
         <div class="card-body p-4">
@@ -89,7 +89,7 @@
                     {% endif %}
 
                     <!-- Jornadas activas del colegio -->
-                    <!-- DATA: jornadas_activas → sp_admin_colegio_jornadas_activas() -->
+                    <!-- DATA: jornadas_activas = sp_admin_colegio_jornadas_activas() -->
                     <div class="d-flex gap-1 flex-wrap justify-content-md-end">
                         {% for jornada in jornadas_activas %}
                             {% if jornada.Nombre_Jornada == 'Mañana' %}
@@ -241,8 +241,8 @@
 
                 <div class="row g-3">
                     {% set iconos_jornada = {
-                        'Mañana':        ('fa-sun',           'primary'),
-                        'Tarde':         ('fa-cloud-sun',     'warning'),
+                        'Mañana':        ('fa-sun',           'warning'),
+                        'Tarde':         ('fa-cloud-sun',     'primary'),
                         'Nocturna':      ('fa-moon',          'secondary'),
                         'Única':         ('fa-circle',        'info'),
                         'Completa':      ('fa-check-double',  'success'),
@@ -516,7 +516,7 @@
     <!-- ║  SECCIÓN 4 — ESTADO DEL COLEGIO                     ║ -->
     <!-- ╚══════════════════════════════════════════════════════╝ -->
     <!--
-        FormCambiarEstadoColegio → POST admin.school_config_estado
+        FormCambiarEstadoColegio = POST admin.school_config_estado
         Procesado por School_Config_Service.cambiar_estado()
         Hace toggle sobre Estado_Colegio (sp_admin_colegio_estado_cambiar).
     -->

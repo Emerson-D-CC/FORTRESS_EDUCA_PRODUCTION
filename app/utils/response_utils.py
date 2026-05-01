@@ -1,3 +1,4 @@
+# FUNCIONES DE FLASK
 from flask import make_response, render_template
 
 def render_no_cache(template: str, **ctx):

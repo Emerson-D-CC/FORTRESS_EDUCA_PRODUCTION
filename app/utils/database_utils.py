@@ -22,7 +22,6 @@ class ConnectionDB:
             "password": Config_DB.DB_PASSWORD,
             "database": Config_DB.DB_NAME,
             "connection_timeout": 10, # Timeout de conexión
-            "autocommit": False, # Control explícito de transacciones
             **ssl_args,
             
         }

@@ -5,7 +5,7 @@ from app.utils.database_utils import db
 # ====================================================================================================================================================
 
 def sp_dashboard_resumen_acudiente(id_usuario: int):
-    """Retorna el resumen del panel principal para el acudiente."""
+    """Retorna el resumen del panel principal para el acudiente"""
     resultado = db.call_procedure("sp_tbl_dashboard_resumen_acudiente", (id_usuario,))
     return resultado[0] if resultado else None
 
@@ -30,7 +30,7 @@ def sp_obtener_tiempos_residencia():
 # VERIFICACIONES
 
 def sp_ticket_verificar_activo(id_estudiante, id_usuario):
-    """Retorna True si el estudiante ya tiene un ticket abierto."""
+    """Retorna True si el estudiante ya tiene un ticket abierto"""
     resultado = db.call_procedure(
         "sp_ticket_verificar_activo",
         (id_estudiante, id_usuario)
@@ -66,12 +66,12 @@ def sp_ticket_obtener_ultimo_numero():
 # LISTAS DE TICKETS
 
 def sp_ticket_consultar_por_usuario(id_usuario: int):
-    """Retorna todos los tickets activos del acudiente."""
+    """Retorna todos los tickets activos del acudiente"""
     return db.call_procedure("sp_tbl_ticket_consultar_por_usuario", (id_usuario,)) or []
 
 
 def sp_ticket_cerrado_consultar_por_usuario(id_usuario: int):
-    """Retorna todos los tickets cerrados del acudiente."""
+    """Retorna todos los tickets cerrados del acudiente"""
     return db.call_procedure("sp_tbl_ticket_cerrado_consultar_por_usuario", (id_usuario,)) or []
 
 
@@ -79,28 +79,28 @@ def sp_ticket_cerrado_consultar_por_usuario(id_usuario: int):
 # DATOS PARA LOS DETALLES DEL TICKET
 
 def sp_ticket_consultar_detalle(id_ticket: str, id_usuario: int):
-    """Retorna los datos completos de un ticket, verificando que pertenece al usuario."""
+    """Retorna los datos completos de un ticket, verificando que pertenece al usuario"""
     resultado = db.call_procedure("sp_tbl_ticket_consultar_detalle", (id_ticket, id_usuario))
     return resultado[0] if resultado else None
 
 
 def sp_ticket_comentarios_consultar(id_ticket: str, id_usuario: int):
-    """Retorna los comentarios públicos de un ticket."""
+    """Retorna los comentarios públicos de un ticket"""
     return db.call_procedure("sp_tbl_ticket_comentarios_consultar", (id_ticket, id_usuario)) or []
 
 
 def sp_ticket_documentos_consultar(id_ticket: str, id_usuario: int):
-    """Retorna la lista de documentos de un ticket."""
+    """Retorna la lista de documentos de un ticket"""
     return db.call_procedure("sp_tbl_ticket_documentos_consultar", (id_ticket, id_usuario)) or []
 
 
 def sp_tipo_documento_consultar():
-    """Retorna los tipos de documento activos."""
+    """Retorna los tipos de documento activos"""
     return db.call_procedure("sp_tbl_tipo_documento_consultar", ()) or []
 
 
 def sp_documento_ticket_insertar(id_ticket: str, id_tipo_doc: int, archivo: bytes, nombre_original: str):
-    """Inserta un nuevo documento asociado a un ticket."""
+    """Inserta un nuevo documento asociado a un ticket"""
     db.call_procedure("sp_documento_ticket_insertar", (
         id_ticket,
         id_tipo_doc,
@@ -116,11 +116,18 @@ def sp_documento_comentario_insertar(id_ticket, tipo_evento, id_usuario, comenta
     )
 
 def sp_documento_ticket_descargar(id_doc: int, id_usuario: int):
-    """Retorna el binario y metadata de un documento, verificando pertenencia."""
+    """Retorna el binario y metadata de un documento, verificando pertenencia"""
     resultado = db.call_procedure("sp_tbl_documento_ticket_descargar", (id_doc, id_usuario))
     return resultado[0] if resultado else None
 
+# AGREGAR UN COMENTARIO EN EL TICKET
 
+def sp_comentario_usuario_insertar(id_ticket: str, id_usuario: int, comentario: str):
+    """Inserta un comentario público del usuario en el ticket"""
+    db.call_procedure(
+        "sp_ticket_panel_comentario_insertar",
+        (id_ticket, "Comentario", id_usuario, comentario, 0),
+    )
 
 # ====================================================================================================================================================
 #                                           PAGINA PROFILE.HTML - MI USUARIO
@@ -172,20 +179,20 @@ def sp_actualizar_datos_adicionales(data):
 # PERFIL DE ESTUDIANTES
 
 def sp_obtener_estudiantes_por_acudiente(id_usuario):
-    """Retorna la lista de todos los estudiantes activos del acudiente."""
+    """Retorna la lista de todos los estudiantes activos del acudiente"""
     return db.call_procedure(
         "sp_perfil_estudiantes_por_acudiente", (id_usuario,)
     ) or []
 
 def sp_obtener_estudiante_por_id(id_estudiante, id_usuario):
-    """Retorna los datos de un estudiante específico."""
+    """Retorna los datos de un estudiante específico"""
     resultado = db.call_procedure(
         "sp_perfil_estudiante_por_id", (id_estudiante, id_usuario)
     )
     return resultado[0] if resultado else None
 
 def sp_verificar_estudiante_acudiente(id_acudiente):
-    """Retorna {'total_estudiantes': N} — si N > 0 el acudiente ya tiene al menos uno."""
+    """Retorna {'total_estudiantes': N} — si N > 0 el acudiente ya tiene al menos uno"""
     resultado = db.call_procedure(
         "sp_tbl_estudiante_verificar_por_acudiente", (id_acudiente,)
     )
@@ -224,35 +231,6 @@ def sp_estudiante_existe(num_doc_estudiante, id_usuario):
 # ====================================================================================================================================================
 #                                           PAGINA SECURITY.HTML - SEGURIDAD    
 # ====================================================================================================================================================
-    
-# CONTRASEÑA
- 
-def sp_cambiar_contraseña_perfil(id_usuario, nuevo_hash, ip, user_agent):
-    """Valida la contraseña actual y actualiza a la nueva"""
-    return db.call_procedure(
-        "sp_tbl_usuario_cambiar_contraseña_perfil",
-        (id_usuario, nuevo_hash, ip, user_agent),
-        commit=False
-    )
-
-def sp_validar_data_user(username):
-        return db.call_procedure(
-        "sp_validar_data_user",
-        (username,)
-    )
-        
-
-def sp_validar_data_autenticacion(username):
-    return db.call_procedure(
-        "sp_obtener_datos_autenticacion",
-        (username,)
-    )
-    
-def sp_exito_login(username):
-        return db.call_procedure(
-        "sp_registrar_exito_login",
-        (username,)
-    )
 
         
 # MFA
@@ -289,48 +267,6 @@ def sp_obtener_mfa_secret(id_usuario):
         commit=False
     )
 
-# SISTEMA PARA VALIDAR SESIONES ACTIVAS
-
-def sp_registrar_sesion(id_usuario, jti, dispositivo, ip):
-    """Registra o actualiza una sesión activa"""
-    return db.call_procedure(
-        "sp_tbl_sesion_activa_registrar_sesion",
-        (id_usuario, jti, dispositivo, ip),
-        commit=False
-    )
-
-def sp_listar_sesiones(id_usuario):
-    """Lista las sesiones activas de un usuario"""
-    return db.call_procedure(
-        "sp_tbl_sesion_activa_listar_sesiones",
-        (id_usuario,),
-        commit=False
-    )
-
-def sp_cerrar_sesion(jti):
-    """Marca como inactiva una sesión por su JTI"""
-    return db.call_procedure(
-        "sp_tbl_sesion_activa_cerrar_sesion",
-        (jti,),
-        commit=False
-    )
-
-def sp_cerrar_todas_sesiones(id_usuario, jti_actual):
-    """Cierra todas las sesiones excepto la actual"""
-    return db.call_procedure(
-        "sp_tbl_sesion_activa_cerrar_todas_sesiones",
-        (id_usuario, jti_actual),
-        commit=False
-    )
-
-def sp_verificar_jti(jti):
-    """Verifica si un JTI está activo (para token blacklist)"""
-    return db.call_procedure(
-        "sp_tbl_sesion_activa_verificar_jti",
-        (jti,),
-        commit=False
-    )
-    
     
 
     
@@ -378,4 +314,11 @@ def sp_eliminar_cuenta_completa(id_usuario, ip, user_agent):
         "sp_eliminar_cuenta_completa",
         (id_usuario, ip, user_agent),
         commit=True
+    )
+
+
+def sp_validar_data_user(username):
+        return db.call_procedure(
+        "sp_validar_data_user",
+        (username,)
     )

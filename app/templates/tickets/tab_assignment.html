@@ -1,0 +1,235 @@
+<div class="tab-pane fade tab-content-inner" id="pane-asignacion" role="tabpanel">
+
+    <div class="row g-4">
+
+        <!--  Panel lateral: preferencias del acudiente  -->
+        <div class="col-lg-3">
+            <div class="inner-card">
+                <div class="inner-card-head">
+                    <i class="fas fa-eye"></i> Preferencias del Acudiente
+                </div>
+                <div class="inner-card-body">
+                    <h6 class="fw-bold text-secondary mb-3">
+                        <i class="fas fa-map-marker-alt me-1"></i> Ubicación
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Barrio de Residencia</label>
+                        <input type="text" class="form-control form-control-sm"
+                            value="{{ ticket.Nombre_Barrio }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Tiempo de Residencia</label>
+                        <input type="text" class="form-control form-control-sm"
+                            value="{{ ticket.Nombre_Tiempo or '—' }}" readonly>
+                    </div>
+                    <br>
+                    <h6 class="fw-bold text-secondary mb-3">
+                        <i class="fas fa-school me-1"></i> Institución
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Colegio de Preferencia</label>
+                        <input type="text" class="form-control form-control-sm"
+                            value="{{ ticket.Colegio_Preferencia }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Jornada Preferida</label>
+                        <input type="text" class="form-control form-control-sm"
+                            value="{{ ticket.Nombre_Jornada }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /col lateral -->
+
+        <!-- Columna principal -->
+        <div class="col-lg-9">
+            <div class="inner-card">
+                <div class="inner-card-head">
+                    <i class="fas fa-pen-to-square"></i> Asignación Oficial
+                </div>
+                <div class="inner-card-body">
+
+                    {% if ticket.Estado_Final == 0 %}
+
+                    <!-- ══ PASO 1: BARRIO ══ -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-secondary mb-3">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                Paso 1 — Seleccionar Barrio
+                            </h6>
+                            <p class="text-muted small mb-3">
+                                Solo se listan barrios con al menos un colegio activo.
+                            </p>
+                            <form method="POST"
+                                action="{{ url_for('ticket_ad.ticket_filtrar_cupo', id_ticket=ticket.ID_Ticket) }}">
+                                {{ form_confirmar.csrf_token }}
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-8">
+                                        <label class="form-label small fw-bold">
+                                            Barrio <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="barrio_id" class="form-select form-select-sm">
+                                            <option value="0">-- Seleccione un barrio --</option>
+                                            {% for b in barrios_con_colegios %}
+                                            <option value="{{ b.ID_Barrio }}"
+                                                {% if b.ID_Barrio == barrio_id %}selected{% endif %}>
+                                                {{ b.Nombre_Barrio }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                            <i class="fas fa-filter me-1"></i> Filtrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ══ PASO 2: COLEGIO + JORNADA ══ -->
+                    {% if barrio_id %}
+                        {% if colegios_barrio %}
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-secondary mb-3">
+                                    <i class="fas fa-school me-1"></i>
+                                    Paso 2 — Seleccionar Institución y Jornada
+                                </h6>
+                                <form method="POST"
+                                    action="{{ url_for('ticket_ad.ticket_filtrar_cupo', id_ticket=ticket.ID_Ticket) }}">
+                                    {{ form_confirmar.csrf_token }}
+                                    <!-- Preserva el barrio seleccionado en el paso anterior -->
+                                    <input type="hidden" name="barrio_id" value="{{ barrio_id }}">
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-md-5">
+                                            <label class="form-label small fw-bold">
+                                                Colegio <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="colegio_id" class="form-select form-select-sm">
+                                                <option value="0">-- Seleccione --</option>
+                                                {% for c in colegios_barrio %}
+                                                <option value="{{ c.ID_Colegio }}"
+                                                    {% if c.ID_Colegio == colegio_id %}selected{% endif %}>
+                                                    {{ c.Nombre_Colegio }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">
+                                                Jornada <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="jornada_id" class="form-select form-select-sm">
+                                                <option value="0">-- Seleccione --</option>
+                                                {% for j in jornadas %}
+                                                <option value="{{ j.ID_Jornada }}"
+                                                    {% if j.ID_Jornada == jornada_id %}selected{% endif %}>
+                                                    {{ j.Nombre_Jornada }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                                <i class="fas fa-search me-1"></i> Verificar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning small">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            No hay colegios disponibles en el barrio seleccionado. Elija otro barrio.
+                        </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- ══ PASO 3: RESULTADO + CONFIRMACIÓN ══ -->
+                    {% if barrio_id and colegio_id and jornada_id %}
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-secondary mb-3">
+                                <i class="fas fa-chair me-1"></i>
+                                Paso 3 — Resultado de Verificación
+                            </h6>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Grado a Cursar</label>
+                                <input type="text" class="form-control form-control-sm"
+                                    value="{{ estudiante.Nombre_Grado_Proximo or '—' }}" readonly>
+                            </div>
+
+                            {% if cupo_info %}
+                            <div class="alert alert-success py-2 small">
+                                <i class="fas fa-check-circle me-1"></i>
+                                <strong>¡Cupo disponible!</strong>
+                                Hay <strong>{{ cupo_info.Cupos_Disponibles }}</strong> cupo(s) para esta combinación.
+                            </div>
+                            <div class="alert alert-light border small mb-3">
+                                <strong>Resumen de asignación propuesta:</strong><br>
+                                <i class="fas fa-school fa-xs me-1 text-muted"></i>
+                                Institución: <strong>{{ cupo_info.Nombre_Colegio }}</strong><br>
+                                <i class="fas fa-map-marker-alt fa-xs me-1 text-muted"></i>
+                                Dirección: {{ cupo_info.Direccion_Colegio }}<br>
+                                <i class="fas fa-phone fa-xs me-1 text-muted"></i>
+                                Teléfono: {{ cupo_info.Telefono }}<br>
+                                <i class="fas fa-envelope fa-xs me-1 text-muted"></i>
+                                Correo: {{ cupo_info.Email }}<br>
+                                <i class="fas fa-graduation-cap fa-xs me-1 text-muted"></i>
+                                Grado: {{ cupo_info.Nombre_Grado }}<br>
+                                <i class="fas fa-clock fa-xs me-1 text-muted"></i>
+                                Jornada: {{ cupo_info.Nombre_Jornada }}
+                            </div>
+                            <div class="alert alert-warning py-2 small mb-3">
+                                <i class="fas fa-triangle-exclamation me-1"></i>
+                                Al confirmar, se notificará al usuario y el ticket pasará a
+                                <strong>Pendiente Acción de Usuario</strong>. Si no responde en
+                                <strong>3 días hábiles</strong>, el ticket se rechazará automáticamente.
+                            </div>
+
+                            <!-- POST de confirmación -->
+                            <form method="POST"
+                                action="{{ url_for('ticket_ad.ticket_asignar_cupo', id_ticket=ticket.ID_Ticket) }}">
+                                {{ form_confirmar.csrf_token }}
+                                <input type="hidden" name="id_cupo" value="{{ cupo_info.ID_Cupos }}">
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Confirmar Asignación y Notificar al Usuario
+                                    </button>
+                                </div>
+                            </form>
+
+                            {% else %}
+                            <div class="alert alert-danger py-2 small mb-0">
+                                <i class="fas fa-times-circle me-1"></i>
+                                <strong>Sin cupos disponibles</strong> para la combinación seleccionada.
+                                Pruebe con otro colegio o jornada.
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Colegio Asignado</label>
+                        <input type="text" class="form-control form-control-sm"
+                            value="{{ ticket.Colegio_Asignado or '—' }}" readonly>
+                    </div>
+                    <div class="alert alert-secondary py-2 small mb-0">
+                        <i class="fas fa-lock me-1"></i>
+                        Asignación bloqueada. El ticket está cerrado.
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

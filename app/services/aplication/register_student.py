@@ -5,8 +5,18 @@ from flask import render_template, request, redirect, url_for, flash, session
 from app.utils.database_utils import db
 
 # CONFIGURACIONES LOCALES
-from app.forms.aplication_forms import *
-from app.repositories.aplication_repository import *
+from app.repositories.aplication_repository import (
+    sp_obtener_generos,
+    sp_obtener_grupos_preferenciales,
+    sp_obtener_grados,
+    sp_obtener_colegios,
+    sp_obtener_tipos_identificacion,
+    sp_obtener_parentesco_est,
+    sp_estudiante_existe,
+    sp_registrar_estudiante,
+)
+
+from app.forms.aplication_forms import FormRegistroEstudiante
 
 # ====================================================================================================================================================
 #                                           PAGINA REGISTER_STUDENT.HTML

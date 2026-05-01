@@ -1,3 +1,4 @@
+# FUNCIONES DE FLASK
 from flask import render_template, redirect, url_for, flash, request
 
 from app.forms.admin_forms import FormEditarColegio, FormGuardarJornadas, FormCambiarEstadoColegio
@@ -20,16 +21,7 @@ from app.repositories.admin_repository import (
     # ------------------------------------------------------------------
     
 def _construir_matriz_cupos(cupos_raw: list[dict]) -> dict:
-    """
-    Convierte la lista plana de cupos en una estructura anidada:
-    {
-      niveles_ordenados: ['Preescolar', 'Primaria', ...],
-      grados_por_nivel:  { nivel: [{ ID_Grado, Nombre_Grado }, ...] },
-      jornadas:          [{ ID_Jornada, Nombre_Jornada }, ...],
-      cupos:             { (id_grado, id_jornada): Cupos_Disponibles }
-    }
-    Esto simplifica el renderizado en la plantilla Jinja2.
-    """
+    """Convierte la lista plana de cupos en una estructura anidada"""
     jornadas_vistas = {}
     grados_por_nivel: dict[str, list] = {}
     cupos: dict[tuple, int] = {}
@@ -81,10 +73,7 @@ class School_Config_Service:
 
     # Cargar página de configuración
     def cargar_config(self, id_colegio: int):
-        """
-        Carga school_config.html con todos los datos del colegio:
-        datos generales, jornadas activas y matriz de cupos.
-        """
+        """Carga school_config.html con todos los datos del colegio"""
         colegio = sp_admin_colegio_detalle(id_colegio)
         if not colegio:
             flash("Colegio no encontrado.", "danger")
@@ -130,9 +119,9 @@ class School_Config_Service:
             total_cupos = colegio["Total_Cupos"],
         )
 
-    # ── Guardar datos institucionales ─────────────────────────────────
+    #  Guardar datos institucionales 
     def guardar_datos(self, id_colegio: int):
-        """Procesa el POST de la Sección 1 (datos del colegio)."""
+        """Procesa el POST de la Sección 1 (datos del colegio)"""
         form = FormEditarColegio()
         form.id_barrio.choices = self._cargar_catalogo_barrios_choices()
 
@@ -154,13 +143,9 @@ class School_Config_Service:
 
         return redirect(url_for("admin.school_config", id_colegio=id_colegio))
 
-    # ── Guardar jornadas ─────────────────────────────────────────────
+    #  Guardar jornadas 
     def guardar_jornadas(self, id_colegio: int):
-        """
-        Procesa el POST de la Sección 2 (jornadas).
-        Compara las jornadas actuales con las enviadas y aplica
-        los cambios: agrega las nuevas, quita las removidas.
-        """
+        """POST de la Sección 2 (jornadas). Compara las jornadas actuales con las enviadas y aplica los cambios"""
         form = FormGuardarJornadas()
         form.jornadas_activas.choices = self._cargar_catalogo_jornadas_choices()
 
@@ -185,15 +170,9 @@ class School_Config_Service:
 
         return redirect(url_for("admin.school_config", id_colegio=id_colegio))
 
-    # ── Guardar cupos ────────────────────────────────────────────────
+    #  Guardar cupos 
     def guardar_cupos(self, id_colegio: int):
-        """
-        Procesa el POST de la Sección 3 (cupos).
-        Los campos tienen el formato: cupo_g{id_grado}_j{id_jornada}
-        Se parsean manualmente desde request.form y se persiste
-        cada celda con sp_admin_colegio_cupo_guardar.
-        No usa WTForms porque los campos son completamente dinámicos.
-        """
+        """POST de la Sección 3 (cupos)"""
         errores_guardado = []
 
         for clave, valor in request.form.items():
@@ -201,10 +180,10 @@ class School_Config_Service:
             if not clave.startswith("cupo_g"):
                 continue
             try:
-                # Parsear "cupo_g3_j1" → id_grado=3, id_jornada=1
+                # Parsear "cupo_g3_j1" = id_grado=3, id_jornada=1
                 partes = clave.split("_")     # ['cupo', 'g3', 'j1']
-                id_grado = int(partes[1][1:])   # 'g3' → 3
-                id_jornada = int(partes[2][1:])   # 'j1' → 1
+                id_grado = int(partes[1][1:])   # 'g3' = 3
+                id_jornada = int(partes[2][1:])   # 'j1' = 1
                 cupos = max(0, int(valor or 0))
 
                 sp_admin_colegio_cupo_guardar(id_colegio, id_grado, id_jornada, cupos)
@@ -220,7 +199,7 @@ class School_Config_Service:
 
     # Cambiar estado
     def cambiar_estado(self, id_colegio: int):
-        """Procesa el POST de la Sección 4 (activar/desactivar)."""
+        """Procesa el POST de la Sección 4 (activar/desactivar)"""
         form = FormCambiarEstadoColegio()
 
         if form.validate_on_submit():

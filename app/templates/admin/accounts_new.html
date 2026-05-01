@@ -1,0 +1,920 @@
+{% extends 'layout_admin.html' %}
+
+{% block titulo %}Crear Cuenta — Admin Educa{% endblock %}
+
+{% set admin_header_title = "Crear Nueva Cuenta" %}
+
+<!-- ===========================================================
+     MACRO: Formulario de usuario (Acudiente / Técnico / Admin)
+     Parámetros:
+       form          — objeto CreateUsuarioForm
+       tipo          — 'acudiente' | 'tecnico' | 'admin'
+       titulo        — etiqueta legible para UI
+       icono         — clase FontAwesome (sin el "fas ")
+       parentesco    — True si el campo debe mostrarse (solo Acudiente)
+       f_min / f_max — límites del date picker
+       tab_val       — valor actual de tab_activo (para condicionar errores)
+=========================================================== -->
+{% macro render_form_usuario(form, tipo, titulo, icono, parentesco, f_min, f_max, tab_val) %}
+
+<!-- Mostrar errores solo en el tab activo -->
+{% set es_activo = (tab_val == tipo) %}
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-header p-4"
+         style="background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-light));">
+        <div class="d-flex align-items-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                 style="width:55px; height:55px; background:rgba(255,255,255,0.15);">
+                <i class="fas {{ icono }} fa-lg text-white"></i>
+            </div>
+            <div>
+                <h3 class="mb-0 text-white fw-bold">Crear {{ titulo }}</h3>
+                <p class="mb-0 text-white opacity-75 small">
+                    Fortress Educa · Panel de Administración
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-4 p-md-5">
+
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            Los campos marcados con <strong>*</strong> son obligatorios.
+            El correo electrónico actuará como <strong>nombre de usuario</strong>.
+        </div>
+
+        <form id="form-{{ tipo }}" method="POST"
+              action="{{ url_for('admin.accounts_new') }}"
+              novalidate autocomplete="off">
+
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="form_type" value="{{ tipo }}">
+
+            <div class="row g-3">
+
+                <!-- ===== 1. IDENTIFICACIÓN ===== -->
+                <div class="col-12">
+                    <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                        <i class="fas fa-id-card me-2"></i>1. Identificación
+                    </h5>
+                </div>
+
+                <!-- Tipo de documento -->
+                <div class="col-md-4">
+                    <label for="{{ tipo }}_tipo_doc" class="form-label">
+                        Tipo de Documento <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.tipo_documento.errors and es_activo %}
+                    {{ form.tipo_documento(
+                        class = "form-select" + (" is-invalid" if e else ""),
+                        id    = tipo + "_tipo_doc"
+                    ) }}
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.tipo_documento.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Número de documento -->
+                <div class="col-md-4">
+                    <label for="{{ tipo }}_documento" class="form-label">
+                        Número de Documento <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.documento.errors and es_activo %}
+                    <input type="text"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="documento"
+                           id="{{ tipo }}_documento"
+                           value="{{ form.documento.data or '' }}"
+                           inputmode="numeric"
+                           placeholder="Ej: 1234567890">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.documento.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Nacionalidad (solo lectura) -->
+                <div class="col-md-4">
+                    <label class="form-label">Nacionalidad</label>
+                    <input type="text" class="form-control" value="Colombiano" disabled readonly>
+                </div>
+
+                <div class="col-12"><hr class="my-2"></div>
+
+                <!-- ===== NOMBRE COMPLETO ===== -->
+                <div class="col-12">
+                    <h6 class="text-muted fw-bold mb-3">
+                        <i class="fas fa-user me-1"></i> Nombre Completo
+                    </h6>
+                </div>
+
+                <!-- Primer Nombre -->
+                <div class="col-md-3">
+                    <label for="{{ tipo }}_pnombre" class="form-label">
+                        Primer Nombre <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.primer_nombre.errors and es_activo %}
+                    <input type="text"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="primer_nombre" id="{{ tipo }}_pnombre"
+                           value="{{ form.primer_nombre.data or '' }}">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.primer_nombre.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Segundo Nombre -->
+                <div class="col-md-3">
+                    <label for="{{ tipo }}_snombre" class="form-label">Segundo Nombre</label>
+                    {% set e = form.segundo_nombre.errors and es_activo %}
+                    <input type="text"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="segundo_nombre" id="{{ tipo }}_snombre"
+                           value="{{ form.segundo_nombre.data or '' }}">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.segundo_nombre.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Primer Apellido -->
+                <div class="col-md-3">
+                    <label for="{{ tipo }}_papellido" class="form-label">
+                        Primer Apellido <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.primer_apellido.errors and es_activo %}
+                    <input type="text"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="primer_apellido" id="{{ tipo }}_papellido"
+                           value="{{ form.primer_apellido.data or '' }}">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.primer_apellido.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Segundo Apellido -->
+                <div class="col-md-3">
+                    <label for="{{ tipo }}_sapellido" class="form-label">Segundo Apellido</label>
+                    {% set e = form.segundo_apellido.errors and es_activo %}
+                    <input type="text"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="segundo_apellido" id="{{ tipo }}_sapellido"
+                           value="{{ form.segundo_apellido.data or '' }}">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.segundo_apellido.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12"><hr class="my-2"></div>
+
+                <!-- ===== DATOS DE CONTACTO ===== -->
+                <div class="col-12">
+                    <h6 class="text-muted fw-bold mb-3">
+                        <i class="fas fa-address-book me-1"></i> Datos de Contacto
+                    </h6>
+                </div>
+
+                <!-- Fecha de Nacimiento -->
+                <div class="col-md-{% if parentesco %}3{% else %}4{% endif %}">
+                    <label for="{{ tipo }}_fecha" class="form-label">
+                        Fecha de Nacimiento <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.fecha_nacimiento.errors and es_activo %}
+                    {{ form.fecha_nacimiento(
+                        type        = "date",
+                        class       = "form-control" + (" is-invalid" if e else ""),
+                        id          = tipo + "_fecha",
+                        min         = f_min,
+                        max         = f_max,
+                        onkeydown   = "return false;",
+                        onpaste     = "return false;"
+                    ) }}
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.fecha_nacimiento.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="form-text">Solo mayores de 18 años.</div>
+                    {% endif %}
+                </div>
+
+                {% if parentesco %}
+                <!-- Parentesco — visible solo para Acudiente -->
+                <div class="col-md-3">
+                    <label for="{{ tipo }}_parentesco" class="form-label">
+                        Parentesco con el Menor <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.parentesco.errors and es_activo %}
+                    {{ form.parentesco(
+                        class = "form-select" + (" is-invalid" if e else ""),
+                        id    = tipo + "_parentesco"
+                    ) }}
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.parentesco.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <!-- Parentesco — valor placeholder para Técnico / Admin -->
+                <input type="hidden" name="parentesco" value="1">
+                {% endif %}
+
+                <!-- Teléfono -->
+                <div class="col-md-{% if parentesco %}3{% else %}4{% endif %}">
+                    <label for="{{ tipo }}_tel" class="form-label">
+                        Teléfono / Celular <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.telefono.errors and es_activo %}
+                    <input type="tel"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="telefono" id="{{ tipo }}_tel"
+                           value="{{ form.telefono.data or '' }}"
+                           inputmode="numeric"
+                           placeholder="Ej: 3001234567">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.telefono.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Correo -->
+                <div class="col-md-{% if parentesco %}3{% else %}4{% endif %}">
+                    <label for="{{ tipo }}_email" class="form-label">
+                        Correo Electrónico <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.email.errors and es_activo %}
+                    <input type="email"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="email" id="{{ tipo }}_email"
+                           value="{{ form.email.data or '' }}"
+                           placeholder="correo@ejemplo.com"
+                           autocomplete="off">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.email.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="form-text">Será el nombre de usuario para iniciar sesión.</div>
+                    {% endif %}
+                </div>
+
+                <!-- Dirección -->
+                <div class="col-md-6">
+                    <label for="{{ tipo }}_dir" class="form-label">
+                        Dirección de Residencia <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.direccion.errors and es_activo %}
+                    <input type="text"
+                           class="form-control{{ ' is-invalid' if e else '' }}"
+                           name="direccion" id="{{ tipo }}_dir"
+                           value="{{ form.direccion.data or '' }}"
+                           placeholder="Ej: Cra 80 #65-12">
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.direccion.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Barrio -->
+                <div class="col-md-6">
+                    <label for="{{ tipo }}_barrio" class="form-label">
+                        Barrio <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.barrio.errors and es_activo %}
+                    {{ form.barrio(
+                        class = "form-select" + (" is-invalid" if e else ""),
+                        id    = tipo + "_barrio"
+                    ) }}
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.barrio.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12"><hr class="my-2"></div>
+
+                <!-- ===== 2. SEGURIDAD ===== -->
+                <div class="col-12">
+                    <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                        <i class="fas fa-lock me-2"></i>2. Seguridad de la Cuenta
+                    </h5>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="col-md-6">
+                    <label for="{{ tipo }}_pw" class="form-label">
+                        Contraseña <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.password.errors and es_activo %}
+                    <div class="input-group">
+                        <input type="password"
+                               class="form-control{{ ' is-invalid' if e else '' }}"
+                               name="password" id="{{ tipo }}_pw">
+                        <button class="btn btn-outline-secondary" type="button"
+                                onclick="(function(b){ var i=document.getElementById('{{ tipo }}_pw'); i.type=(i.type==='password'?'text':'password'); b.querySelector('i').className=(i.type==='text'?'fas fa-eye-slash':'fas fa-eye'); })(this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.password.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text small mt-1">
+                        Mínimo 10 caracteres. Mayúsculas, minúsculas, números y símbolos.
+                    </div>
+                </div>
+
+                <!-- Confirmar contraseña -->
+                <div class="col-md-6">
+                    <label for="{{ tipo }}_cpw" class="form-label">
+                        Confirmar Contraseña <span class="text-danger">*</span>
+                    </label>
+                    {% set e = form.confirm_password.errors and es_activo %}
+                    <div class="input-group">
+                        <input type="password"
+                               class="form-control{{ ' is-invalid' if e else '' }}"
+                               name="confirm_password" id="{{ tipo }}_cpw">
+                        <button class="btn btn-outline-secondary" type="button"
+                                onclick="(function(b){ var i=document.getElementById('{{ tipo }}_cpw'); i.type=(i.type==='password'?'text':'password'); b.querySelector('i').className=(i.type==='text'?'fas fa-eye-slash':'fas fa-eye'); })(this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    {% if e %}
+                        <div class="invalid-feedback d-block">
+                            {% for msg in form.confirm_password.errors %}<div>{{ msg }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Botón enviar -->
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+                        <i class="fas fa-user-plus me-2"></i>Crear {{ titulo }}
+                    </button>
+                    <p class="text-center text-muted small mt-3">
+                        <i class="fas fa-shield-alt me-1 text-success"></i>
+                        La operación quedará registrada en el historial de auditoría.
+                    </p>
+                </div>
+
+            </div><!-- /row -->
+        </form>
+    </div><!-- /card-body -->
+</div><!-- /card -->
+{% endmacro %}
+<!-- fin macro render_form_usuario -->
+
+
+{% block Contenido_Pagina %}
+
+    <!--
+        FORTRESS EDUCA — PANEL DE ADMINISTRACIÓN
+        Archivo : admin/accounts_new.html
+        Función : Creación de Acudientes, Técnicos, Admins y Estudiantes
+    -->
+
+    <main class="page-content">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas
+                            {% if category == 'success' %}fa-check-circle
+                            {% elif category == 'warning' %}fa-exclamation-triangle
+                            {% else %}fa-times-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ===== TABS NAV ===== -->
+        <ul class="nav nav-tabs mb-4" id="createTabs" role="tablist">
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {{ 'active' if tab_activo == 'acudiente' else '' }}"
+                        data-bs-toggle="tab" data-bs-target="#tab-acudiente"
+                        type="button" role="tab">
+                    <i class="fas fa-user-pen me-1"></i> Acudiente
+                </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {{ 'active' if tab_activo == 'tecnico' else '' }}"
+                        data-bs-toggle="tab" data-bs-target="#tab-tecnico"
+                        type="button" role="tab">
+                    <i class="fas fa-user-gear me-1"></i> Técnico
+                </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {{ 'active' if tab_activo == 'admin' else '' }}"
+                        data-bs-toggle="tab" data-bs-target="#tab-admin"
+                        type="button" role="tab">
+                    <i class="fas fa-user-shield me-1"></i> Administrador
+                </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold {{ 'active' if tab_activo == 'estudiante' else '' }}"
+                        data-bs-toggle="tab" data-bs-target="#tab-estudiante"
+                        type="button" role="tab">
+                    <i class="fas fa-user-graduate me-1"></i> Estudiante
+                </button>
+            </li>
+
+        </ul>
+
+        <!-- ===== TAB CONTENT ===== -->
+        <div class="tab-content">
+
+            <!-- TAB: Acudiente -->
+            <div class="tab-pane fade {{ 'show active' if tab_activo == 'acudiente' else '' }}"
+                 id="tab-acudiente" role="tabpanel">
+                {{ render_form_usuario(
+                    form_usuario, 'acudiente', 'Acudiente',
+                    'fa-user-pen', true,
+                    fecha_min_adulto, fecha_max_adulto,
+                    tab_activo
+                ) }}
+            </div>
+
+            <!-- TAB: Técnico -->
+            <div class="tab-pane fade {{ 'show active' if tab_activo == 'tecnico' else '' }}"
+                 id="tab-tecnico" role="tabpanel">
+                {{ render_form_usuario(
+                    form_usuario, 'tecnico', 'Técnico',
+                    'fa-user-gear', false,
+                    fecha_min_adulto, fecha_max_adulto,
+                    tab_activo
+                ) }}
+            </div>
+
+            <!-- TAB: Admin -->
+            <div class="tab-pane fade {{ 'show active' if tab_activo == 'admin' else '' }}"
+                 id="tab-admin" role="tabpanel">
+                {{ render_form_usuario(
+                    form_usuario, 'admin', 'Administrador',
+                    'fa-user-shield', false,
+                    fecha_min_adulto, fecha_max_adulto,
+                    tab_activo
+                ) }}
+            </div>
+
+            <!-- TAB: Estudiante -->
+            <div class="tab-pane fade {{ 'show active' if tab_activo == 'estudiante' else '' }}"
+                 id="tab-estudiante" role="tabpanel">
+
+                {% set es_est = (tab_activo == 'estudiante') %}
+
+                <div class="card shadow-sm border-0">
+
+                    <div class="card-header p-4"
+                         style="background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-light));">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width:55px; height:55px; background:rgba(255,255,255,0.15);">
+                                <i class="fas fa-user-graduate fa-lg text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0 text-white fw-bold">Crear Estudiante</h3>
+                                <p class="mb-0 text-white opacity-75 small">
+                                    Fortress Educa · Panel de Administración
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Los campos marcados con <strong>*</strong> son obligatorios.
+                            El estudiante debe vincularse a un <strong>Acudiente registrado</strong>.
+                        </div>
+
+                        <form id="form-estudiante" method="POST"
+                              action="{{ url_for('admin.accounts_new') }}"
+                              novalidate autocomplete="off">
+
+                            {{ form_estudiante.hidden_tag() }}
+                            <input type="hidden" name="form_type" value="estudiante">
+
+                            <div class="row g-3">
+
+                                <!-- ===== 1. IDENTIFICACIÓN ===== -->
+                                <div class="col-12">
+                                    <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                                        <i class="fas fa-id-card me-2"></i>1. Identificación del Estudiante
+                                    </h5>
+                                </div>
+
+                                <!-- Tipo de documento -->
+                                <div class="col-md-4">
+                                    <label for="est_tipo_doc" class="form-label">
+                                        Tipo de Documento <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.tipo_documento.errors and es_est %}
+                                    {{ form_estudiante.tipo_documento(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_tipo_doc"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.tipo_documento.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Número de documento -->
+                                <div class="col-md-4">
+                                    <label for="est_documento" class="form-label">
+                                        Número de Documento <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.documento.errors and es_est %}
+                                    <input type="text"
+                                           class="form-control{{ ' is-invalid' if e else '' }}"
+                                           name="documento" id="est_documento"
+                                           value="{{ form_estudiante.documento.data or '' }}"
+                                           inputmode="numeric"
+                                           placeholder="Ej: 1023456789">
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.documento.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Fecha de nacimiento -->
+                                <div class="col-md-4">
+                                    <label for="est_fecha" class="form-label">
+                                        Fecha de Nacimiento <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.fecha_nacimiento.errors and es_est %}
+                                    {{ form_estudiante.fecha_nacimiento(
+                                        type        = "date",
+                                        class       = "form-control" + (" is-invalid" if e else ""),
+                                        id          = "est_fecha",
+                                        min         = fecha_min_est,
+                                        max         = fecha_max_est,
+                                        onkeydown   = "return false;",
+                                        onpaste     = "return false;"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.fecha_nacimiento.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12"><hr class="my-2"></div>
+
+                                <!-- ===== NOMBRE COMPLETO ===== -->
+                                <div class="col-12">
+                                    <h6 class="text-muted fw-bold mb-3">
+                                        <i class="fas fa-user me-1"></i> Nombre Completo del Estudiante
+                                    </h6>
+                                </div>
+
+                                <!-- Primer Nombre -->
+                                <div class="col-md-3">
+                                    <label for="est_pnombre" class="form-label">
+                                        Primer Nombre <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.primer_nombre.errors and es_est %}
+                                    <input type="text"
+                                           class="form-control{{ ' is-invalid' if e else '' }}"
+                                           name="primer_nombre" id="est_pnombre"
+                                           value="{{ form_estudiante.primer_nombre.data or '' }}">
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.primer_nombre.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Segundo Nombre -->
+                                <div class="col-md-3">
+                                    <label for="est_snombre" class="form-label">Segundo Nombre</label>
+                                    {% set e = form_estudiante.segundo_nombre.errors and es_est %}
+                                    <input type="text"
+                                           class="form-control{{ ' is-invalid' if e else '' }}"
+                                           name="segundo_nombre" id="est_snombre"
+                                           value="{{ form_estudiante.segundo_nombre.data or '' }}">
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.segundo_nombre.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Primer Apellido -->
+                                <div class="col-md-3">
+                                    <label for="est_papellido" class="form-label">
+                                        Primer Apellido <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.primer_apellido.errors and es_est %}
+                                    <input type="text"
+                                           class="form-control{{ ' is-invalid' if e else '' }}"
+                                           name="primer_apellido" id="est_papellido"
+                                           value="{{ form_estudiante.primer_apellido.data or '' }}">
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.primer_apellido.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Segundo Apellido -->
+                                <div class="col-md-3">
+                                    <label for="est_sapellido" class="form-label">Segundo Apellido</label>
+                                    {% set e = form_estudiante.segundo_apellido.errors and es_est %}
+                                    <input type="text"
+                                           class="form-control{{ ' is-invalid' if e else '' }}"
+                                           name="segundo_apellido" id="est_sapellido"
+                                           value="{{ form_estudiante.segundo_apellido.data or '' }}">
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.segundo_apellido.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12"><hr class="my-2"></div>
+
+                                <!-- ===== 2. DATOS ACADÉMICOS ===== -->
+                                <div class="col-12">
+                                    <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                                        <i class="fas fa-graduation-cap me-2"></i>2. Datos Académicos
+                                    </h5>
+                                </div>
+
+                                <!-- Grado Actual -->
+                                <div class="col-md-6">
+                                    <label for="est_grado_actual" class="form-label">
+                                        Último Grado Aprobado <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.grado_actual.errors and es_est %}
+                                    {{ form_estudiante.grado_actual(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_grado_actual"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.grado_actual.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Grado Próximo — deshabilitado, calculado por JS -->
+                                <div class="col-md-6">
+                                    <label for="est_grado_prox" class="form-label">
+                                        Grado a Cursar
+                                    </label>
+                                    {{ form_estudiante.grado_proximo(
+                                        class    = "form-select",
+                                        id       = "est_grado_prox",
+                                        disabled = true
+                                    ) }}
+                                    {#
+                                        El select está deshabilitado (no se envía en el POST).
+                                        El valor real viaja en este hidden input, igual que en register_student.html.
+                                    #}
+                                    <input type="hidden" name="grado_proximo" id="est_grado_prox_hidden">
+                                    <div id="est_grado_prox_msg" class="form-text text-muted" style="display:none;"></div>
+                                    <div class="form-text">Se calcula automáticamente según el grado actual.</div>
+                                </div>
+
+                                <!-- Colegio Anterior -->
+                                <div class="col-md-12">
+                                    <label for="est_colegio" class="form-label">
+                                        Última Institución Educativa <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.colegio_anterior.errors and es_est %}
+                                    {{ form_estudiante.colegio_anterior(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_colegio"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.colegio_anterior.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12"><hr class="my-2"></div>
+
+                                <!-- ===== 3. DATOS PERSONALES ===== -->
+                                <div class="col-12">
+                                    <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                                        <i class="fas fa-user-circle me-2"></i>3. Datos Personales
+                                    </h5>
+                                </div>
+
+                                <!-- Fecha de nacimiento (ya está en sección 1, repetir aquí solo el campo edad) -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Edad Calculada</label>
+                                    <input type="number" class="form-control" id="est_edad" readonly
+                                        placeholder="—" tabindex="-1">
+                                    <div class="form-text">Calculada desde la fecha de nacimiento.</div>
+                                </div>
+
+                                <!-- Género -->
+                                <div class="col-md-4">
+                                    <label for="est_genero" class="form-label">
+                                        Género <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.genero.errors and es_est %}
+                                    {{ form_estudiante.genero(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_genero"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.genero.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Grupo Preferencial -->
+                                <div class="col-md-4">
+                                    <label for="est_grupo" class="form-label">
+                                        Grupo Preferencial <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.grupo_preferencial.errors and es_est %}
+                                    {{ form_estudiante.grupo_preferencial(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_grupo"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.grupo_preferencial.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+
+                                <div class="col-12"><hr class="my-2"></div>
+
+                                <!-- ===== 4. VÍNCULO CON ACUDIENTE ===== -->
+                                <div class="col-12">
+                                    <h5 class="text-primary mt-2 mb-3 pb-2 border-bottom">
+                                        <i class="fas fa-link me-2"></i>4. Vínculo con Acudiente
+                                    </h5>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="alert alert-warning py-2">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        El acudiente debe estar <strong>registrado y activo</strong> en el sistema antes de crear el estudiante.
+                                    </div>
+                                </div>
+
+                                <!-- Acudiente -->
+                                <div class="col-md-7">
+                                    <label for="est_acudiente" class="form-label">
+                                        Acudiente Responsable <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.acudiente.errors and es_est %}
+                                    {{ form_estudiante.acudiente(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_acudiente"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.acudiente.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Parentesco del acudiente con el estudiante -->
+                                <div class="col-md-5">
+                                    <label for="est_parentesco" class="form-label">
+                                        Parentesco del Acudiente <span class="text-danger">*</span>
+                                    </label>
+                                    {% set e = form_estudiante.parentesco_estudiante.errors and es_est %}
+                                    {{ form_estudiante.parentesco_estudiante(
+                                        class = "form-select" + (" is-invalid" if e else ""),
+                                        id    = "est_parentesco"
+                                    ) }}
+                                    {% if e %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for msg in form_estudiante.parentesco_estudiante.errors %}<div>{{ msg }}</div>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Botón enviar -->
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+                                        <i class="fas fa-user-graduate me-2"></i>Registrar Estudiante
+                                    </button>
+                                    <p class="text-center text-muted small mt-3">
+                                        <i class="fas fa-shield-alt me-1 text-success"></i>
+                                        La operación quedará registrada en el historial de auditoría.
+                                    </p>
+                                </div>
+
+                            </div><!-- /row -->
+                        </form>
+                    </div><!-- /card-body -->
+                </div><!-- /card -->
+
+            </div><!-- /tab-pane estudiante -->
+
+        </div><!-- /tab-content -->
+
+    </main>
+
+    {% block scripts %}
+    <script>
+        // ── Calcular edad del estudiante ──────────────────────────────────────────────
+        (function () {
+            var fechaInput = document.getElementById('est_fecha');
+            var edadInput  = document.getElementById('est_edad');
+
+            if (!fechaInput || !edadInput) return;
+
+            function calcularEdad() {
+                var val = fechaInput.value;
+                if (!val) { edadInput.value = ''; return; }
+
+                var nac  = new Date(val);
+                var hoy  = new Date();
+                var edad = hoy.getFullYear() - nac.getFullYear();
+                var mes  = hoy.getMonth() - nac.getMonth();
+                if (mes < 0 || (mes === 0 && hoy.getDate() < nac.getDate())) edad--;
+
+                edadInput.value = (isNaN(edad) || edad < 0) ? '' : edad;
+            }
+
+            fechaInput.addEventListener('change', calcularEdad);
+            calcularEdad();   // ejecutar si el form se repobla con errores de sesión
+        }());
+
+
+        // ── Auto-calcular grado próximo (mismo comportamiento que register_student) ──
+        (function () {
+            var gradoActual  = document.getElementById('est_grado_actual');
+            var gradoProximo = document.getElementById('est_grado_prox');
+            var hiddenProx   = document.getElementById('est_grado_prox_hidden');
+            var msgProx      = document.getElementById('est_grado_prox_msg');
+
+            if (!gradoActual || !gradoProximo || !hiddenProx) return;
+
+            function actualizarGradoProximo() {
+                var opciones        = Array.from(gradoActual.options);
+                var indexSeleccionado = gradoActual.selectedIndex;
+
+                // Resetear estado visual
+                gradoProximo.value       = '';
+                hiddenProx.value         = '';
+                msgProx.style.display    = 'none';
+                gradoProximo.style.display = 'block';
+
+                // Nada seleccionado o placeholder (value "0")
+                if (!gradoActual.value || gradoActual.value === '0') return;
+
+                var siguienteIndex = indexSeleccionado + 1;
+
+                if (siguienteIndex < opciones.length) {
+                    // Existe grado siguiente: seleccionarlo
+                    gradoProximo.selectedIndex = siguienteIndex;
+                    hiddenProx.value           = gradoProximo.value;
+                } else {
+                    // Último grado: mostrar "No aplica"
+                    gradoProximo.style.display = 'none';
+                    msgProx.textContent        = 'No aplica (último grado)';
+                    msgProx.style.display      = 'block';
+                    hiddenProx.value           = '0';   // SP aplica NULLIF(0, 0) → NULL
+                }
+            }
+
+            gradoActual.addEventListener('change', actualizarGradoProximo);
+            actualizarGradoProximo();   // ejecutar al cargar (form repoblado)
+        }());
+    </script>
+    {% endblock %}
+
+{% endblock %}
