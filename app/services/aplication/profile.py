@@ -235,7 +235,7 @@ class Profile_Data_Service:
                 user_agent,
             ))
 
-            # 2. Actualizar TBL_ESTUDIANTE
+            # 2. Actualizar tbl_estudiante
             sp_actualizar_estudiante((
                 form.grado_actual.data,
                 form.grado_proximo.data,

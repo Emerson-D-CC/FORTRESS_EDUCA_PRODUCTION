@@ -341,7 +341,7 @@ class AdminCreateService:
             user_agent = request.headers.get("User-Agent", "")
             id_admin = session.get("id_usuario", 1)
 
-            # Grado próximo: 0 → None (nullable en TBL_ESTUDIANTE)
+            # Grado próximo: 0 → None (nullable en tbl_estudiante)
             grado_prox = (
                 int(form.grado_proximo.data)
                 if form.grado_proximo.data and str(form.grado_proximo.data) != "0"

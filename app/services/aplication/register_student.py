@@ -135,7 +135,7 @@ class Register_Student_Service:
                 form.primer_apellido.data,
                 form.segundo_apellido.data or None,
                 form.fecha_nacimiento.data,
-                # TBL_ESTUDIANTE
+                # tbl_estudiante
                 form.tipo_identificacion.data,
                 form.grado_actual.data,
                 form.grado_proximo.data,

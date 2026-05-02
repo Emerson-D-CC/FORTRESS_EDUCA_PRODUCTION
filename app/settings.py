@@ -70,7 +70,7 @@ class Config_DB:
     
     # Ruta al certificado SSL de AWS RDS
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DB_SSL_CA = os.path.join(BASE_DIR, "certs", "rds-global-bundle.pem")
+    DB_SSL_CA = os.path.join(BASE_DIR, "certs", "global-bundle.pem")
 
     @classmethod
     def get_ssl_config(cls):
