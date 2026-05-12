@@ -205,26 +205,26 @@ class Ticket_Detail_Service:
             return render_template("aplication/ticket_detail.html", **ctx)
 
         try:
-            sp_documento_ticket_insertar(
-                id_ticket,
-                form.tipo_documento.data,
-                contenido,
-                nombre_original,
-            )
-            sp_documento_comentario_insertar(
-                id_ticket=id_ticket,
-                tipo_evento="Documento Subido",
-                id_usuario=session["user_id"],
-                comentario=f"[Documento Subido] El usuario ha subido el documento: {nombre_original}",
-                es_interno=0,
-            )
-            
-            db.commit()
+            with db.transaction() as conn:
+                sp_documento_ticket_insertar(
+                    id_ticket,
+                    form.tipo_documento.data,
+                    contenido,
+                    nombre_original,
+                    conn=conn
+                )
+                sp_documento_comentario_insertar(
+                    id_ticket=id_ticket,
+                    tipo_evento="Documento Subido",
+                    id_usuario=session["user_id"],
+                    comentario=f"[Documento Subido] El usuario ha subido el documento: {nombre_original}",
+                    es_interno=0,
+                    conn=conn
+                )
             flash("Documento subido correctamente.", "success")
             return redirect(url_for("aplication.ticket_detail", id_ticket=id_ticket, active_page="status"))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] Subida de documento fallida: {e}")
             flash("Ocurrió un error al subir el documento. Intente nuevamente.", "danger")
             return render_template("aplication/ticket_detail.html", **ctx)
@@ -265,15 +265,15 @@ class Ticket_Detail_Service:
             return redirect(url_for("aplication.ticket_detail", id_ticket=id_ticket))
 
         try:
-            sp_comentario_usuario_insertar(
-                id_ticket  = id_ticket,
-                id_usuario = user_id,
-                comentario = form_comentario.comentario.data.strip(),
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_comentario_usuario_insertar(
+                    id_ticket  = id_ticket,
+                    id_usuario = user_id,
+                    comentario = form_comentario.comentario.data.strip(),
+                    conn=conn
+                )
             flash("Comentario agregado correctamente.", "success")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - comentario usuario] {e}")
             flash("Ocurrió un error al guardar el comentario. Intente nuevamente.", "danger")
 

@@ -4,17 +4,7 @@
 
 {% set admin_header_title = "Crear Nueva Cuenta" %}
 
-<!-- ===========================================================
-     MACRO: Formulario de usuario (Acudiente / Técnico / Admin)
-     Parámetros:
-       form          — objeto CreateUsuarioForm
-       tipo          — 'acudiente' | 'tecnico' | 'admin'
-       titulo        — etiqueta legible para UI
-       icono         — clase FontAwesome (sin el "fas ")
-       parentesco    — True si el campo debe mostrarse (solo Acudiente)
-       f_min / f_max — límites del date picker
-       tab_val       — valor actual de tab_activo (para condicionar errores)
-=========================================================== -->
+
 {% macro render_form_usuario(form, tipo, titulo, icono, parentesco, f_min, f_max, tab_val) %}
 
 <!-- Mostrar errores solo en el tab activo -->

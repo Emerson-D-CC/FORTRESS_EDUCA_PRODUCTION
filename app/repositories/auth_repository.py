@@ -42,27 +42,31 @@ def sp_exito_login(username):
     )
 
 
-def sp_auditoria_sesion(id_usuario, ip, evento, navegador):
+def sp_auditoria_sesion(id_usuario, ip, evento, navegador, conn=None):
     return db.call_procedure(
         "sp_auditoria_sesion",
-        (id_usuario, ip, evento, navegador)
+        (id_usuario, ip, evento, navegador),
+        commit=False,
+        conn=conn        
     )
 
-def sp_registrar_sesion(id_usuario, jti, dispositivo, ip):
+def sp_registrar_sesion(id_usuario, jti, dispositivo, ip, conn=None):
     """Registra o actualiza una sesión activa"""
     return db.call_procedure(
         "sp_tbl_sesion_activa_registrar_sesion",
         (id_usuario, jti, dispositivo, ip),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
 # Cerrar sesión
-def sp_cerrar_sesion(jti):
+def sp_cerrar_sesion(jti, conn=None):
     """Marca como inactiva una sesión por su JTI"""
     return db.call_procedure(
         "sp_tbl_sesion_activa_cerrar_sesion",
         (jti,),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
 
@@ -86,20 +90,22 @@ def sp_obtener_mfa_secret(id_usuario):
 #                                           PAGINA CONFIG_MFA.HTML
 # ====================================================================================================================================================
 
-def sp_guardar_mfa_secret_temp(id_usuario, secret):
+def sp_guardar_mfa_secret_temp(id_usuario, secret, conn=None):
     """Guarda el secret temporal mientras el usuario no ha confirmado el código"""
     return db.call_procedure(
         "sp_tbl_usuario_guardar_mfa_secret_temp",
         (id_usuario, secret),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
-def sp_activar_mfa(id_usuario):
+def sp_activar_mfa(id_usuario, conn=None):
     """Mueve el secret temporal al campo definitivo y activa 2FA"""
     return db.call_procedure(
         "sp_tbl_usuario_activar_mfa",
         (id_usuario,),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
 

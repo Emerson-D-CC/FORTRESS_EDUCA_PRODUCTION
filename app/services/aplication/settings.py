@@ -156,14 +156,14 @@ class General_Settings_Service:
                 ip = request.remote_addr or ""
                 user_agent = request.headers.get("User-Agent", "")
                 
-                sp_eliminar_cuenta_completa(id_usuario, ip, user_agent)
+                with db.transaction() as conn:
+                    sp_eliminar_cuenta_completa(id_usuario, ip, user_agent, conn=conn)
                 
                 session.clear()
                 flash("Cuenta eliminada correctamente. Hasta pronto.", "success")
                 return redirect(url_for("auth.login_user"))
 
             except Exception as e:
-                db.rollback()
                 print(f"[ERROR] eliminar_cuenta: {e}")
                 flash("Error de sistema al procesar la solicitud.", "danger")
                 return redirect(url_for("aplication.settings"))

@@ -65,12 +65,11 @@ class SharedSecurityService:
                 return redirect(url_for(self.security_endpoint))
 
             nuevo_hash = hashear_contraseña(nueva_contraseña)
-            sp_cambiar_contraseña_perfil(id_usuario, nuevo_hash, ip, user_agent)
-            db.commit()
+            with db.transaction() as conn:
+                sp_cambiar_contraseña_perfil(id_usuario, nuevo_hash, ip, user_agent, conn=conn)
             flash("Contraseña actualizada correctamente.", "success")
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] change_password [{self.security_endpoint}]: {e}")
             flash("Error interno. Intente nuevamente.", "danger")
 
@@ -134,11 +133,10 @@ class SharedSecurityService:
         id_usuario = session.get("user_id")
         try:
             jti_actual = self._get_jti_actual()
-            sp_cerrar_todas_sesiones(id_usuario, jti_actual)
-            db.commit()
+            with db.transaction() as conn:
+                sp_cerrar_todas_sesiones(id_usuario, jti_actual, conn=conn)
             flash("Todas las demás sesiones han sido cerradas.", "success")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] cerrar_todas_sesiones [{self.security_endpoint}]: {e}")
             flash("Error al cerrar sesiones. Intente nuevamente.", "danger")
 
@@ -160,12 +158,11 @@ class SharedSecurityService:
                 flash("No puede cerrar su sesión actual desde aquí.", "danger")
                 return redirect(url_for(self.security_endpoint))
 
-            sp_cerrar_sesion(jti_sesion)
-            db.commit()
+            with db.transaction() as conn:
+                sp_cerrar_sesion(jti_sesion, conn=conn)
             flash("Sesión cerrada correctamente.", "success")
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] cerrar_sesion [{self.security_endpoint}]: {e}")
             flash("Error al cerrar sesión. Intente nuevamente.", "danger")
 

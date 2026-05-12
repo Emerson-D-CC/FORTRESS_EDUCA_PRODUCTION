@@ -51,14 +51,13 @@ class Config_MFA_Service:
             uri = MFA_Controller.generar_uri(secret, username)
             qr_b64 = MFA_Controller.generar_qr_base64(uri)
 
-            sp_guardar_mfa_secret_temp(id_usuario, secret)
-            db.commit()
+            with db.transaction() as conn:
+                sp_guardar_mfa_secret_temp(id_usuario, secret, conn=conn)
 
             session["mfa_secret_temp"] = secret
             session["mfa_qr_temp"] = f"data:image/png;base64,{qr_b64}"
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] Setup_MFA (GET): {e}")
             flash("No se pudo generar el QR. Intente nuevamente.", "danger")
             return redirect(login_url)
@@ -114,8 +113,8 @@ class Config_MFA_Service:
                 return render_no_cache("auth/config_mfa.html", form=form)
 
             # Código válido: activar MFA
-            sp_activar_mfa(id_usuario)
-            db.commit()
+            with db.transaction() as conn:
+                sp_activar_mfa(id_usuario, conn=conn)
 
             # Limpiar banderas de setup
             session.pop("mfa_setup_pendiente", None)
@@ -128,7 +127,6 @@ class Config_MFA_Service:
             return redirect(session.get("mfa_success_url", url_for("admin.dashboard")))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] Confirmar_Setup_MFA: {e}")
             flash("Error interno. Intente nuevamente.", "danger")
             return render_no_cache("auth/config_mfa.html", form=form)

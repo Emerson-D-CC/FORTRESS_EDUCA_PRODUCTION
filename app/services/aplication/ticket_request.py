@@ -329,19 +329,20 @@ class Ticket_Request_Service:
         id_ticket = _generar_id_ticket()
 
         try:
-            sp_ticket_crear((
-                id_ticket,
-                user_id,
-                id_estudiante,
-                form_p2.id_tipo_afectacion.data,
-                form_p2.descripcion.data,
-                form_p3.id_barrio.data,
-                form_p3.id_tiempo_residencia.data,
-                form_p4.id_jornada.data,
-                id_colegio,
-                ip,
-                user_agent,
-            ))
+            with db.transaction() as conn:
+                sp_ticket_crear((
+                    id_ticket,
+                    user_id,
+                    id_estudiante,
+                    form_p2.id_tipo_afectacion.data,
+                    form_p2.descripcion.data,
+                    form_p3.id_barrio.data,
+                    form_p3.id_tiempo_residencia.data,
+                    form_p4.id_jornada.data,
+                    id_colegio,
+                    ip,
+                    user_agent,
+                ), conn=conn)
 
             # Documentos individuales
             archivos = [
@@ -353,16 +354,14 @@ class Ticket_Request_Service:
                 datos = _leer_archivo(file_storage, max_size)
                 if datos:
                     sp_documento_ticket_insertar(
-                        id_ticket, id_tipo_doc, datos, file_storage.filename
+                        id_ticket, id_tipo_doc, datos, file_storage.filename, conn=conn
                     )
 
             # Certificados múltiples
             for cert in (form_p5.doc_certificados.data or []):
                 datos = _leer_archivo(cert, _MAX_FILE_SIZE_CERTS)
                 if datos:
-                    sp_documento_ticket_insertar(id_ticket, 3, datos, cert.filename)
-
-            db.commit()
+                    sp_documento_ticket_insertar(id_ticket, 3, datos, cert.filename, conn=conn)
 
             # Limpiar cualquier dato de sesión previo del wizard
             for key in ("ticket_form_data", "ticket_form_errors",
@@ -373,7 +372,6 @@ class Ticket_Request_Service:
             return redirect(url_for("aplication.ticket_status"))
 
         except ValueError as ve:
-            db.rollback()
             # Error de tamaño de archivo — regresar al paso 5
             session["ticket_form_data"] = _recopilar_datos_sesion()
             session["ticket_form_errors"] = {}
@@ -383,7 +381,6 @@ class Ticket_Request_Service:
             return redirect(url_for("aplication.ticket_request"))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] Creación de ticket fallida: {e}")
             session["ticket_form_data"] = _recopilar_datos_sesion()
             session["ticket_form_errors"] = {}

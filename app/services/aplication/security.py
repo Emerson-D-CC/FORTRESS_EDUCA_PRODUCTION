@@ -60,11 +60,11 @@ class Security_Settings_Service:
     def MFA_Activation(self):
         """Genera el QR y guarda el secret temporal en BD."""
         id_usuario = session.get("user_id")
-        username   = session.get("username")
+        username = session.get("username")
 
         try:
             data = sp_obtener_mfa_secret(id_usuario)
-            row  = data[0] if data else {}
+            row = data[0] if data else {}
 
             secret_temp_existente = row.get("MFA_Secret_Temp")
             if isinstance(secret_temp_existente, (bytes, bytearray)):
@@ -74,28 +74,27 @@ class Security_Settings_Service:
                 flash("Ya tiene un QR pendiente. Escanéelo e ingrese el código para confirmar.", "info")
                 return redirect(url_for(self._ENDPOINT))
 
-            secret  = MFA_Controller.generar_secret()
-            uri     = MFA_Controller.generar_uri(secret, username)
+            secret = MFA_Controller.generar_secret()
+            uri = MFA_Controller.generar_uri(secret, username)
             qr_b64  = MFA_Controller.generar_qr_base64(uri)
 
-            sp_guardar_mfa_secret_temp(id_usuario, secret)
-            db.commit()
+            with db.transaction() as conn:
+                sp_guardar_mfa_secret_temp(id_usuario, secret, conn=conn)
 
             session["mfa_secret_temp"] = secret
-            session["mfa_qr_temp"]     = f"data:image/png;base64,{qr_b64}"
+            session["mfa_qr_temp"] = f"data:image/png;base64,{qr_b64}"
 
             flash("QR generado. Escanéelo con Microsoft Authenticator e ingrese el código.", "info")
             return redirect(url_for(self._ENDPOINT))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] MFA_Activation: {e}")
             flash("No se pudo generar el QR. Intente nuevamente.", "danger")
             return redirect(url_for(self._ENDPOINT))
 
     def mfa_activacion(self):
         """Confirma el código TOTP y activa el MFA."""
-        form       = FormVerificarMFA()
+        form = FormVerificarMFA()
         id_usuario = session.get("user_id")
 
         if not form.validate_on_submit():
@@ -124,8 +123,8 @@ class Security_Settings_Service:
                 flash("Código incorrecto. Verifique la hora de su dispositivo.", "danger")
                 return redirect(url_for(self._ENDPOINT))
 
-            sp_activar_mfa(id_usuario)
-            db.commit()
+            with db.transaction() as conn:
+                sp_activar_mfa(id_usuario, conn=conn)
 
             session["double_factor"] = "ACTIVE"
             session.pop("mfa_secret_temp", None)
@@ -135,7 +134,6 @@ class Security_Settings_Service:
             return redirect(url_for(self._ENDPOINT))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] mfa_activacion: {e}")
             flash("Error interno al confirmar. Intente nuevamente.", "danger")
             return redirect(url_for(self._ENDPOINT))
@@ -169,15 +167,14 @@ class Security_Settings_Service:
                 flash("Código incorrecto. No se puede desactivar.", "danger")
                 return redirect(url_for(self._ENDPOINT))
 
-            sp_desactivar_mfa(id_usuario)
-            db.commit()
+            with db.transaction() as conn:
+                sp_desactivar_mfa(id_usuario, conn=conn)
 
             session["double_factor"] = "INACTIVE"
             flash("Autenticación de dos factores desactivada.", "success")
             return redirect(url_for(self._ENDPOINT))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] mfa_desactivar: {e}")
             flash("Error interno. Intente nuevamente.", "danger")
             return redirect(url_for(self._ENDPOINT))

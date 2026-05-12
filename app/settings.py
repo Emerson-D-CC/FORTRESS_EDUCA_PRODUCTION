@@ -31,7 +31,7 @@ class Config_Security:
 class Config_JWT:
     """Variables de Jason Web Token"""
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-dev-secret")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=55)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=24)
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = False
@@ -52,7 +52,7 @@ class Config_Email:
 
 class Config_Session:
     """Variables de configuración del tiempo de una sesión"""
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=55)
     MAX_SESSION_DURATION = timedelta(hours=24)
     SESSION_MAX_ACTIVAS = int(os.getenv("SESSION_MAX_ACTIVAS", 3))
     SESSION_COOKIE_SECURE = False
@@ -60,24 +60,13 @@ class Config_Session:
     
 
 class Config_DB:
-    """Variables de conexión a la Base de Datos (RDS)"""
+    """Variables de conexión a la Base de Datos"""
     DB_HOST = os.getenv("DB_HOST", "localhost")
     DB_PORT = int(os.getenv("DB_PORT", 3306))
     DB_USER = os.getenv("DB_USER")
     DB_PASSWORD = os.getenv("DB_PASSWORD")
     DB_NAME = os.getenv("DB_NAME")
     DB_SSL = os.getenv("DB_SSL", "false").lower() == "true"
-    
-    # Ruta al certificado SSL de AWS RDS
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DB_SSL_CA = os.path.join(BASE_DIR, "certs", "global-bundle.pem")
-
-    @classmethod
-    def get_ssl_config(cls):
-        """Retorna configuración SSL si está habilitada"""
-        if cls.DB_SSL:
-            return {"ca": cls.DB_SSL_CA}
-        return None
 
     @classmethod
     def validate(cls):
@@ -86,19 +75,13 @@ class Config_DB:
             "DB_USER": cls.DB_USER,
             "DB_PASSWORD": cls.DB_PASSWORD,
             "DB_NAME": cls.DB_NAME,
-            "DB_HOST": cls.DB_HOST,
         }.items() if not v]
         if missing:
             raise EnvironmentError(f"[CONFIG] Faltan variables de entorno: {missing}")
-        
-        # Verifica que el certificado SSL exista si SSL está habilitado
-        if cls.DB_SSL and not os.path.exists(cls.DB_SSL_CA):
-            raise FileNotFoundError(
-                f"[CONFIG] Certificado SSL no encontrado en: {cls.DB_SSL_CA}"
-            )
+    
 
 class DevelopmentConfig(Config, Config_Security, Config_JWT, Config_Email, Config_Session, Config_DB):
-    DEBUG = False
+    DEBUG = True
 
 class ProductionConfig(Config):
-    DEBUG = True
+    DEBUG = False

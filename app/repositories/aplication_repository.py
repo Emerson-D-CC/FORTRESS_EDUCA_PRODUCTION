@@ -99,20 +99,21 @@ def sp_tipo_documento_consultar():
     return db.call_procedure("sp_tbl_tipo_documento_consultar", ()) or []
 
 
-def sp_documento_ticket_insertar(id_ticket: str, id_tipo_doc: int, archivo: bytes, nombre_original: str):
+def sp_documento_ticket_insertar(id_ticket: str, id_tipo_doc: int, archivo: bytes, nombre_original: str, conn=None):
     """Inserta un nuevo documento asociado a un ticket"""
     db.call_procedure("sp_documento_ticket_insertar", (
         id_ticket,
         id_tipo_doc,
         archivo,
         nombre_original,
-    ))
+    ), conn=conn)
 
-def sp_documento_comentario_insertar(id_ticket, tipo_evento, id_usuario, comentario, es_interno) -> None:
+def sp_documento_comentario_insertar(id_ticket, tipo_evento, id_usuario, comentario, es_interno, conn=None) -> None:
     """Inserta un comentario manual en el ticket al subir un documento"""
     db.call_procedure(
         "sp_ticket_panel_comentario_insertar",
         (id_ticket, tipo_evento, id_usuario, comentario, int(es_interno)),
+        conn=conn
     )
 
 def sp_documento_ticket_descargar(id_doc: int, id_usuario: int):
@@ -122,11 +123,12 @@ def sp_documento_ticket_descargar(id_doc: int, id_usuario: int):
 
 # AGREGAR UN COMENTARIO EN EL TICKET
 
-def sp_comentario_usuario_insertar(id_ticket: str, id_usuario: int, comentario: str):
+def sp_comentario_usuario_insertar(id_ticket: str, id_usuario: int, comentario: str, conn=None):
     """Inserta un comentario público del usuario en el ticket"""
     db.call_procedure(
         "sp_ticket_panel_comentario_insertar",
         (id_ticket, "Comentario", id_usuario, comentario, 0),
+        conn=conn
     )
 
 # ====================================================================================================================================================
@@ -172,8 +174,8 @@ def sp_obtener_perfil_acudiente(id_usuario):
     resultado = db.call_procedure("sp_perfil_acudiente_consultar", (id_usuario,))
     return resultado[0] if resultado else None
 
-def sp_actualizar_datos_adicionales(data):
-    return db.call_procedure("sp_tbl_datos_adicionales_actualizar", data, commit=False)
+def sp_actualizar_datos_adicionales(data, conn=None):
+    return db.call_procedure("sp_tbl_datos_adicionales_actualizar", data, commit=False, conn=conn)
 
 
 # PERFIL DE ESTUDIANTES
@@ -205,17 +207,17 @@ def sp_obtener_perfil_estudiante(id_usuario):
 
 # ACTUALIZAR DATOS 
 
-def sp_actualizar_persona(data):
-    return db.call_procedure("sp_tbl_persona_actualizar", data, commit=False)
+def sp_actualizar_persona(data, conn=None):
+    return db.call_procedure("sp_tbl_persona_actualizar", data, commit=False, conn=conn)
 
-def sp_actualizar_estudiante(data):
-    return db.call_procedure("sp_tbl_estudiante_actualizar", data, commit=False)
+def sp_actualizar_estudiante(data, conn=None):
+    return db.call_procedure("sp_tbl_estudiante_actualizar", data, commit=False, conn=conn)
 
 
 # REGISTRAR ESTUDIANTE
 
-def sp_registrar_estudiante(data):
-    return db.call_procedure("sp_registrar_estudiante_completo", data, commit=False)
+def sp_registrar_estudiante(data, conn=None):
+    return db.call_procedure("sp_registrar_estudiante_completo", data, commit=False, conn=conn)
 
 def sp_estudiante_existe(num_doc_estudiante, id_usuario):
     resultado = db.call_procedure(
@@ -251,12 +253,13 @@ def sp_activar_mfa(id_usuario):
         commit=False
     )
 
-def sp_desactivar_mfa(id_usuario):
+def sp_desactivar_mfa(id_usuario, conn=None):
     """Borra el secret y desactiva 2FA"""
     return db.call_procedure(
         "sp_tbl_usuario_desactivar_mfa",
         (id_usuario,),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
 def sp_obtener_mfa_secret(id_usuario):
@@ -308,12 +311,13 @@ def sp_validar_login(username, password):
         (username, password)
     )
 
-def sp_eliminar_cuenta_completa(id_usuario, ip, user_agent):
+def sp_eliminar_cuenta_completa(id_usuario, ip, user_agent, conn=None):
     """Elimina lógicamente un usuario y el estudiante vinculado"""
     return db.call_procedure(
         "sp_eliminar_cuenta_completa",
         (id_usuario, ip, user_agent),
-        commit=True
+        commit=False,
+        conn=conn
     )
 
 

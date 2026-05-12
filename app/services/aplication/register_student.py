@@ -126,36 +126,34 @@ class Register_Student_Service:
                     "aplication/register_student.html",
                     form=form,
                 )
+            with db.transaction() as conn:
+                sp_registrar_estudiante((
+                    # TBL_PERSONA
+                    form.numero_documento.data,
+                    form.primer_nombre.data,
+                    form.segundo_nombre.data or None,
+                    form.primer_apellido.data,
+                    form.segundo_apellido.data or None,
+                    form.fecha_nacimiento.data,
+                    # TBL_ESTUDIANTE
+                    form.tipo_identificacion.data,
+                    form.grado_actual.data,
+                    form.grado_proximo.data,
+                    form.colegio_anterior.data,
+                    form.genero.data,
+                    form.grupo_preferencial.data,
+                    user_id,
+                    form.parentesco.data,
+                    # Auditoría
+                    ip,
+                    user_agent,
+                ), conn=conn)
 
-            sp_registrar_estudiante((
-                # TBL_PERSONA
-                form.numero_documento.data,
-                form.primer_nombre.data,
-                form.segundo_nombre.data or None,
-                form.primer_apellido.data,
-                form.segundo_apellido.data or None,
-                form.fecha_nacimiento.data,
-                # tbl_estudiante
-                form.tipo_identificacion.data,
-                form.grado_actual.data,
-                form.grado_proximo.data,
-                form.colegio_anterior.data,
-                form.genero.data,
-                form.grupo_preferencial.data,
-                user_id,
-                form.parentesco.data,
-                # Auditoría
-                ip,
-                user_agent,
-            ))
-
-            db.commit()
             session["estudiante_verificado"] = True
             flash("Estudiante registrado correctamente.", "success")
             return redirect(url_for("aplication.profile"))
 
         except Exception as e:
-            db.rollback()
             print(f"[ERROR] Registro de estudiante fallido: {e}")
             session["estudiante_verificado"] = False
             flash("Ocurrió un error al registrar al estudiante. Intente nuevamente.", "danger")

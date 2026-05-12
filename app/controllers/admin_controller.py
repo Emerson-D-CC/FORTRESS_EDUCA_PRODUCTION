@@ -50,7 +50,7 @@ class AdminController:
     def accounts_exportar_acciones(self):
         return self.accounts_service.exportar_historial_acciones()
     
-    # ACCOUNTS NEW|
+    # ACCOUNTS NEW
     def accounts_new(self):
         return self.accounts_new_service.Accounts_New()
     

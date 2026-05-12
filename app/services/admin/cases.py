@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import math
 
@@ -13,6 +15,11 @@ from app.repositories.admin_repository import (
 )
 from app.forms.admin_forms import FormFiltroTickets
 from app.utils.export_doc_utils import ExportarReporte
+from app.utils.sp_cache_utils import sp_cache
+
+# ==============================================================================
+# Constantes
+# ==============================================================================
 
 POR_PAGINA = 20
 
@@ -22,61 +29,72 @@ COLUMNAS_EXPORT = [
     "Colegio Asignado", "Técnico",
 ]
 
+_CAMPOS_BUSQUEDA = (
+    "ID_Ticket", "Nombre_Estudiante", "Nombre_Acudiente",
+    "Nombre_Estado", "Nombre_Grado", "Nombre_Afectacion",
+    "Colegio_Asignado", "Nombre_Tecnico",
+)
 
 # ==============================================================================
-# Helpers de filtrado en Python
+# Índice de búsqueda — se construye una vez por bloque cacheado
 # ==============================================================================
 
-def _filtrar_tickets(
-    registros: list[dict],
-    id_estado: int | None,
-    id_grado: int | None,
-    id_afectacion: int | None,
-) -> list[dict]:
-    resultado = registros
+def _construir_indice(registros: list[dict]) -> list[tuple[dict, str]]:
+    """Pre-computa cadena de búsqueda por registro"""
+    return [
+        (r, " ".join(
+            str(r.get(c, "")).lower() for c in _CAMPOS_BUSQUEDA
+        ))
+        for r in registros
+    ]
+
+
+def _buscar_tickets(indexado: list[tuple[dict, str]], query: str | None) -> list[dict]:
+    """Filtra sobre el índice pre-computado"""
+    if not query:
+        return [r for r, _ in indexado]
+    terminos = [t for t in query.strip().lower().split() if t]
+    if not terminos:
+        return [r for r, _ in indexado]
+    return [
+        r for r, cadena in indexado
+        if all(t in cadena for t in terminos)
+    ]
+
+# ==============================================================================
+# Filtrado por selectores
+# ==============================================================================
+
+def _filtrar_tickets(registros: list[dict], id_estado: int | None, id_grado: int | None, id_afectacion: int | None) -> list[dict]:
     if id_estado:
-        resultado = [r for r in resultado if r["FK_ID_Estado_Ticket"] == id_estado]
+        registros = [r for r in registros if r["FK_ID_Estado_Ticket"] == id_estado]
     if id_grado:
-        resultado = [r for r in resultado if r["FK_ID_Grado"] == id_grado]
+        registros = [r for r in registros if r["FK_ID_Grado"] == id_grado]
     if id_afectacion:
-        resultado = [r for r in resultado if r["FK_ID_Tipo_Afectacion"] == id_afectacion]
-    return resultado
-
+        registros = [r for r in registros if r["FK_ID_Tipo_Afectacion"] == id_afectacion]
+    return registros
 
 # ==============================================================================
-# Helpers de ordenamiento
+# Ordenamiento  —  Timsort O(n log n)
 # ==============================================================================
 
-def _insertion_sort_fecha_desc(registros: list[dict]) -> list[dict]:
-    """Insertion Sort DESC por Fecha_Creacion — se usa cuando hay filtros activos."""
-    lista = list(registros)
-    for i in range(1, len(lista)):
-        actual = lista[i]
-        clave = actual["Fecha_Creacion"] or datetime.datetime.min
-        j = i - 1
-        while j >= 0:
-            clave_j = lista[j]["Fecha_Creacion"] or datetime.datetime.min
-            if clave_j < clave:
-                lista[j + 1] = lista[j]
-                j -= 1
-            else:
-                break
-        lista[j + 1] = actual
-    return lista
+_FECHA_MIN = datetime.datetime.min
 
 
-def _selection_sort_prioridad_desc(registros: list[dict]) -> list[dict]:
-    """Selection Sort DESC por Puntaje_Prioridad — se usa sin filtros."""
-    lista = list(registros)
-    n = len(lista)
-    for i in range(n):
-        idx_max = i
-        for j in range(i + 1, n):
-            if (lista[j]["Puntaje_Prioridad"] or 0) > (lista[idx_max]["Puntaje_Prioridad"] or 0):
-                idx_max = j
-        lista[i], lista[idx_max] = lista[idx_max], lista[i]
-    return lista
+def _ordenar_fecha_desc(registros: list[dict]) -> list[dict]:
+    return sorted(
+        registros,
+        key=lambda r: r["Fecha_Creacion"] or _FECHA_MIN,
+        reverse=True,
+    )
 
+
+def _ordenar_prioridad_desc(registros: list[dict]) -> list[dict]:
+    return sorted(
+        registros,
+        key=lambda r: r["Puntaje_Prioridad"] or 0,
+        reverse=True,
+    )
 
 # ==============================================================================
 # Paginación
@@ -86,63 +104,62 @@ def _paginar(registros: list[dict], pagina: int, por_pagina: int) -> list[dict]:
     inicio = (pagina - 1) * por_pagina
     return registros[inicio: inicio + por_pagina]
 
-
 # ==============================================================================
 # Servicio
 # ==============================================================================
 
 class Cases_Service:
-    """Servicio para la vista de listado de todos los tickets (admin)."""
 
-    # ------------------------------------------------------------------
-    # Vista principal
-    # ------------------------------------------------------------------
     def listar_todos_tickets(self):
-
-        # Leer y sanitizar filtros desde GET
         id_estado = self._parse_int(request.args.get("estado"))
         id_grado = self._parse_int(request.args.get("grado"))
         id_afectacion = self._parse_int(request.args.get("afectacion"))
+        busqueda = (request.args.get("busqueda") or "").strip()[:100]
         pagina = self._parse_pagina(request.args.get("pagina"))
 
-        # Catálogos para los <select>
-        estados = sp_catalogo_estados_ticket()
-        grados = sp_catalogo_grados()
-        afectaciones = sp_catalogo_tipo_afectacion()
+        # ── Catálogos ─────────────────────────────────────────────────
+        estados = sp_cache.get_or_set("cases:cat:estados", sp_catalogo_estados_ticket)
+        grados = sp_cache.get_or_set("cases:cat:grados", sp_catalogo_grados)
+        afectaciones = sp_cache.get_or_set("cases:cat:afectaciones", sp_catalogo_tipo_afectacion)
 
-        # Poblar el formulario y pre-seleccionar opciones
         form_filtro = FormFiltroTickets(request.args, meta={"csrf": False})
-        form_filtro.estado.choices = [(0, "Todos los estados")] + [(e["ID_Estado_Ticket"], e["Nombre_Estado"]) for e in estados]
-        form_filtro.grado.choices = [(0, "Todos los grados")] + [(g["ID_Grado"], g["Nombre_Grado"]) for g in grados]
-        form_filtro.afectacion.choices = [(0, "Todas las afectaciones")] + [(a["ID_Tipo_Afectacion"], a["Nombre_Afectacion"]) for a in afectaciones]
+        form_filtro.estado.choices = (
+            [(0, "Todos los estados")] +
+            [(e["ID_Estado_Ticket"], e["Nombre_Estado"]) for e in estados]
+        )
+        form_filtro.grado.choices = (
+            [(0, "Todos los grados")] +
+            [(g["ID_Grado"], g["Nombre_Grado"]) for g in grados]
+        )
+        form_filtro.afectacion.choices = (
+            [(0, "Todas las afectaciones")] +
+            [(a["ID_Tipo_Afectacion"], a["Nombre_Afectacion"]) for a in afectaciones]
+        )
 
-        # Traer todos desde BD y filtrar en Python
-        todos = sp_cases_listar_todos()
-        filtrados = _filtrar_tickets(todos, id_estado, id_grado, id_afectacion)
+        # ── Datos + índice de búsqueda  ───────────────
+        todos   = sp_cache.get_or_set("cases:todos", sp_cases_listar_todos)
+        indexado = sp_cache.get_or_set(
+            "cases:indice",
+            lambda: _construir_indice(todos),
+        )
 
-        # Ordenar según si hay filtros activos
-        hay_filtro = any([id_estado, id_grado, id_afectacion])
-        if hay_filtro:
-            ordenados = _insertion_sort_fecha_desc(filtrados)
-        else:
-            ordenados = _selection_sort_prioridad_desc(filtrados)
+        hay_restriccion = any([id_estado, id_grado, id_afectacion, busqueda])
 
-        # Paginación
+        buscados = _buscar_tickets(indexado, busqueda)
+        filtrados = _filtrar_tickets(buscados, id_estado, id_grado, id_afectacion)
+
+        ordenados = (
+            _ordenar_fecha_desc(filtrados)
+            if hay_restriccion
+            else _ordenar_prioridad_desc(filtrados)
+        )
+
         total_tickets = len(ordenados)
         total_paginas = max(1, math.ceil(total_tickets / POR_PAGINA))
-        if pagina > total_paginas:
-            pagina = total_paginas
+        pagina = min(pagina, total_paginas)
 
         tickets_pagina = _paginar(ordenados, pagina, POR_PAGINA)
-
-        # Métricas (no se filtran: siempre sobre el total del sistema)
-        metricas = sp_cases_metricas() or {}
-
-        filtros_activos = {
-            "estado": id_estado,
-            "grado": id_grado,
-            "afectacion": id_afectacion,
-        }
+        metricas = sp_cache.get_or_set("cases:metricas", sp_cases_metricas) or {}
 
         return render_template(
             "admin/cases.html",
@@ -150,7 +167,10 @@ class Cases_Service:
             total_tickets = total_tickets,
             metricas = metricas,
             form_filtro = form_filtro,
-            filtros = filtros_activos,
+            filtros = {
+                "estado": id_estado, "grado": id_grado,
+                "afectacion": id_afectacion, "busqueda": busqueda,
+            },
             pagina_actual = pagina,
             total_paginas = total_paginas,
             por_pagina = POR_PAGINA,
@@ -158,18 +178,24 @@ class Cases_Service:
         )
 
     # ------------------------------------------------------------------
-    # Exportar CSV / PDF
-    # ------------------------------------------------------------------
     def exportar_tickets(self):
         formato = request.args.get("formato", "csv").lower()
         id_estado = self._parse_int(request.args.get("estado"))
         id_grado = self._parse_int(request.args.get("grado"))
         id_afectacion = self._parse_int(request.args.get("afectacion"))
+        busqueda = (request.args.get("busqueda") or "").strip()[:100]
 
         todos = sp_cases_exportar_todos()
-        filtrados = _filtrar_tickets(todos, id_estado, id_grado, id_afectacion)
-        ordenados = _insertion_sort_fecha_desc(filtrados) if any([id_estado, id_grado, id_afectacion]) \
-                    else _selection_sort_prioridad_desc(filtrados)
+        indexado = _construir_indice(todos)
+        buscados = _buscar_tickets(indexado, busqueda)
+        filtrados = _filtrar_tickets(buscados, id_estado, id_grado, id_afectacion)
+
+        hay_restriccion = any([id_estado, id_grado, id_afectacion, busqueda])
+        ordenados = (
+            _ordenar_fecha_desc(filtrados)
+            if hay_restriccion
+            else _ordenar_prioridad_desc(filtrados)
+        )
 
         def mapeador(r):
             return {
@@ -182,23 +208,21 @@ class Cases_Service:
                 "Estado": r["Nombre_Estado"],
                 "Prioridad": r["Puntaje_Prioridad"],
                 "Colegio Asignado": r.get("Colegio_Asignado") or "Sin asignar",
-                "Técnico": r.get("Nombre_Tecnico") or "Sin asignar",
+                "Técnico":         r.get("Nombre_Tecnico") or "Sin asignar",
             }
 
-        fila = ExportarReporte.cargar_fila(ordenados, mapeador)
+        fila  = ExportarReporte.cargar_fila(ordenados, mapeador)
         datos = fila.a_lista_datos()
+        marca = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
 
-        fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
-        
         if formato == "pdf":
-            return ExportarReporte.pdf(datos, COLUMNAS_EXPORT, "Solicitudes de Cupo", f"solicitudes_tickets_{fecha}")
-        return ExportarReporte.csv(datos, COLUMNAS_EXPORT, f"solicitudes_tickets_{fecha}")
+            return ExportarReporte.pdf(datos, COLUMNAS_EXPORT,
+                                       "Solicitudes de Cupo", f"solicitudes_{marca}")
+        return ExportarReporte.csv(datos, COLUMNAS_EXPORT, f"solicitudes_{marca}")
 
-    # ------------------------------------------------------------------
-    # Helpers
     # ------------------------------------------------------------------
     @staticmethod
-    def _parse_int(valor: str | None) -> int | None:
+    def _parse_int(valor) -> int | None:
         try:
             v = int(valor)
             return v if v > 0 else None
@@ -206,9 +230,9 @@ class Cases_Service:
             return None
 
     @staticmethod
-    def _parse_pagina(valor: str | None) -> int:
+    def _parse_pagina(valor) -> int:
         try:
             p = int(valor)
-            return p if p >= 1 else 1
+            return max(1, p)
         except (TypeError, ValueError):
             return 1

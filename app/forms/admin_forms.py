@@ -39,6 +39,15 @@ class FormFiltroTickets(SanitizedForm):
     class Meta:
         csrf = False
 
+    busqueda = StringField(
+        "Buscar",
+        validators=[Optional(), Length(max=100)],
+        render_kw={
+            "placeholder": "ID, estudiante, acudiente, colegio…",
+            "autocomplete": "off",
+        },
+    )
+
     estado = SelectField(
         "Estado",
         coerce=int,
@@ -58,7 +67,64 @@ class FormFiltroTickets(SanitizedForm):
         coerce=int,
         default=0,
         validators=[Optional()],
+    )
+
+
+
+# ====================================================================================================================================================
+#                                           PAGINA ACCOUNTS_FUNC.html
+# ====================================================================================================================================================
+
+class FormFiltroFuncionarios(SanitizedForm):
+    """Filtros GET para la tabla de funcionarios (técnicos y admins)"""
+
+    class Meta:
+        csrf = False
+
+    busqueda = StringField(
+        "Buscar",
+        validators=[Optional(), Length(max=100)],
+        render_kw={
+            "placeholder": "ID del usuario…",
+            "autocomplete": "off",
+        },
+    )
+
+    estado = SelectField(
+        "Estado",
+        coerce=int,
+        default=0,
+        validators=[Optional()],
+    )
+
+
+# ====================================================================================================================================================
+#                                           PAGINA ACCOUNTS_USER.html
+# ====================================================================================================================================================
+
+
+class FormFiltroUsuarios(SanitizedForm):
+    """Filtros GET para la tabla de usuarios (acudientes y estudiantes)"""
+
+    class Meta:
+        csrf = False
+
+    busqueda = StringField(
+        "Buscar",
+        validators=[Optional(), Length(max=100)],
+        render_kw={
+            "placeholder": "ID del usuario…",
+            "autocomplete": "off",
+        },
+    )
+
+    estado = SelectField(
+        "Estado",
+        coerce=int,
+        default=0,
+        validators=[Optional()],
     )    
+    
     
     
 # ====================================================================================================================================================

@@ -1,7 +1,7 @@
 # FUNCIONES DE FLASK
 from flask_wtf import FlaskForm
 
-from wtforms import SelectField, PasswordField
+from wtforms import SelectField, PasswordField, StringField
 from wtforms.validators import DataRequired, Length, Optional, EqualTo, ValidationError
 
 # UTILIDADES
@@ -18,6 +18,15 @@ class FormFiltroTicketsTecnico(FlaskForm):
 
     class Meta:
         csrf = False # Formulario GET de solo lectura
+
+    busqueda = StringField(
+        "Buscar",
+        validators=[Optional(), Length(max=100)],
+        render_kw={
+            "placeholder": "ID, estudiante, acudiente, colegio…",
+            "autocomplete": "off",
+        },
+    )
 
     estado = SelectField(
         "Estado",

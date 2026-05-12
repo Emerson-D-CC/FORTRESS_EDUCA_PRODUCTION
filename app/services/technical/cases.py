@@ -1,5 +1,7 @@
 # app/services/technical_cases_service.py
 
+import datetime
+
 # FUNCIONES DE FLASK
 from flask import render_template, request, session
 
@@ -11,6 +13,51 @@ from app.repositories.technical_repository import (
     sp_catalogo_grados,
     sp_catalogo_tipo_afectacion,
 )
+
+
+_CAMPOS_BUSQUEDA = (
+    "ID_Ticket",
+    "Nombre_Estudiante",
+    "Nombre_Acudiente",
+    "Nombre_Estado",
+    "Nombre_Grado",
+    "Nombre_Afectacion",
+    "Colegio_Asignado",
+    "Nombre_Tecnico",
+)
+
+
+# ---------------------------
+# Helpers de búsqueda
+# ---------------------------
+
+def _normalizar(valor) -> str:
+    """Convierte cualquier valor a string minúscula para comparación."""
+    return str(valor).lower() if valor else ""
+
+
+def _construir_indice(registros: list[dict]) -> list[tuple[dict, str]]:
+    """Pre-computa una cadena de búsqueda por registro"""
+    return [
+        (r, " ".join(_normalizar(r.get(c)) for c in _CAMPOS_BUSQUEDA))
+        for r in registros
+    ]
+
+
+def _buscar_tickets(registros: list[dict], query: str | None) -> list[dict]:
+    """Filtra registros cuya cadena indexada contenga TODOS los términos"""
+    if not query:
+        return registros
+
+    terminos = [t for t in query.strip().lower().split() if t]
+    if not terminos:
+        return registros
+
+    indexado = _construir_indice(registros)
+    return [
+        r for r, cadena in indexado
+        if all(t in cadena for t in terminos)
+    ]
 
 
 # ---------------------------
@@ -50,16 +97,20 @@ def _filtrar_tickets_tecnico(tickets: list[dict], id_estado: int | None, id_grad
 # Helpers de ordenamiento
 # ==============================================================================
 
-def _insertion_sort_por_fecha_asc(tickets: list[dict]) -> list[dict]:
-    """Insertion Sort ascendente por Fecha_Creacion. Se usa cuando hay filtros activos"""
-    lista = list(tickets)
+def _insertion_sort_fecha_desc(registros: list[dict]) -> list[dict]:
+    """Insertion Sort DESC por Fecha_Creacion — con filtros/búsqueda activos."""
+    lista = list(registros)
     for i in range(1, len(lista)):
         actual = lista[i]
-        clave  = actual["Fecha_Creacion"]
+        clave  = actual["Fecha_Creacion"] or datetime.datetime.min
         j = i - 1
-        while j >= 0 and lista[j]["Fecha_Creacion"] > clave:
-            lista[j + 1] = lista[j]
-            j -= 1
+        while j >= 0:
+            clave_j = lista[j]["Fecha_Creacion"] or datetime.datetime.min
+            if clave_j < clave:
+                lista[j + 1] = lista[j]
+                j -= 1
+            else:
+                break
         lista[j + 1] = actual
     return lista
 
@@ -94,6 +145,7 @@ class Cases_Service:
         id_estado = self._parse_int(request.args.get("estado"))
         id_grado = self._parse_int(request.args.get("grado"))
         id_afectacion = self._parse_int(request.args.get("afectacion"))
+        busqueda = (request.args.get("busqueda") or "").strip()[:100]
 
         # Catálogos y formulario de filtros 
         estados = sp_catalogo_estados_ticket()
@@ -112,19 +164,16 @@ class Cases_Service:
         # Traer tickets del técnico desde BD 
         todos_tickets = sp_technical_cases_listar(id_tecnico)
 
-        # Filtrar
+        # Filtrar + búsqueda libre
         tickets_filtrados = _filtrar_tickets_tecnico(
             todos_tickets, id_estado, id_grado, id_afectacion
         )
+        tickets_buscados = _buscar_tickets(tickets_filtrados, busqueda)
 
-        # Ordenar según si hay filtros activos o no
-        hay_filtro = any([id_estado, id_grado, id_afectacion])
-        if hay_filtro:
-            # Con filtros: Insertion Sort por fecha ASC (orden de llegada)
-            tickets_ordenados = _insertion_sort_por_fecha_asc(tickets_filtrados)
-        else:
-            # Sin filtros: Selection Sort por prioridad DESC (más urgentes primero)
-            tickets_ordenados = _selection_sort_por_prioridad_desc(tickets_filtrados)
+        # Ordenar según si hay filtros o búsqueda activos
+        hay_restriccion = any([id_estado, id_grado, id_afectacion, busqueda])
+        tickets_ordenados = _insertion_sort_fecha_desc(tickets_buscados) if hay_restriccion \
+            else _selection_sort_por_prioridad_desc(tickets_buscados)
 
         # Métricas y render
         metricas = sp_technical_cases_metricas(id_tecnico)
@@ -133,6 +182,7 @@ class Cases_Service:
             "estado": id_estado,
             "grado": id_grado,
             "afectacion": id_afectacion,
+            "busqueda": busqueda,
         }
 
         return render_template(

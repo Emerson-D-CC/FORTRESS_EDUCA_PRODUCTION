@@ -183,38 +183,36 @@ class Register_Service:
                 ip = request.remote_addr
                 user_agent = request.headers.get("User-Agent", "")
  
-                # Llamar al stored procedure para registrar usuario     
-                sp_registrar_usuario((
-                    # DATOS PERSONA
-                    form.documento.data,
-                    form.primer_nombre.data.strip(),
-                    form.segundo_nombre.data.strip() if form.segundo_nombre.data else None,
-                    form.primer_apellido.data.strip(),
-                    form.segundo_apellido.data.strip() if form.segundo_apellido.data else None,
-                    form.fecha_nacimiento.data,
- 
-                    # DATOS CONTACTO
-                    form.email.data.lower(),
-                    form.telefono.data.strip(),
-                    form.parentesco.data,
-                    form.tipo_documento.data,
-                    1,  # ID Genero
-                    1,  # ID Grupo Preferencial (valor default)
-                    1,  # ID Estrato
-                    form.barrio.data,
- 
-                    # DATOS USUARIO
-                    form.email.data.lower(),
-                    hash_password,
-                    2,  # ID Rol
- 
-                    # AUDITORÍA
-                    ip,
-                    user_agent
-                ))
-                
-                # Confirmar cambios en BD
-                db.commit()
+                # Llamar al stored procedure para registrar usuario
+                with db.transaction() as conn:
+                    sp_registrar_usuario((
+                        # DATOS PERSONA
+                        form.documento.data,
+                        form.primer_nombre.data.strip(),
+                        form.segundo_nombre.data.strip() if form.segundo_nombre.data else None,
+                        form.primer_apellido.data.strip(),
+                        form.segundo_apellido.data.strip() if form.segundo_apellido.data else None,
+                        form.fecha_nacimiento.data,
+    
+                        # DATOS CONTACTO
+                        form.email.data.lower(),
+                        form.telefono.data.strip(),
+                        form.parentesco.data,
+                        form.tipo_documento.data,
+                        1,  # ID Genero
+                        1,  # ID Grupo Preferencial (valor default)
+                        1,  # ID Estrato
+                        form.barrio.data,
+    
+                        # DATOS USUARIO
+                        form.email.data.lower(),
+                        hash_password,
+                        2,  # ID Rol
+    
+                        # AUDITORÍA
+                        ip,
+                        user_agent
+                    ), conn=conn)
                 
                 # Limpiar cualquier dato de sesión
                 session.pop('form_data', None)
@@ -230,7 +228,6 @@ class Register_Service:
  
             except Exception as e:
                 # Revertir cambios en BD en caso de error
-                db.rollback()
                 
                 print(f"[ERROR] Registro fallido: {e}")
                 

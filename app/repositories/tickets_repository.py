@@ -19,11 +19,12 @@ def sp_ticket_panel_comentarios_consultar(id_ticket) -> list[dict]:
     return db.call_procedure("sp_ticket_panel_comentarios_consultar", (id_ticket,)) or []
 
 
-def sp_ticket_panel_comentario_insertar(id_ticket, tipo_evento, id_usuario, comentario, es_interno) -> None:
+def sp_ticket_panel_comentario_insertar(id_ticket, tipo_evento, id_usuario, comentario, es_interno, conn=None) -> None:
     """Inserta un comentario en el ticket"""
     db.call_procedure(
         "sp_ticket_panel_comentario_insertar",
         (id_ticket, tipo_evento, id_usuario, comentario, int(es_interno)),
+        conn=conn
     )
 
 
@@ -36,32 +37,35 @@ def sp_ticket_validar_cupo(id_ticket: str, id_colegio: int, id_jornada: int) -> 
     return resultado[0] if resultado else None
 
 
-def sp_ticket_confirmar_asignacion(id_ticket: str, id_cupo: int, id_tecnico: int) -> None:
+def sp_ticket_confirmar_asignacion(id_ticket: str, id_cupo: int, id_tecnico: int, conn=None) -> None:
     """Asigna el cupo al ticket, cambia estado a 4 e inserta el comentario público automático"""
     db.call_procedure(
-        "sp_ticket_confirmar_asignacion", (id_ticket, id_cupo, id_tecnico)
+        "sp_ticket_confirmar_asignacion", (id_ticket, id_cupo, id_tecnico),
+        conn=conn
     )
 
     # GESTIÓN DE DTICKET ABANDONADOS
-def sp_ticket_obtener_abandonados() -> list[dict]:
+def sp_ticket_obtener_abandonados(conn=None) -> list[dict]:
     """Retorna tickets en estado 4 sin respuesta del usuario en +3 días"""
-    return db.call_procedure("sp_ticket_obtener_abandonados", ()) or []
+    return db.call_procedure("sp_ticket_obtener_abandonados", (), conn=conn) or []
 
 
-def sp_ticket_rechazar_abandonado(id_ticket: str, id_responsable: int) -> None:
+def sp_ticket_rechazar_abandonado(id_ticket: str, id_responsable: int, conn=None) -> None:
     """Cierra el ticket como Rechazado y registra el comentario automático"""
     db.call_procedure(
-        "sp_ticket_rechazar_abandonado", (id_ticket, id_responsable)
+        "sp_ticket_rechazar_abandonado", (id_ticket, id_responsable),
+        conn=conn
     )
 
 
 # CAMBIO DE ESTADO
 
-def sp_ticket_panel_estado_actualizar(id_ticket, id_estado_nuevo, fecha_cierre, resolucion, id_tecnico,) -> None:
+def sp_ticket_panel_estado_actualizar(id_ticket, id_estado_nuevo, fecha_cierre, resolucion, id_tecnico, conn=None) -> None:
     """Actualiza el estado del ticket y registra automáticamente un comentario interno de auditoría con el cambio"""
     db.call_procedure(
         "sp_ticket_panel_estado_actualizar",
         (id_ticket, id_estado_nuevo, fecha_cierre, resolucion, id_tecnico),
+        conn=conn
     )
 
 
@@ -78,11 +82,12 @@ def sp_ticket_panel_documento_descargar(id_doc) -> dict | None:
     return resultado[0] if resultado else None
 
 
-def sp_ticket_panel_documento_insertar(id_ticket, id_tipo_doc, archivo, nombre_original) -> None:
+def sp_ticket_panel_documento_insertar(id_ticket, id_tipo_doc, archivo, nombre_original, conn=None) -> None:
     """Inserta un documento subido por el técnico al ticket"""
     db.call_procedure(
         "sp_documento_ticket_insertar",
         (id_ticket, id_tipo_doc, archivo, nombre_original),
+        conn=conn
     )
 
 
@@ -135,11 +140,11 @@ def sp_ticket_cupo_asignado_detalle(id_ticket: str) -> dict | None:
     return resultado[0] if resultado else None
 
 
-def sp_ticket_usuario_confirmar_cupo(id_ticket: str, id_tecnico: int) -> None:
+def sp_ticket_usuario_confirmar_cupo(id_ticket: str, id_tecnico: int, conn=None) -> None:
     """Confirma el cupo: descuenta disponible+reservado, cierra ticket como Solucionado"""
-    db.call_procedure("sp_ticket_usuario_confirmar_cupo", (id_ticket, id_tecnico))
+    db.call_procedure("sp_ticket_usuario_confirmar_cupo", (id_ticket, id_tecnico), conn=conn)
 
 
-def sp_ticket_usuario_cancelar_cupo(id_ticket: str, id_tecnico: int) -> None:
+def sp_ticket_usuario_cancelar_cupo(id_ticket: str, id_tecnico: int, conn=None) -> None:
     """Cancela el cupo: libera reserva, quita FK_ID_Cupo_Asignado, vuelve a estado 5"""
-    db.call_procedure("sp_ticket_usuario_cancelar_cupo", (id_ticket, id_tecnico))
+    db.call_procedure("sp_ticket_usuario_cancelar_cupo", (id_ticket, id_tecnico), conn=conn)

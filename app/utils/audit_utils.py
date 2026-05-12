@@ -5,8 +5,7 @@ from app.utils.database_utils import db
 def Auditoria_Session(usuario, ip, evento, agent):
     """Registra eventos de sesión. Falla/Ingreso"""
     try:
-        sp_auditoria_sesion(usuario, ip, evento, agent)
-        db.commit()
+        with db.transaction() as conn:
+            sp_auditoria_sesion(usuario, ip, evento, agent, conn=conn)
     except Exception as e:
-        db.rollback()
         print(f"[ERROR] Auditoría fallida: {e}")

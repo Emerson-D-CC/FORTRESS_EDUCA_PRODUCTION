@@ -102,15 +102,15 @@ class Ticket_Panel_Service:
         """Llama a los SPs de detección y cierre de tickets abandonados. Se ejecuta en cada carga del panel para mantener estados actualizados"""
         try:
             abandonados = sp_ticket_obtener_abandonados()
-            for t in abandonados:
-                sp_ticket_rechazar_abandonado(
-                    id_ticket = t["ID_Ticket"],
-                    id_responsable = t["ID_Responsable"],
-                )
             if abandonados:
-                db.commit()
+                with db.transaction() as conn:
+                    for t in abandonados:
+                        sp_ticket_rechazar_abandonado(
+                            id_ticket = t["ID_Ticket"],
+                            id_responsable = t["ID_Responsable"],
+                            conn=conn
+                        )
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - abandonados] {e}")
 
     # ----------------------------------------------------------
@@ -218,40 +218,39 @@ class Ticket_Panel_Service:
             return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
 
         try:
-            sp_ticket_confirmar_asignacion(
-                id_ticket = id_ticket,
-                id_cupo = id_cupo,
-                id_tecnico = session["user_id"],
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_ticket_confirmar_asignacion(
+                    id_ticket = id_ticket,
+                    id_cupo = id_cupo,
+                    id_tecnico = session["user_id"],
+                    conn=conn
+                )
             flash(
                 "Cupo asignado correctamente. Se ha notificado al usuario "
                 "y el ticket queda en espera de su confirmación.",
                 "success",
             )
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - cupo] {e}")
             flash("No se pudo asignar el cupo. Intente nuevamente.", "danger")
 
         return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
 
 
-    #  autorizar cupo 
     def autorizar_cupo(self, id_ticket: str):
         form = FormConfirmarCupo()
         if not form.validate_on_submit():
             flash("Solicitud inválida.", "danger")
             return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
         try:
-            sp_ticket_usuario_confirmar_cupo(
-                id_ticket  = id_ticket,
-                id_tecnico = session["user_id"],
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_ticket_usuario_confirmar_cupo(
+                    id_ticket  = id_ticket,
+                    id_tecnico = session["user_id"],
+                    conn=conn
+                )
             flash("Cupo confirmado. El ticket ha sido marcado como Solucionado.", "success")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - autorizar cupo] {e}")
             flash("No se pudo confirmar el cupo. Intente nuevamente.", "danger")
         return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
@@ -263,14 +262,14 @@ class Ticket_Panel_Service:
             flash("Solicitud inválida.", "danger")
             return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
         try:
-            sp_ticket_usuario_cancelar_cupo(
-                id_ticket  = id_ticket,
-                id_tecnico = session["user_id"],
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_ticket_usuario_cancelar_cupo(
+                    id_ticket  = id_ticket,
+                    id_tecnico = session["user_id"],
+                    conn=conn
+                )
             flash("Cupo cancelado. El ticket vuelve a Asignación de Cupo.", "warning")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - cancelar cupo] {e}")
             flash("No se pudo cancelar el cupo. Intente nuevamente.", "danger")
         return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
@@ -286,17 +285,17 @@ class Ticket_Panel_Service:
             flash("Por favor revise el comentario antes de enviarlo.", "danger")
             return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
         try:
-            sp_ticket_panel_comentario_insertar(
-                id_ticket = id_ticket,
-                tipo_evento = "Comentario",
-                id_usuario = session["user_id"],
-                comentario = form.comentario.data.strip(),
-                es_interno = form.es_interno.data,
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_ticket_panel_comentario_insertar(
+                    id_ticket = id_ticket,
+                    tipo_evento = "Comentario",
+                    id_usuario = session["user_id"],
+                    comentario = form.comentario.data.strip(),
+                    es_interno = form.es_interno.data,
+                    conn=conn
+                )
             flash("Comentario agregado correctamente.", "success")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - comentario] {e}")
             flash("Ocurrió un error al guardar el comentario.", "danger")
         return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
@@ -312,17 +311,17 @@ class Ticket_Panel_Service:
             return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
         fecha_cierre = form_estado.fecha_cierre.data or None
         try:
-            sp_ticket_panel_estado_actualizar(
-                id_ticket = id_ticket,
-                id_estado_nuevo = form_estado.estado.data,
-                fecha_cierre = fecha_cierre,
-                resolucion = form_estado.resolucion.data.strip(),
-                id_tecnico = session["user_id"],
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_ticket_panel_estado_actualizar(
+                    id_ticket = id_ticket,
+                    id_estado_nuevo = form_estado.estado.data,
+                    fecha_cierre = fecha_cierre,
+                    resolucion = form_estado.resolucion.data.strip(),
+                    id_tecnico = session["user_id"],
+                    conn=conn
+                )
             flash("Estado del ticket actualizado correctamente.", "success")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - estado] {e}")
             flash("No se pudo actualizar el estado.", "danger")
         return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
@@ -355,23 +354,24 @@ class Ticket_Panel_Service:
             return redirect(url_for("ticket_ad.ticket_panel_detail", id_ticket=id_ticket))
 
         try:
-            sp_ticket_panel_documento_insertar(
-                id_ticket = id_ticket,
-                id_tipo_doc = form_doc.tipo_documento.data,
-                archivo = contenido,
-                nombre_original = nombre_original,
-            )
-            sp_ticket_panel_comentario_insertar(
-                id_ticket  = id_ticket,
-                tipo_evento = "Documento Subido",
-                id_usuario = session["user_id"],
-                comentario = f"[Documento Subido] {nombre_original}",
-                es_interno = True,
-            )
-            db.commit()
+            with db.transaction() as conn:
+                sp_ticket_panel_documento_insertar(
+                    id_ticket = id_ticket,
+                    id_tipo_doc = form_doc.tipo_documento.data,
+                    archivo = contenido,
+                    nombre_original = nombre_original,
+                    conn=conn
+                )
+                sp_ticket_panel_comentario_insertar(
+                    id_ticket  = id_ticket,
+                    tipo_evento = "Documento Subido",
+                    id_usuario = session["user_id"],
+                    comentario = f"[Documento Subido] {nombre_original}",
+                    es_interno = True,
+                    conn=conn
+                )
             flash("Documento subido correctamente.", "success")
         except Exception as e:
-            db.rollback()
             print(f"[ERROR - documento upload] {e}")
             flash("Ocurrió un error al subir el documento.", "danger")
 

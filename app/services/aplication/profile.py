@@ -180,23 +180,24 @@ class Profile_Data_Service:
             return False
 
         try:
-            sp_actualizar_datos_adicionales((
-                datos_acu.get("ID_Datos_Adicionales"),
-                form.telefono.data,
-                datos_acu.get("ID_Persona"),
-                form.genero.data,
-                form.grupo_preferencial.data,
-                form.estrato.data,
-                form.barrio.data,
-                user_id,
-                request.remote_addr,
-                request.headers.get("User-Agent"),
-            ))
-            db.commit()
+            with db.transaction() as conn:            
+                sp_actualizar_datos_adicionales((
+                    datos_acu.get("ID_Datos_Adicionales"),
+                    form.telefono.data,
+                    datos_acu.get("ID_Persona"),
+                    form.genero.data,
+                    form.grupo_preferencial.data,
+                    form.estrato.data,
+                    form.barrio.data,
+                    user_id,
+                    request.remote_addr,
+                    request.headers.get("User-Agent"),
+                ), conn=conn)
+                      
+            
             flash("Datos del acudiente actualizados correctamente.", "success")
             return True
         except Exception as e:
-            db.rollback()
             flash("Error al guardar los cambios del acudiente.", "danger")
             return False
 
@@ -223,35 +224,35 @@ class Profile_Data_Service:
         
         try:
             # 1. Actualizar TBL_PERSONA del menor
-            sp_actualizar_persona((
-                datos_est["ID_Persona"],
-                form.primer_nombre.data,
-                form.segundo_nombre.data or None,
-                form.primer_apellido.data,
-                form.segundo_apellido.data or None,
-                form.fecha_nacimiento.data,
-                user_id,
-                ip,
-                user_agent,
-            ))
+            with db.transaction() as conn:            
+                sp_actualizar_persona((
+                    datos_est["ID_Persona"],
+                    form.primer_nombre.data,
+                    form.segundo_nombre.data or None,
+                    form.primer_apellido.data,
+                    form.segundo_apellido.data or None,
+                    form.fecha_nacimiento.data,
+                    user_id,
+                    ip,
+                    user_agent,
+                ), conn=conn)
 
-            # 2. Actualizar tbl_estudiante
-            sp_actualizar_estudiante((
-                form.grado_actual.data,
-                form.grado_proximo.data,
-                form.colegio_anterior.data,
-                form.genero.data,
-                form.grupo_preferencial.data,
-                datos_est["ID_Persona"],
-                user_id,
-                ip,
-                user_agent,
-            ))
+            # 2. Actualizar TBL_ESTUDIANTE
+            with db.transaction() as conn:            
+                sp_actualizar_estudiante((
+                    form.grado_actual.data,
+                    form.grado_proximo.data,
+                    form.colegio_anterior.data,
+                    form.genero.data,
+                    form.grupo_preferencial.data,
+                    datos_est["ID_Persona"],
+                    user_id,
+                    ip,
+                    user_agent,
+                ), conn=conn)
 
-            db.commit()
             flash("Datos del estudiante actualizados correctamente.", "success")
             return True
         except Exception as e:
-            db.rollback()
             flash("Ocurrió un error al guardar los cambios del estudiante.", "danger")
             return False

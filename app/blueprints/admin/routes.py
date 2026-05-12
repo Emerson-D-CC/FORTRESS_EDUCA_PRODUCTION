@@ -22,8 +22,9 @@ def cases():
     return controller.cases()
 
 @admin_bp.route("/cases/export")
-#@login_required
-#@admin_required
+@login_required
+@admin_required
+@mfa_required
 def cases_export():
     return controller.cases_export()
 

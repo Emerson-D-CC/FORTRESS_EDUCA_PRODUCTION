@@ -150,8 +150,8 @@ class Login_User_Service:
                     decoded = decode_token(access_token)
                     jti = decoded.get("jti", "")
                     session["jti"] = jti
-                    sp_registrar_sesion(data_user["ID_Usuario"], jti,(user_agent or "Desconocido")[:255], ip)
-                    db.commit()
+                    with db.transaction() as conn:
+                        sp_registrar_sesion(data_user["ID_Usuario"], jti,(user_agent or "Desconocido")[:255], ip, conn=conn)
                     
                 except Exception as e:
                     print(f"[WARN] No se pudo registrar sesión: {e}")
@@ -248,8 +248,8 @@ class Login_User_Service:
                 # Marcar sesión como inactiva en BD
                 if jti:
                     try:
-                        sp_cerrar_sesion(jti)
-                        db.commit()
+                        with db.transaction() as conn:
+                            sp_cerrar_sesion(jti, conn=conn)
                     except Exception as e:
                         print(f"[WARN] No se pudo cerrar sesión en BD: {e}")
 

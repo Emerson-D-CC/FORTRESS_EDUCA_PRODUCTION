@@ -270,32 +270,31 @@ class AdminCreateService:
             user_agent = request.headers.get("User-Agent", "")
             id_admin = session.get("id_usuario", 1)
 
-            sp_registrar_usuario_admin((
-                form.documento.data.strip(),
-                form.primer_nombre.data.strip(),
-                form.segundo_nombre.data.strip() if form.segundo_nombre.data else None,
-                form.primer_apellido.data.strip(),
-                form.segundo_apellido.data.strip() if form.segundo_apellido.data else None,
-                form.fecha_nacimiento.data,
-                form.email.data.lower().strip(),
-                form.telefono.data.strip(),
-                id_parentesco,
-                int(form.tipo_documento.data),
-                1, # FK_ID_Genero  (default — no capturado en este form)
-                1, # FK_ID_Grupo_Preferencial (default)
-                1, # FK_ID_Estrato (default)
-                int(form.barrio.data),
-                form.email.data.lower().strip(),
-                hash_pwd,
-                _ROL_MAP[form_type],
-                ip,
-                user_agent,
-                id_admin,
-            ))
-            db.commit()
+            with db.transaction() as conn:
+                sp_registrar_usuario_admin((
+                    form.documento.data.strip(),
+                    form.primer_nombre.data.strip(),
+                    form.segundo_nombre.data.strip() if form.segundo_nombre.data else None,
+                    form.primer_apellido.data.strip(),
+                    form.segundo_apellido.data.strip() if form.segundo_apellido.data else None,
+                    form.fecha_nacimiento.data,
+                    form.email.data.lower().strip(),
+                    form.telefono.data.strip(),
+                    id_parentesco,
+                    int(form.tipo_documento.data),
+                    1, # FK_ID_Genero  (default — no capturado en este form)
+                    1, # FK_ID_Grupo_Preferencial (default)
+                    1, # FK_ID_Estrato (default)
+                    int(form.barrio.data),
+                    form.email.data.lower().strip(),
+                    hash_pwd,
+                    _ROL_MAP[form_type],
+                    ip,
+                    user_agent,
+                    id_admin,
+                ), conn=conn)
 
         except Exception as exc:
-            db.rollback()
             print(f"[ERROR] sp_registrar_usuario_admin: {exc}")
             self._set_session_error(form_type, request.form.to_dict(), {},
                                     "Error al crear la cuenta. Intente nuevamente o contacte al administrador.")
@@ -341,36 +340,34 @@ class AdminCreateService:
             user_agent = request.headers.get("User-Agent", "")
             id_admin = session.get("id_usuario", 1)
 
-            # Grado próximo: 0 → None (nullable en tbl_estudiante)
+            # Grado próximo: 0 → None (nullable en TBL_ESTUDIANTE)
             grado_prox = (
                 int(form.grado_proximo.data)
                 if form.grado_proximo.data and str(form.grado_proximo.data) != "0"
                 else 0   # el SP aplica NULLIF(val, 0)
             )
-
-            sp_registrar_estudiante_admin((
-                form.documento.data.strip(),
-                form.primer_nombre.data.strip(),
-                form.segundo_nombre.data.strip() if form.segundo_nombre.data else None,
-                form.primer_apellido.data.strip(),
-                form.segundo_apellido.data.strip() if form.segundo_apellido.data else None,
-                form.fecha_nacimiento.data,
-                int(form.tipo_documento.data),
-                int(form.grado_actual.data),
-                grado_prox,
-                int(form.colegio_anterior.data),
-                int(form.genero.data),
-                int(form.grupo_preferencial.data),
-                int(form.acudiente.data),
-                int(form.parentesco_estudiante.data),
-                ip,
-                user_agent,
-                id_admin,
-            ))
-            db.commit()
+            with db.transaction() as conn:
+                sp_registrar_estudiante_admin((
+                    form.documento.data.strip(),
+                    form.primer_nombre.data.strip(),
+                    form.segundo_nombre.data.strip() if form.segundo_nombre.data else None,
+                    form.primer_apellido.data.strip(),
+                    form.segundo_apellido.data.strip() if form.segundo_apellido.data else None,
+                    form.fecha_nacimiento.data,
+                    int(form.tipo_documento.data),
+                    int(form.grado_actual.data),
+                    grado_prox,
+                    int(form.colegio_anterior.data),
+                    int(form.genero.data),
+                    int(form.grupo_preferencial.data),
+                    int(form.acudiente.data),
+                    int(form.parentesco_estudiante.data),
+                    ip,
+                    user_agent,
+                    id_admin,
+                ), conn=conn)
 
         except Exception as exc:
-            db.rollback()
             print(f"[ERROR] sp_registrar_estudiante_admin: {exc}")
             self._set_session_error("estudiante", request.form.to_dict(), {},
                                     "Error al registrar el estudiante. Intente nuevamente.")

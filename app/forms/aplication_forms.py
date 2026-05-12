@@ -316,7 +316,7 @@ class FormRegistroEstudiante(SanitizedForm):
         validators = [DataRequired()]
     )
 
-    # Datos del estudiante (tbl_estudiante)
+    # Datos del estudiante (TBL_ESTUDIANTE)
     tipo_identificacion = SelectField(
         "Tipo de Identificación",
         validators = [DataRequired(), seleccion_valida],
