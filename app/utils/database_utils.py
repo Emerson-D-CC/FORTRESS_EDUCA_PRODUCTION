@@ -28,7 +28,7 @@ class ConnectionDB:
         try:
             self._pool = pooling.MySQLConnectionPool(
                 pool_name = "fortress_pool",
-                pool_size = 30, # ajusta según tu carga esperada
+                pool_size = 10, # ajusta según tu carga esperada
                 pool_reset_session = True, # limpia variables de sesión al devolver
                 **pool_config,
             )
