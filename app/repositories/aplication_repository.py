@@ -46,7 +46,7 @@ def sp_ticket_crear(data, conn=None) -> str:
     """Llama al SP que inserta el ticket y retorna el ID generado"""
     return db.call_procedure(
         "sp_ticket_crear",
-        (data,),
+        data,
         commit=False,
         conn=conn,
     )
@@ -238,20 +238,22 @@ def sp_estudiante_existe(num_doc_estudiante, id_usuario):
         
 # MFA
 
-def sp_guardar_mfa_secret_temp(id_usuario, secret):
+def sp_guardar_mfa_secret_temp(id_usuario, secret, conn=None):
     """Guarda el secret temporal mientras el usuario no ha confirmado el código"""
     return db.call_procedure(
         "sp_tbl_usuario_guardar_mfa_secret_temp",
         (id_usuario, secret),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
-def sp_activar_mfa(id_usuario):
+def sp_activar_mfa(id_usuario, conn=None):
     """Mueve el secret temporal al campo definitivo y activa 2FA"""
     return db.call_procedure(
         "sp_tbl_usuario_activar_mfa",
         (id_usuario,),
-        commit=False
+        commit=False,
+        conn=conn
     )
 
 def sp_desactivar_mfa(id_usuario, conn=None):
@@ -306,10 +308,10 @@ def sp_configuracion_actualizar_notif_navegador(id_usuario, activo):
 
 # SISTEMA PARA ELIMINAR AL USUARIO ACTUAL
 
-def sp_validar_login(username, password):
+def sp_validar_data_autenticacion(username):
     return db.call_procedure(
-        "sp_tbl_usuario_validar_login",
-        (username, password)
+        "sp_obtener_datos_autenticacion",
+        (username,)
     )
 
 def sp_eliminar_cuenta_completa(id_usuario, ip, user_agent, conn=None):

@@ -344,26 +344,26 @@ class Ticket_Request_Service:
                     user_agent,
                 ), conn=conn)
 
-            # Documentos individuales
-            archivos = [
-                (form_p5.doc_acudiente.data, 1, _MAX_FILE_SIZE),
-                (form_p5.doc_menor.data, 2, _MAX_FILE_SIZE),
-                (form_p5.doc_victima.data, 4, _MAX_FILE_SIZE),
-            ]
-            for file_storage, id_tipo_doc, max_size in archivos:
-                datos = _leer_archivo(file_storage, max_size)
-                if datos:
-                    sp_documento_ticket_insertar(
-                        id_ticket, id_tipo_doc, datos, file_storage.filename, conn=conn
-                    )
+                archivos = [
+                    (form_p5.doc_acudiente.data,  1, _MAX_FILE_SIZE),
+                    (form_p5.doc_menor.data,      2, _MAX_FILE_SIZE),
+                    (form_p5.doc_victima.data,    4, _MAX_FILE_SIZE),
+                ]
+                for file_storage, id_tipo_doc, max_size in archivos:
+                    datos = _leer_archivo(file_storage, max_size)
+                    if datos:
+                        sp_documento_ticket_insertar(
+                            id_ticket, id_tipo_doc, datos, file_storage.filename, conn=conn
+                        )
 
-            # Certificados múltiples
-            for cert in (form_p5.doc_certificados.data or []):
-                datos = _leer_archivo(cert, _MAX_FILE_SIZE_CERTS)
-                if datos:
-                    sp_documento_ticket_insertar(id_ticket, 3, datos, cert.filename, conn=conn)
+                for cert in (form_p5.doc_certificados.data or []):
+                    datos = _leer_archivo(cert, _MAX_FILE_SIZE_CERTS)
+                    if datos:
+                        sp_documento_ticket_insertar(
+                            id_ticket, 3, datos, cert.filename, conn=conn
+                        )
 
-            # Limpiar cualquier dato de sesión previo del wizard
+            # Limpiar sesión y redirigir
             for key in ("ticket_form_data", "ticket_form_errors",
                         "ticket_step_error", "flash_message", "flash_category"):
                 session.pop(key, None)

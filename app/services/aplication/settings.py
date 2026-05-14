@@ -3,16 +3,15 @@ from flask import render_template, request, redirect, url_for, flash, session
 
 # UTILIDADES
 from app.utils.database_utils import db
-from app.utils.password_utils import hashear_contraseña
+from app.utils.password_utils import verificar_contraseña
 
 # CONFIGURACIONES LOCALES
 from app.repositories.aplication_repository import (
     sp_configuracion_obtener_notificaciones,
     sp_configuracion_actualizar_notif_email,
     sp_configuracion_actualizar_notif_navegador,
-    sp_validar_data_user,
-    sp_validar_login,
     sp_eliminar_cuenta_completa,
+    sp_validar_data_autenticacion,
 )
 
 from app.forms.aplication_forms import FormNotificacionesEmail, FormNotificacionesNavegador, FormEliminarCuenta
@@ -43,7 +42,7 @@ class General_Settings_Service:
         form_eliminar = FormEliminarCuenta()
  
         # Pre-seleccionar checkboxes según el estado guardado en BD
-        form_email.notificaciones_email.data          = notif_email
+        form_email.notificaciones_email.data = notif_email
         form_navegador.notificaciones_navegador.data  = notif_navegador
  
         return render_template(
@@ -140,15 +139,16 @@ class General_Settings_Service:
             password = form_eliminar.contraseña.data
 
             try:
-                # 1. Obtener sal y validar contraseña
-                data_user = sp_validar_data_user(username)
+                # 1. Obtener hash y validar contraseña
+                data_user = sp_validar_data_autenticacion(username)  # igual que en Login
                 if not data_user:
                     raise Exception("Usuario no encontrado")
-                
-                data_user = data_user[0]
-                salt = data_user["Password_Salt"]
 
-                if not self._validar_usuario(username, password, salt):
+                hash_almacenado = data_user[0].get("Contraseña_Hash")
+                if not hash_almacenado:
+                    raise Exception("Hash no disponible")
+
+                if not self._validar_usuario(password, hash_almacenado):
                     flash("Contraseña incorrecta. No se procedió con la eliminación.", "danger")
                     return redirect(url_for("aplication.settings"))
                 
@@ -168,16 +168,12 @@ class General_Settings_Service:
                 flash("Error de sistema al procesar la solicitud.", "danger")
                 return redirect(url_for("aplication.settings"))
             
-        # Si el formulario no es válido o falta la contraseña
         flash("Debe ingresar su contraseña para confirmar.", "warning")
         return redirect(url_for("aplication.settings"))
 
-    def _validar_usuario(self, username, password, salt):
+    def _validar_usuario(self, password, hash_almacenado):
         try:
-            hash_password = hashear_contraseña(password, "user", salt)
-            result = sp_validar_login(username, hash_password)
-            # Retorna True solo si el resultado es SUCCESS
-            return result and result[0].get("Resultado") == "SUCCESS"
+            return verificar_contraseña(password, hash_almacenado)
         except Exception as e:
             print(f"[ERROR] _validar_usuario: {e}")
             return False
